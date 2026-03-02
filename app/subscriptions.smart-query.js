@@ -1087,12 +1087,12 @@ window.SubscriptionsSmartQuery = (function () {
           </div>
           <button
             type="button"
-            class="dpr-inline-slot-add dpr-inline-slot-add-side"
+            class="arxiv-tool-btn dpr-inline-slot-add dpr-inline-slot-add-side"
             data-action="append-draft-slot"
             data-kind="${kind}"
             data-index="${idx}"
           >
-            +
+            新增
           </button>
         </div>
       `;
@@ -1106,12 +1106,12 @@ window.SubscriptionsSmartQuery = (function () {
         </div>
         <button
           type="button"
-          class="dpr-inline-slot-add"
+          class="arxiv-tool-btn dpr-inline-slot-add"
           data-action="append-draft-slot"
           data-kind="${kind}"
           data-index="${idx}"
         >
-          +
+          新增
         </button>
       </div>
     `;
