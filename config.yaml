@@ -25,3 +25,46 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: ECO AI
+      description: 生成式人工智能、强化学习及深度学习在生态驾驶与能量管理中的应用研究
+      enabled: true
+      keywords:
+        - keyword: Generative AI
+          keyword_cn: 生成式人工智能
+          query: Generative Artificial Intelligence applications in vehicle control
+        - keyword: Reinforcement Learning
+          keyword_cn: 强化学习
+          query: Reinforcement Learning for energy management systems
+        - keyword: Deep Learning
+          keyword_cn: 深度学习
+          query: Deep Learning models for eco-driving strategies
+        - keyword: Eco-driving
+          keyword_cn: 生态驾驶
+          query: Eco-driving optimization using machine learning
+        - keyword: Energy Management
+          keyword_cn: 能量管理
+          query: Energy management strategy for hybrid electric vehicles
+        - keyword: HEV
+          keyword_cn: 混合动力汽车
+          query: Hybrid Electric Vehicle energy consumption optimization
+        - keyword: Trajectory Optimization
+          keyword_cn: 轨迹优化
+          query: Vehicle trajectory optimization for fuel economy
+      intent_queries:
+        - query: Application of Generative AI in vehicle energy management systems
+          query_cn: 生成式人工智能在车辆能量管理系统中的应用
+          enabled: true
+          source: manual
+          note: ''
+        - query: Deep reinforcement learning for eco driving in connected and automated vehicles
+          query_cn: 深度强化学习在联网自动驾驶车辆生态驾驶中的应用
+          enabled: true
+          source: manual
+          note: ''
+        - query: Machine learning based energy optimization for hybrid electric vehicles
+          query_cn: 基于机器学习的混合动力汽车能量优化
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-11T05:50:36.827Z'
