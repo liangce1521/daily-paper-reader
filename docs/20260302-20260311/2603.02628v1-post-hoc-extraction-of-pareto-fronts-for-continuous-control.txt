@@ -1,0 +1,623 @@
+Title: Post Hoc Extraction of Pareto Fronts for Continuous Control
+
+URL Source: https://arxiv.org/pdf/2603.02628v1
+
+Published Time: Wed, 04 Mar 2026 01:33:08 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Post Hoc Extraction of Pareto Fronts for Continuous Control 
+
+# Raghav Thakar 1 , Gaurav Dixit 1 and Kagan Tumer 11The Collaborative Robotics and Intelligent Systems (CoRIS) Institute Oregon State University, Corvallis, Oregon, USA 
+
+# {thakarr, dixitg, kagan.tumer }@oregonstate.edu 
+
+# Abstract 
+
+Agents in the real world must often balance mul-tiple objectives, such as speed, stability, and en-ergy efficiency in continuous control. To account for changing conditions and preferences, an agent must ideally learn a Pareto frontier of policies rep-resenting multiple optimal trade-offs. Recent ad-vances in multi-policy multi-objective reinforce-ment learning (MORL) enable learning a Pareto front directly, but require full multi-objective con-sideration from the start of training. In prac-tice, multi-objective preferences often arise af-ter a policy has already been trained on a sin-gle specialised objective. Existing MORL meth-ods cannot leverage these pre-trained ‘specialists’ to learn Pareto fronts and avoid incurring the sam-ple costs of retraining. We introduce Mixed Ad-vantage Pareto Extraction (MAPEX), an offline MORL method that constructs a frontier of poli-cies by reusing pre-trained specialist policies, crit-ics, and replay buffers. MAPEX combines evalu-ations from specialist critics into a mixed advan-tage signal, and weights a behaviour cloning loss with it to train new policies that balance multiple objectives. MAPEX’s post hoc Pareto front ex-traction preserves the simplicity of single-objective off-policy RL, and avoids retrofitting these algo-rithms into complex MORL frameworks. We for-mally describe the MAPEX procedure and evaluate MAPEX on five multi-objective MuJoCo environ-ments. Given the same starting policies, MAPEX produces comparable fronts at 0.001% the sample cost of established baselines. 
+
+# 1 Introduction 
+
+Many real-world continuous control problems require agents to balance multiple, even conflicting, objectives. In legged locomotion, for example, a robot must simultaneously opti-mise forward speed, gait stability, and energy efficiency. In such settings, there is no single optimal solution, and agents must instead discover a set of non-dominated policies that capture the range of feasible trade-offs. Learning this Pareto front enables downstream stakeholders to select behaviours that reflect their current preferences or adapt to changing op-erational conditions. Typically, multiple objectives are handled through scalar-isation into a single weighted sum and training via standard reinforcement learning (RL). While accessible and tractable, this approach yields only a single, fixed trade-off. Simply re-peating this procedure for every trade-off is inefficient and practically infeasible without sophisticated experience and representation sharing. Multi-Objective RL (MORL), and specifically multi-policy 
+
+MORL algorithms partially address this through various ar-chitectural improvements to learn the entire frontier directly. Methods like MORL/D [Felten et al. , 2024] divide the prob-lem into several single-objective problems through scalari-sation, and use single-objective RL with buffer sharing to train policies for each scalarisation. Other works like PG-MORL [Xu et al. , 2020] and MOPDERL [Tran et al. , 2023] maintain populations of policies, combining RL with evolu-tionary principles to jointly improve the policies in the pop-ulation and cover the objective space. PSL-MORL [Liu et al. , 2025], a notable recent work, trains a hypernetwork to produce a fresh policy for every desired trade-off. Despite successfully learning Pareto fronts, these methods suffer from a critical limitation: requiring full multi-objective consideration from the outset of training. This rigidity creates a disconnect with practical scenarios, where multi-objective preferences often arise retroactively, typically only after a ro-bust policy for a primary task has already been trained. For instance, a preference for more stability may only emerge af-ter observing a locomotion policy highly optimised for speed. To obtain new trade-offs in these scenarios, practitioners must 1) discard pre-trained policies and incur the sample costs of re-training, and 2) retrofit their algorithm into complex multi-objective learning frameworks. Currently, no method reuses disjoint specialist policies and training data to recover Pareto fronts efficiently and with minimal added algorithmic com-plexity. In this work we present Mixed Advantage Pareto Extrac-tion (MAPEX) 1, a novel method that fully leverages prior-trained single-objective policies, critics, and replay buffers to produce Pareto fronts of policies. Our key insight is that agents learn optimal trade-offs by intelligently blending ex-
+
+> 1Code: https://github.com/raghavthakar/MAPEX
+> arXiv:2603.02628v1 [cs.LG] 3 Mar 2026
+
+pert behaviour on each objective. MAPEX implements this by blending the single-objective evaluation from each spe-cialist critic into a multi-objective mixed advantage value and weighting a behaviour cloning loss with it. MAPEX bypasses the need to retrofit bespoke or standard off-policy RL into complex multi-objective learning frame-works. It preserves both, the simplicity, and intricacies of these algorithms by providing a realistic pathway to learn-ing multi-objective behaviours from single-objective train-ing data. If training from scratch, MAPEX allows allocating the entire sample budget to training high-performing single-objective specialists, from which high-quality Pareto fronts can later be extracted at a minimal sample cost. We provide a detailed view of MAPEX’s Pareto extrac-tion procedure, and perform Pareto extraction from special-ists trained using both standard and bespoke off-policy RL. Across five multi-objective MuJoCo environments, MAPEX produces fronts comparable to, or better than established baselines from the literature. When extracting Pareto fronts from the same starting policies, other methods consume up to 1000 × more samples than MAPEX to produce similar fronts. 
+
+# 2 Background 
+
+2.1 Actor–Critic Methods and Offline Reinforcement Learning 
+
+Actor–critic methods: These methods perform reinforce-ment learning using an actor , which defines the policy, and a 
+
+critic , which estimates the expected return of the actor’s be-haviour [Sutton and Barto, 2018]. By relying on learned value estimates rather than Monte Carlo returns alone, actor–critic methods enable efficient and stable policy optimisation, and are commonly used in continuous control. These methods are often implemented in an off-policy setting, where experi-ence collected by one or more behaviour policies is stored in a replay buffer and reused for policy updates [Haarnoja et al. ,2018; Fujimoto et al. , 2018]. Policy improvement is commonly guided by the advantage 
+
+function, 
+
+Aπ (s, a ) = Qπ (s, a ) − V π (s), (1) where Qπ (s, a ) is the critic’s action-value function, and 
+
+V π (s) = Ea∼π(·| s)[Qπ (s, a )] . In practice, particularly in de-terministic actor–critic methods, the value function is often approximated by Qπ (s, π (s)) , yielding 
+
+Aπ (s, a ) ≈ Qπ (s, a ) − Qπ (s, π (s)) . (2) 
+
+Offline Reinforcement Learning: Offline reinforcement learning studies the problem of learning a policy from a fixed dataset of transitions, without any further interaction with the environment during training. A key challenge in this setting is distributional shift: the dataset may con-tain diverse experiences that are hard to generalise to, lead-ing to unreliable value estimates [Panaganti et al. , 2025; Levine et al. , 2020]. Advantage-weighted regression (AWR) [Peng et al. , 2019] provides a simple and stable mechanism for policy improve-ment in this setting by casting reinforcement learning as a weighted supervised learning problem. Given a critic-derived advantage estimate A(s, a ), the AWR policy update solves 
+
+π+ = arg max  
+
+> π
+
+E(s,a )∼D 
+
+h
+
+log π(a|s) exp 
+
+ 1 
+
+> β
+
+A(s, a )
+
+i 
+
+,
+
+(3) where β > 0 is a temperature parameter. This objective em-phasises actions that are predicted to improve performance while sampled purely from the observed data, making it well suited to off-policy and offline reinforcement learning problems. We use an AWR-inspired regression weighting in MAPEX to learn multi-objective behaviours from static single-objective replay buffers. 
+
+2.2 Multi-Objective Sequential Decision-Making 
+
+Multi-objective sequential decision-making problems are commonly modelled as Multi-Objective Markov Decision Processes (MOMDPs). A MOMDP is defined by the tuple 
+
+⟨S , A, T , γ, R⟩, containing the state space S, the action space 
+
+A, the transition dynamics T : S × A × S → [0 , 1] , and a scalar discount factor γ ∈ [0 , 1) . Unlike standard MDPs, the reward function R : S × A × S → Rk returns a vector of k
+
+rewards, each corresponding to a distinct objective. A policy π : S → A induces an expected return for each objective. We characterise policy performance directly through its expected long-term returns. Let J(π) ∈ Rk de-note the vector of objective returns achieved by policy π, with components 
+
+Ji(π) = Es0∼ρ0, a t∼π(·| st)
+
+" ∞X
+
+> t=0
+
+γtri(st, a t)
+
+#
+
+, i ∈ { 1, . . . , k }.
+
+(4) where ri is the reward function associated with the i-th ob-jective and ρ0 is the initial state distribution. From a multi-objective optimisation perspective, learning in a MOMDP can be viewed as maximising a vector-valued objective 
+
+max  
+
+> π
+
+F(π) ≜ max  
+
+> π
+
+[J1(π), J 2(π), . . . , J k(π)] . (5) 
+
+Pareto Dominance and Optimality As objectives are of-ten conflicting, it is generally impossible for a single policy to optimise all objectives simultaneously. Thus, optimality in multi-objective settings is defined in terms of Pareto dom-inance . Given two objective return vectors v, u ∈ Rk, v
+
+Pareto-dominates u (denoted v ≻p u) if v is at least as good as u in all objectives and strictly better in at least one: 
+
+v ≻p u ⇐⇒ (∀i : vi ≥ ui) ∧ (∃j : vj > u j ). (6) If neither vector Pareto-dominates the other, they are said to be non-dominated .A policy π is Pareto optimal if its return vector J(π) is not Pareto-dominated by that of any other policy. The set of all Pareto-optimal policies induces the Pareto front , which characterises the optimal trade-offs achievable in the objec-tive space. 
+
+# 3 Related Works 
+
+Recent surveys [Hayes et al. , 2022; Roijers et al. , 2013] cate-gorise the expanding MORL landscape into single-policy and multi-policy approaches. We adopt this taxonomy herein. Single-policy methods optimise a fixed scalar utility func-tion [Hayes et al. , 2022], using standard RL with linear utili-ties, and dedicated approaches for non-linear utilities [Lin et al. , 2024b; Van Moffaert et al. , 2013; Reymond et al. , 2023]. Conversely, multi-policy approaches approximate the Pareto front, a better-suited approach for unknown or dynamic pref-erences. Early works like Pareto Q-Learning [Moffaert and Now´ e, 2014] tracked non-dominated return vectors for each state-action pair, while recent extensions employ preference-conditioned deep networks [Abels et al. , 2018] or convex envelope updates [Yang et al. , 2019] for high-dimensional spaces. In continuous control, decomposition-based methods di-vide the problem into several scalarised objectives. Prior work [Chen et al. , 2020] has augmented naively solving each scalar objective with an evolutionary strategy [Salimans et al. , 2017] for post-processing. Notably, MORL/D [Felten 
+
+et al. , 2024] improves efficiency via cooperative buffer shar-ing and intelligent weight sampling. Another branch of work combines RL with evolutionary operators: PG-MORL [Xu et al. , 2020] iteratively pushes a population of policies toward promising objective space regions, while MOPDERL [Tran 
+
+et al. , 2023] distills a frontier from subpopulations trained via evolutionary RL [Bodnar et al. , 2020; Khadka and Tumer, 2018]. Alternatively, parameter-efficient methods consolidate policies using meta-learning [Chen et al. , 2019], universal preference-conditioned networks [Basaklar et al. , 2023], or hypernetworks [Liu et al. , 2025]. Despite architectural differences, these methods share a structural limitation: they are designed solely for “from scratch” learning. If training on one or more individual ob-jectives has already been performed, these methods cannot leverage it, effectively requiring pre-trained policies to be dis-carded and training to be restarted. A separate line of inquiry focuses on offline MORL, train-ing preference-conditioned agents from massive datasets. Approaches like PEDA [Zhu et al. , 2023], DiffMORL [Xiao 
+
+et al. , 2025], and PR-MORL [Lin et al. , 2024a] utilise trans-formers, diffusion, and regularisation to generalise across preferences. While seemingly similar, MAPEX tackles the distinct problem of extracting frontiers from pre-trained spe-cialists rather than large-scale generalisation. Consequently, MAPEX operates with replay buffers two orders of mag-nitude smaller than the D4MORL benchmarks [Zhu et al. ,2023] used in offline RL works (e.g., 1 million vs. 150 mil-lion transitions). Finally, PCN [Reymond et al. , 2022] also uses supervised learning from an off-policy dataset, but relies on iterative on-line data collection to populate the objective space. In con-trast, MAPEX addresses the strictly offline extraction of fron-tiers from fixed, disjoint datasets. PCN is also currently lim-ited to discrete action spaces. 
+
+# 4 Method 
+
+We now introduce Mixed Advantage Pareto Extraction (MAPEX), an offline algorithm to extract a Pareto front of continuous control policies from a set of disjoint single-objective specialists . The core intent of MAPEX is to fully 
+
+Algorithm 1: Mixed Advantage Pareto Extraction (MAPEX) 
+
+INPUT : Policy set Π, critic set Q, buffer set D,number of objectives N
+
+OUTPUT : Pareto front P of policies  
+
+> 1
+
+FUNCTION MAPEX (Π, Q, D, N ): 
+
+> 2
+
+while Required do  
+
+> 3
+
+EVALUATE (Π) 
+
+> 4
+
+P ← FIND PARETO FRONT (Π)  
+
+> 5
+
+{π1, . . . , π N } ← SELECT PARENTS (P) 
+
+> 6
+
+v ← CENTROID (π1, . . . , π N ) 
+
+> // In objective space
+> 7
+
+wtarget ← v  
+
+> ∥v∥2// Target weight vector
+> 8
+
+Dhybrid ← SNk=1 SAMPLE (Dk, ∝ wk) 
+
+> 9
+
+πnew ← INIT POLICY (∅) 
+
+> 10
+
+for ϵ ← 1 to E do  
+
+> 11
+
+(s, a ) ∼ D hybrid  
+
+> 12
+
+A ←
+
+
+
+Qi(s, a ) − Q i
+
+ s, π new (s)Ni=1  
+
+> 13
+
+Amixed ← w⊤
+
+> target
+
+A // Mixed advantage  
+
+> 14
+
+ω(s, a ) = min 
+
+
+
+exp 
+
+ Amixed (s,a )
+
+> β
+
+
+
+, ω max 
+
+ 
+
+> 15
+
+LMAPEX ← E
+
+h
+
+ω(s, a ) · ∥ a − πnew (s)∥22
+
+i 
+
+> 16
+
+UPDATE (πnew , LMAPEX ) 
+
+> 17
+
+Π ← Π ∪ { πnew } 
+
+> 18
+
+P ← FIND PARETO FRONT (Π)  
+
+> 19
+
+return P
+
+leverage the latent information in prior-trained specialists— which includes their policies, along with their value functions (critics) and replay buffers—to produce new policies that ex-press new trade-off behaviours without requiring additional training interaction with the environment. MAPEX achieves this via a Pareto front extraction proce-dure which iteratively fills gaps in the Pareto front estimate. First, MAPEX analyses the available policies in the objec-tive space to identify sparse regions in the Pareto front esti-mate. Once a gap is identified, MAPEX derives a vector of ‘target weights’ that encodes a weighting over the objectives that would optimally fill this gap. To train a policy for this new trade-off, MAPEX constructs a static hybrid buffer by sampling from the specialists’ buffers in proportion to these target weights. Crucially, the algorithm then calculates a 
+
+mixed advantage for every transition in this dataset by query-ing each specialist critic, and mixing the individual advan-tage estimates in the ratio of the target weights. This mixed advantage captures the value of a transition in demonstrating target trade-off behaviour. Finally, a fresh policy is trained using a mechanism inspired by Advantage Weighted Regres-sion (AWR) [Peng et al. , 2019], wherein we regress the pol-icy onto actions from the hybrid buffer, weighted by an ex-ponential of their calculated mixed advantage. Algorithm 1 provides a more rigorous look at this procedure. 
+
+Starting Information and Notation 
+
+We assume that from prior training we have a policy set Π
+
+with at least N policies for an N -objective problem, a critic set Q with N critics, each specialising on evaluating on one of the problem’s objectives, and a replay buffer set D with N
+
+buffers, each containing experiences from training on a single objective. 
+
+4.1 Step 1: Gap Identification and Parent Selection 
+
+At the start of each iteration, we evaluate the current policy set Π to obtain the performance vector J(π) ∈ RN of each policy. We then identify the non-dominated set (the current Pareto front approximation). We then search for the largest 
+
+N -dimensional ‘gap’ on the frontier—a sparse region in the objective space. For N = 2 , we define this as the edge with the maximal Euclidean span. In practice, to avoid repeatedly focusing on the same gap, we select the gap using roulette-wheel sampling based on edge length. The N policies corre-sponding to the vertices of this gap are selected as the parent policies , denoted by {πp1 , . . . , π pN }.To guide the offspring into this sparse region, we compute the centroid of the parents’ performance vectors in the objec-tive space: 
+
+Jmid = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+J(πpi ) (7) We then derive a unit vector wtarget of target weights pointing towards this centroid. This vector encodes the linear prefer-ence required to interpolate the gap and guides the subsequent hybrid buffer creation and advantage mixing steps. 
+
+4.2 Step 2: Hybrid Buffer Creation and Advantage Mixing 
+
+After deriving the target weight vector wtarget , we assemble a training distribution that reflects this desired trade-off. We construct a fixed-size hybrid buffer , Dhybrid , by sampling tran-sitions from each specialist’s buffer Dk in direct proportion to the corresponding weight wtarget ,k . This creates a dataset that is structurally biased to each objective in the desired propor-tion. We then initialise a random policy network πnew that will be optimised to achieve the target trade-off behaviour. For this optimisation, we iteratively sample transitions from 
+
+Dhybrid to compute the mixed advantage training signal. For each transition (s, a ), we compute a vector of advantages 
+
+A(s, a ) ∈ RN . The kth element of this advantage vector is the advantage on the kth objective associated with that tran-sition, and is computed using the kth specialist critic Qk:
+
+Ak(s, a ) = Qk(s, a ) − Q k(s, π new (s)) (8) This formulation leverages the specific value estimation ex-pertise of each critic for their respective objective. Finally, we scalarise these vector-valued advantages into a single training signal. We compute the mixed advantage as the dot product of the advantage vector and the target weights derived in Step 1: 
+
+Amixed (s, a ) = w⊤ 
+
+> target
+
+· A(s, a ) (9) This scalar value Amixed represents the quality of the state-action (s, a ) specifically regarding the desired trade-off 
+
+wtarget .
+
+4.3 Step 3: Mixed Advantage Weighted Regression 
+
+To train the offspring policy πnew , we employ a supervised regression objective weighted by the scalarised signal derived in Equation 9. Our goal is to selectively clone actions that contribute positively to the specific target trade-off wtarget .For a transition (s, a ) we compute a regression weight 
+
+ω(s, a ) by applying a temperature-scaled exponential to its mixed advantage: 
+
+ω(s, a ) = min 
+
+
+
+exp 
+
+ Amixed (s, a )
+
+β
+
+
+
+, ω max 
+
+
+
+(10) where β > 0 is a temperature hyperparameter and ωmax is a clipping threshold to ensure numerical stability. The fresh policy πnew is then optimised to minimise the weighted mean squared error between its predicted action and the retrieved buffer action a:
+
+LMAPEX = E(s,a )
+
+h
+
+ω(s, a ) · ∥ πnew (s) − a∥22
+
+i
+
+(11) Once the policy has been updated for the desired epochs, it is reinserted into the population Π and the MAPEX procedure is executed for another iteration. 
+
+4.4 Mitigating Out-of-Distribution Error 
+
+While MAPEX’s mixed advantage values are intuitive to compute, they expose two main sources of out-of-distribution (OOD) error: 1) when a transition sampled by one objective’s specialist policy is evaluated by another objective’s specialist critic, and 2) when a randomly-initialised policy’s action is evaluated by specialist critics. We mitigate these issues using the following design choices. 
+
+Secondary Critics 
+
+When training each specialist policy πk, we learn not only its 
+
+primary critic for objective k, but also a set of secondary crit-ics for the remaining objectives. All critics associated with specialist k are trained on the same replay buffer Dk gener-ated by πk, so that every objective can be evaluated on data that is in-distribution for the corresponding critic. 
+
+Notation: Let m ∈ { 1, . . . , N } index objectives and k ∈{1, . . . , N } index specialists. We denote by Q(k) 
+
+> m
+
+(s, a ) the action-value critic that predicts the return for objective m us-ing transitions sampled from Dk (i.e., collected under πk). Under this notation, the specialist’s primary critic is Q(k) 
+
+> k
+
+,while the secondary critics are {Q(k) 
+
+> m
+
+}m̸=k.Procedure: During specialist training, only the primary critic Q(k) 
+
+> k
+
+is used to update the policy πk. The secondary crit-ics {Q(k) 
+
+> m
+
+}m̸=k are trained in parallel on the same buffer Dk,but they do not contribute gradients to the policy update. Af-ter training all specialists, we collect the resulting critics into a single family Q ≜ {Q(k) 
+
+> m
+
+}k=1 ...N, m =1 ...N . This construc-tion ensures that when MAPEX samples a transition (s, a )
+
+that originates from a particular specialist buffer Dk, the eval-uations {Q (k) 
+
+> m
+
+(s, a )}Nm=1 are produced by critics trained on the same state–action distribution as the sampled data. 
+
+Practical note: Secondary critics may be trained alongside primary critics with no change to the policy update rule. If single-objective specialists have already been trained, a sec-ondary critic {Q(k) 
+
+> m
+
+}m̸=k can be trained offline using transi-tions from Dk and the corresponding objective rewards. Ei-ther way, a distribution-matched critic family Q can be learnt for a low cost. We include a comparison of joint-vs. post-hoc-trained secondary critics in Section 5. 
+
+Offspring Policy Warm-Up 
+
+In step 2 of the MAPEX procedure (Equation 8), computing the mixed advantage requires querying specialist critics with actions proposed by πnew (s). If πnew is initialised arbitrarily, these actions can be far from the support of the hybrid buffer and cause OOD error. To reduce this effect, we warm up πnew 
+
+by regressing it to the mean of its parents in the action space. Let {πp1 , . . . , π pN } denote the parent policies. The mean parent action at state s is ¯a(s) ≜ 1
+
+> N
+
+PNj=1 πpj (s), which we use to perform a brief behavioural regression step that min-imises 
+
+Linit (θ) ≜ Es∼D hybrid 
+
+h
+
+∥πnew (s) − ¯a(s)∥22
+
+i
+
+, (12) We run this regression for a small number of gradient steps prior to computing the advantage vector in Equation 8. This warm up keeps πnew ’s predicted actions close to those pro-duced by the parents on states drawn from Dhybrid , more closely matching each critic’s training exposure, and improv-ing the reliability of subsequent critic-based updates. 
+
+# 5 Experiments 
+
+We evaluate MAPEX on three criteria: sample efficiency 
+
+of Pareto extraction; flexibility regarding choice of special-ist training algorithm and nature of secondary critic train-ing (joint vs. post-hoc); and general competitiveness against baselines when training from scratch. We assume access to secondary critics trained alongside primary critics during specialist training, but also test a post hoc variant (MAPEX-PostHoc) where critics are trained of-fline on static buffers. Unless stated otherwise, specialists are trained using Proximal Distilled Evolutionary RL (PDERL) [Bodnar et al. , 2020]. 
+
+5.1 Baselines and Domains 
+
+We compare MAPEX against two established MORL meth-ods: • MOPDERL [Tran et al. , 2023]: An evolutionary actor-critic method that first trains on each individual objective using PDERL, and later crosses over solutions across objectives using a multi-objective distilled crossover. It serves as a baseline for both ‘from scratch’ training and pure Pareto extraction (via its distillation phase). • MORL/D [Felten et al. , 2024]: A decomposition-based approach that uses Soft Actor–Critic [Haarnoja et al. ,2018] on each scalar objective. It uses buffer data shar-ing and adapts the scalar weights using Pareto Simulated Annealing [Czyz˙ zak and Jaszkiewicz, 1998]. We use the morl-baselines [Felten et al. , 2023] imple-mentation of MORL/D and the authors’ original implemen-tation of MOPDERL 2 with default hyperparameters. Exper-iments are conducted on five bi-objective continuous control MuJoCo environments from MO-Gymnasium [Felten et al. ,2023], with episodes capped at 750 frames. The nature of objectives in each environment are specified in Appendix A table 2. 
+
+5.2 Experimental Setup 
+
+Sample efficiency: We compare the extraction phase of MAPEX against the distillation phase of MOPDERL starting from identical specialist subpopulations trained with PDERL. 
+
+Flexibility: We compare standard MAPEX against MAPEX-PostHoc and MAPEX-TD3 (specialists trained via TD3) to assess robustness to starting policies and nature of critic train-ing. Competitiveness: We compare the final Pareto fronts of the full MAPEX pipeline against MOPDERL and MORL/D given a fixed sample budget. During specialist training of all MAPEX variants, we use a replay buffer of size 1M. In each test we perform five seeded runs with each method. Ex-act algorithm-specific and experiment parameters are listed in Appendix B. 
+
+# 6 Results 
+
+6.1 Sample Efficiency of Extraction 
+
+MAPEX achieves a massive reduction in sample cost com-pared to baselines. As shown in Figure 1 (MO-Ant-v5), MAPEX and MAPEX-PostHoc extract a high-performing front almost immediately, while MOPDERL requires an ad-ditional 300 , 000 environment interactions to attain the same performance. Figure 2 confirms this trend across MO-Hopper-v5 and MO-Walker2d-v5. Particularly in MO-Hopper-v5, MAPEX requires 100 samples to reach hypervolume thresholds that MOPDERL requires ≈ 10 5 samples to attain—a reduc-tion of three orders of magnitude. This efficiency is driven by MAPEX exploiting the latent representations of multi-objective behaviour in policies and replay buffers. It empir-ically validates our intuition that following expert behaviour to varying degrees on each objective yields trade-offs in the objective space. It also validates our main hypothesis that these behaviours can be learnt by regressing onto target ac-tions, weighed by their mixed advantage value.        
+
+> 2Modified for v5 MO-Gymnasium MuJoCo domains. Code: https://github.com/raghavthakar/MOPDERL-MO-Gymnasium 050000 100000 150000 200000 250000 300000
+
+Environment Samples  
+
+> 0.75
+> 1.00
+> 1.25
+> 1.50
+> Hypervolume
+> 1e7
+
+MO-Ant-v5   
+
+> mapx
+> mapx_posthoc
+> mopderl
+> 02000 4000
+
+Objective 0  
+
+> 0
+> 1000
+> 2000
+> 3000
+> 4000
+> 5000
+> Objective  1 0
+> 02000 4000
+
+Objective 0  
+
+> 108,000
+> 02000 4000
+
+Objective 0  
+
+> 216,000
+> 02000 4000
+
+Objective 0
+
+> 324,000
+
+Figure 1: Sample efficiency comparison on MO-Ant-v5. (Top) Mean hypervolume ± SEM vs. cumulative environment samples. MAPEX and MAPEX-PostHoc achieve high hypervolume almost instantaneously, while MOPDERL requires significantly more interaction. (Bottom) Evolution of the Pareto front approximation. MAPEX/MAPEX-PostHoc fill the front immediately, whereas MOPDERL gradually expands coverage over 300,000+ environment samples. 10 1   
+
+> 10 3
+> 10 5
+> Samples  required
+> MO-Hopper-v5
+> mapex
+> mapex_posthoc
+> mopderl
+> 2.4M 2.6M 2.8M
+> Hypervolume Threshold
+> 10 1
+> 10 3
+> 10 5
+> Samples  required
+> MO-Walker2d-v5
+
+Figure 2: Samples required to attain target hypervolume thresh-olds. Comparison on MO-Hopper-v5 (top) and MO-Walker2d-v5 (bottom). Note the logarithmic scale on the y-axis. MAPEX and MAPEX-PostHoc require up to three orders of magnitude fewer samples ( 10 2 vs 10 5) than MOPDERL to reach identical perfor-mance levels. 
+
+6.2 Flexibility and Robustness 
+
+MAPEX is robust to the source of specialist policies. Figure 3 shows that Pareto extraction for standard MAPEX, MAPEX-PostHoc, and MAPEX-TD3 are largely indistinguishable on MO-Walker2d-v5 and MO-Ant-v5. Crucially, the success 1      
+
+> 2
+> 3
+> 4
+> Hypervolume
+> 1e6 MO-Walker2d-v2
+> mapex
+> mapex_posthoc
+> mapex_td3
+> 0200 400 600 800
+> Generation
+> 0.5
+> 1.0
+> 1.5
+> Hypervolume
+> 1e7 MO-Ant-v2
+
+Figure 3: Robustness of MAPEX to specialist type and critic training. Mean hypervolume (± SEM) over generations on MO-Walker2d-v5 and MO-Ant-v5. The similar performance of stan-dard MAPEX, MAPEX-PostHoc (offline critics), and MAPEX-TD3 (off-policy specialists) demonstrates the method’s flexibility in ef-fectively extracting fronts from decoupled pre-trained sources. 
+
+of MAPEX-PostHoc confirms that secondary critics can be effectively trained retroactively on static buffers, enabling Pareto extraction from fully decoupled single-objective train-ing. If simplicity is key, then the performance of MAPEX-TD3 shows the potential of elegantly adapting off-policy RL Table 1: Performance metrics (Hypervolume and Sparsity) across v5 MO-Gymnasium MuJoCo environments. Results are Mean ± SEM. Hypervolume is the space between the Pareto front and a dominated reference point and sparsity is the average euclidean distance between neighbouring points. 
+
+Hypervolume (↑) Sparsity (↓)
+
+Environment MAPX MOPDERL MORL/D MAPEX MOPDERL MORL/D 
+
+Ant-2obj 1.19 e7 ± 1.2e6 1.46 e7 ± 8.2e5 1.41 e7 ± 1.9e4 315 .5 ± 36 .1 201 .4 ± 13 .8 289 .8 ± 8.3
+
+Hopper-2obj 3.34 e6 ± 2.9e5 3.17 e6 ± 2.8e5 4.31 e6 ± 1.7e5 209 .6 ± 39 .8 64 .2 ± 10 .3 115 .5 ± 17 .7
+
+Swimmer 1.78 e5 ± 1.6e4 2.41 e5 ± 2.9e4 9.29 e4 ± 5.9e2 49 .5 ± 9.2 30 .0 ± 3.2 2.9 ± 0.3
+
+Walker2d 3.09 e6 ± 2.2e5 3.47 e6 ± 3.5e5 6.52 e6 ± 4.2e5 157 .5 ± 7.9 103 .2 ± 16 .0 96 .9 ± 11 .2
+
+HalfCheetah 1.10 e7 ± 5.3e5 1.55 e7 ± 6.8e5 1.88 e7 ± 5.4e4 337 .5 ± 26 .7 101 .7 ± 5.9 136 .4 ± 19 .60 2000 4000 
+
+Objective 0
+
+> 0
+> 2000
+> 4000
+> Objective  1
+
+MO-Ant-v5   
+
+> 05000 10000
+
+Objective 0
+
+> 3000
+> 2000
+> 1000
+> 0
+
+MO-HalfCheetah-v5   
+
+> 1500 2000 2500
+
+Objective 0
+
+> 1000
+> 2000
+> 3000
+
+MO-Hopper-v5   
+
+> 0100 200
+
+Objective 0
+
+> 1000
+> 500
+> 0
+
+MO-Swimmer-v5   
+
+> 1000 2000 3000
+
+Objective 0
+
+> 500
+> 0
+> 500
+
+MO-Walker2d-v5   
+
+> mopderl mapx morld
+
+Figure 4: Final Pareto fronts across five MO-MuJoCo benchmarks. Comparison of fronts extracted by MAPEX against fully trained MOPDERL and MORL/D baselines. Despite relying purely on single-objective training data, MAPEX recovers fronts that are dense and competitive with baselines trained from scratch. 
+
+to learn multi-objective behaviours via MAPEX. While a population of policies (like that produced by PDERL) provides a rich starting point for Pareto extraction, MAPEX-TD3 remains competitive with only one specialist policy per objective (as produced by simple TD3). This is be-cause MAPEX does not simply distil or interpolate between parent policies. Instead, MAPEX draws expertise from the pre-trained replay buffers, which contain a rich and varied set of state-action examples. These experiences span regions of the objective space that an individual policy may only cover sparsely, allowing MAPEX to produce distinct policies for distinct trade-offs. This is also why MAPEX is robust to the exact algorithm used to train specialist policies. 
+
+6.3 General Competitiveness 
+
+Despite being an offline extraction method, MAPEX pro-duces fronts competitive with MOPDERL and MORL/D, which require full multi-objective consideration from the be-ginning. Table 1 shows that MAPEX achieves comparable hypervolumes (e.g., 3.34 × 10 6 vs. MOPDERL’s 3.17 × 10 6
+
+in MO-Hopper-v5, and 1.78 × 10 5 vs. MORL/D’s 9.29 × 10 4
+
+in MO-Swimmer-v5) across five multi-objective MuJoCo en-vironments. While MAPEX fronts are numerically sparser, by inspecting the fronts in Figure 4 visually, it is clear that MAPEX produces even and well-spread Pareto fronts. 
+
+# 7 Conclusion 
+
+We presented MAPEX, a novel approach to extracting Pareto fronts of policies from prior single-objective training for con-tinuous control. We provided a detailed view of MAPEX’s Pareto extraction procedure, and mentioned some practial tips. We tested MAPEX with well-established, dedicated MORL baselines like MOPDERL and MORL/D to empiri-cally validate its mixed advantage approach. Pareto fronts are learnt cheaply with MAPEX when specialists are already trained. If training from scratch, MAPEX integrates easily with off-policy RL methods and still produces fronts that compare well to baselines. Finally, we discuss some limi-tations and future work. While MAPEX is highly sample efficient, it makes as-sumptions inherent to our offline extraction setting. First, MAPEX is strictly bounded by the support of the specialist buffers; it cannot discover novel behaviours or skills that are absent from the specialists’ training history. Second, MAPEX relies on the assumption that valid trade-off policies lie on a continuous manifold between specialists. In scenarios where specialists exhibit markedly disjoint behaviours (e.g., a hu-manoid walking on two legs vs. crawling), interpolation may yield low-performance policies. Our empirical evalua-tion focused on bi-objective domains; scaling MAPEX’s gap-identification heuristic to more objectives ( N ≥ 3) remains a subject for future investigation. Finally, we would like to leverage MAPEX with a multiagent reinforcement learning algorithm to extend multi-objective decision-making to the multiagent setting. References 
+
+[Abels et al. , 2018] Axel Abels, Diederik M. Roijers, T. Lenaerts, Ann Now´ e, and Denis Steckelmacher. Dynamic weights in multi-objective deep reinforcement learning. ArXiv , abs/1809.07803, 2018. [Basaklar et al. , 2023] Toygun Basaklar, Suat Gumussoy, and Umit Ogras. PD-MORL: Preference-driven multi-objective reinforcement learning algorithm. In The Eleventh International Conference on Learning Represen-tations , 2023. [Bodnar et al. , 2020] Cristian Bodnar, Ben Day, and Pietro Lio. Proximal distilled evolutionary reinforcement learn-ing. Proceedings of the AAAI Conference on Artificial In-telligence , 34:3283–3290, 04 2020. [Chen et al. , 2019] Xi Chen, Ali Ghadirzadeh, M˚ arten Bj¨ orkman, and Patric Jensfelt. Meta-learning for multi-objective reinforcement learning. In 2019 IEEE/RSJ In-ternational Conference on Intelligent Robots and Systems (IROS) , page 977–983. IEEE Press, 2019. [Chen et al. , 2020] Diqi Chen, Yizhou Wang, and Wen Gao. Combining a gradient-based method and an evolution strategy for multi-objective reinforcement learning. Ap-plied Intelligence , 50(10):3301–3317, October 2020. [Czyz˙ zak and Jaszkiewicz, 1998] Piotr Czyz˙ zak and Adrezej Jaszkiewicz. Pareto simulated annealing—a metaheuristic technique for multiple-objective combinatorial optimiza-tion. Journal of Multi-criteria Decision Analysis , 7:34–47, 1998. [Felten et al. , 2023] Florian Felten, Lucas N. Alegre, Ann Now´ e, Ana L. C. Bazzan, El Ghazali Talbi, Gr´ egoire Danoy, and Bruno C. da Silva. A toolkit for reliable benchmarking and research in multi-objective reinforce-ment learning. In Proceedings of the 37th Conference on Neural Information Processing Systems (NeurIPS 2023) ,2023. [Felten et al. , 2024] Florian Felten, El-Ghazali Talbi, and Gr´ egoire Danoy. Multi-objective reinforcement learning based on decomposition: A taxonomy and framework. J. Artif. Int. Res. , 79, April 2024. [Fujimoto et al. , 2018] Scott Fujimoto, Herke van Hoof, and David Meger. Addressing function approximation error in actor-critic methods. In International Conference on Machine Learning , 2018. [Haarnoja et al. , 2018] Tuomas Haarnoja, Aurick Zhou, P. Abbeel, and Sergey Levine. Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor. ArXiv , abs/1801.01290, 2018. [Hayes et al. , 2022] Conor F. Hayes, Roxana R˘ adulescu, Eu-genio Bargiacchi, Johan K¨ allstr¨ om, Matthew Macfar-lane, Mathieu Reymond, Timothy Verstraeten, Luisa M. Zintgraf, Richard Dazeley, Fredrik Heintz, Enda How-ley, Athirai A. Irissappane, Patrick Mannion, Ann Now´ e, Gabriel Ramos, Marcello Restelli, Peter Vamplew, and Diederik M. Roijers. A practical guide to multi-objective reinforcement learning and planning. Autonomous Agents and Multi-Agent Systems , 36(1), April 2022. [Khadka and Tumer, 2018] Shauharda Khadka and Kagan Tumer. Evolution-guided policy gradient in reinforcement learning. In Proceedings of the 32nd International Confer-ence on Neural Information Processing Systems , NIPS’18, page 1196–1208, Red Hook, NY, USA, 2018. Curran As-sociates Inc. [Levine et al. , 2020] Sergey Levine, Aviral Kumar, G. Tucker, and Justin Fu. Offline reinforcement learning: Tutorial, review, and perspectives on open problems. 
+
+ArXiv , abs/2005.01643, 2020. [Lin et al. , 2024a] Qian Lin, Chao Yu, Zongkai Liu, and Zi-fan Wu. Policy-regularized offline multi-objective rein-forcement learning. In Proceedings of the 23rd Interna-tional Conference on Autonomous Agents and Multiagent Systems , AAMAS ’24, page 1201–1209, Richland, SC, 2024. International Foundation for Autonomous Agents and Multiagent Systems. [Lin et al. , 2024b] Xi Lin, Xiaoyuan Zhang, Zhiyuan Yang, Fei Liu, Zhenkun Wang, and Qingfu Zhang. Smooth tchebycheff scalarization for multi-objective optimization. In Proceedings of the 41st International Conference on Machine Learning , ICML’24. JMLR.org, 2024. [Liu et al. , 2025] Erlong Liu, Yu-Chang Wu, Xiaobin Huang, Chengrui Gao, Ren-Jian Wang, Ke Xue, and Chao Qian. Pareto set learning for multi-objective reinforcement learning. In Proceedings of the Thirty-Ninth AAAI Confer-ence on Artificial Intelligence and Thirty-Seventh Confer-ence on Innovative Applications of Artificial Intelligence and Fifteenth Symposium on Educational Advances in Ar-tificial Intelligence , AAAI’25/IAAI’25/EAAI’25. AAAI Press, 2025. [Moffaert and Now´ e, 2014] Kristof Van Moffaert and Ann Now´ e. Multi-objective reinforcement learning using sets of pareto dominating policies. Journal of Machine Learn-ing Research , 15(107):3663–3692, 2014. [Panaganti et al. , 2025] Kishan Panaganti, Zaiyan Xu, Dileep Kalathil, and Mohammad Ghavamzadeh. Bridging distributionally robust learning and offline rl: An approach to mitigate distribution shift and partial data coverage. In Necmiye Ozay, Laura Balzano, Dimitra Panagou, and Alessandro Abate, editors, Proceedings of the 7th Annual Learning for Dynamics &amp; Control Conference , vol-ume 283 of Proceedings of Machine Learning Research ,pages 619–634. PMLR, 04–06 Jun 2025. [Peng et al. , 2019] Xue Bin Peng, Aviral Kumar, Grace Zhang, and Sergey Levine. Advantage-weighted regres-sion: Simple and scalable off-policy reinforcement learn-ing. arXiv preprint arXiv:1910.00177 , 2019. [Reymond et al. , 2022] Mathieu Reymond, Eugenio Bar-giacchi, and Ann Now´ e. Pareto conditioned networks. In 
+
+Proceedings of the 21st International Conference on Au-tonomous Agents and Multiagent Systems , AAMAS ’22, page 1110–1118, Richland, SC, 2022. International Foun-dation for Autonomous Agents and Multiagent Systems. [Reymond et al. , 2023] Mathieu Reymond, Conor Hayes, Denis Steckelmacher, Diederik Roijers, and Ann Nowe. Actor-critic multi-objective reinforcement learning for non-linear utility functions. Autonomous Agents and Multi-Agent Systems , 37, 04 2023. [Roijers et al. , 2013] Diederik M. Roijers, Peter Vamplew, Shimon Whiteson, and Richard Dazeley. A survey of multi-objective sequential decision-making. J. Artif. Int. Res. , 48(1):67–113, October 2013. [Salimans et al. , 2017] Tim Salimans, Jonathan Ho, Xi Chen, Szymon Sidor, and Ilya Sutskever. Evolution strategies as a scalable alternative to reinforcement learning, 2017. [Sutton and Barto, 2018] Richard S. Sutton and Andrew G. Barto. Reinforcement Learning: An Introduction . A Brad-ford Book, Cambridge, MA, USA, 2018. [Tran et al. , 2023] Hai-Long Tran, Long Doan, Ngoc Hoang Luong, and Huynh Thi Thanh Binh. A two-stage multi-objective evolutionary reinforcement learning framework for continuous robot control. In Proceedings of the Genetic and Evolutionary Computation Conference , GECCO ’23, page 577–585, New York, NY, USA, 2023. Association for Computing Machinery. [Van Moffaert et al. , 2013] Kristof Van Moffaert, Madalina Drugan, and Ann Nowe. Scalarized multi-objective rein-forcement learning: Novel design techniques. 04 2013. [Xiao et al. , 2025] Yuchen Xiao, Lei Yuan, Lihe Li, Ziqian Zhang, Yichen Li, and Yang Yu. Generalizable of-fline multiobjective reinforcement learning via preference-conditioned diffuser. IEEE Transactions on Neural Net-works and Learning Systems , 36(12):20199–20213, 2025. [Xu et al. , 2020] Jie Xu, Yunsheng Tian, Pingchuan Ma, Daniela Rus, Shinjiro Sueda, and Wojciech Matusik. Prediction-guided multi-objective reinforcement learning for continuous robot control. In Hal Daum´ e III and Aarti Singh, editors, Proceedings of the 37th International Con-ference on Machine Learning , volume 119 of Proceed-ings of Machine Learning Research , pages 10607–10616. PMLR, 13–18 Jul 2020. [Yang et al. , 2019] Runzhe Yang, Xingyuan Sun, and Karthik Narasimhan. A generalized algorithm for multi-objective reinforcement learning and policy adaptation .Curran Associates Inc., Red Hook, NY, USA, 2019. [Zhu et al. , 2023] Baiting Zhu, Meihua Dang, and Aditya Grover. Scaling pareto-efficient decision making via of-fline multi-objective RL. In The Eleventh International Conference on Learning Representations , 2023. 
+
+# A Environment Details 
+
+Table 2 specifies each objective across five multi-objective MuJoCo environments. Episodes in each environment are capped at 750 environment steps. 
+
+# B Experimental Hyperparameters 
+
+We report the hyperparameters used in our experiments. Ta-ble 3 lists the settings for the base TD3 algorithm and the PDERL algorithm which uses TD3, which are shared across                              
+
+> Table 2: The v5 MO-Gymnasium MuJoCo environments. Objec-tives include velocity, energy efficiency, jump height, and stability and must all be maximised . The action dimensions are da, and do
+> the observation (state) dimensions. Env. dadoObjective 1 Objective 2 Ant-2obj 8105 x-vel y-vel Hopper-2obj 311 x-vel & survival Jump (w/ cost) Swimmer 28x-vel Energy eff. Walker2d 617 x-vel Energy eff. HalfCheetah 617 x-vel Energy eff.
+
+all environments. Table 4 details the general parameters for MAPEX, and Table 5 lists the environment-specific values for policy warm up and Pareto extraction. Finally Table 6 lists the number of frames each algorithm was run for, and the division of frames for MOPDERL, which contains dis-tinct warm up and Pareto distillation phases.                        
+
+> Table 3: PDERL and TD3 hyperparameters (Shared across environ-ments).
+> Parameter Value
+> PDERL
+> Population Size 10 Mini Buffer Size 50,000
+> TD3 / General
+> Start Timesteps 25 ,000
+> Discount Factor ( γ)0.99 Target Smoothing ( τ)0.005 Hidden Dimension 256 Actor Learning Rate 3×10 −4
+> Critic Learning Rate 3×10 −4
+> Batch Size 256 Buffer Size 1×10 6
+> Exploration Noise 0.1 Policy Noise 0.2 Noise Clip 0.5 Policy Frequency 2Table 4: MAPEX hyperparameters shared across environments.
+
+Hyperparameter Value 
+
+Total iterations 1,200 Child buffer size 200,000 Warm-up steps / epoch 1,000 Warm-up learning rate 3 × 10 −4
+
+Warm-up batch size 256 Evaluation episodes / actor 5Table 5: Environment-specific MAPEX hyperparameters across five v5 MO-Gymnasium MuJoCo environments. 
+
+Parameter Environment Ant-2obj Hopper-2obj Swimmer Walker2d HalfCheetah 
+
+MAPEX epochs 20 10 10 20 20 AWR β 0.5 0.1 1.0 0.5 1.0 AWR clip ( ωmax ) 1.0 20.0 20.0 20.0 1.0 
+
+Table 6: Environment interaction budgets (frames) per method and environment. For bi-objective tasks ( N =2 ), the “/ obj.” column reports frames per objective-specific training process (PDERL for MOPDERL; PDERL / TD3 for MAPEX). MAPEX extraction uses 0 additional environment interaction. 
+
+Environment MOPDERL MAPEX (specialists) MORL/D Total Warm up Warm up / obj. Stage 2 Total Specialist / obj. Total 
+
+MO-Ant-2obj-v5 2.0M 1.0M 2.0M 4.0M 2.0M 4.0M 4.0M MO-Hopper-2obj-v5 2.25M 1.125M 1.75M 4.0M 2.0M 4.0M 4.0M MO-Swimmer-v5 1.0M 0.5M 1.0M 2.0M 1.0M 2.0M 2.0M MO-Walker2d-v5 2.0M 1.0M 2.0M 4.0M 2.0M 4.0M 4.0M MO-HalfCheetah-v5 2.0M 1.0M 2.0M 4.0M 2.0M 4.0M 4.0M

@@ -1,6 +1,44 @@
 {
-  "generated_at": "2026-03-06T19:11:18.471356+00:00",
-  "updated_date": "20260306",
+  "generated_at": "2026-03-11T05:55:56.259909+00:00",
+  "updated_date": "20260302-20260311",
   "carryover_days": 9,
-  "items": []
+  "items": [
+    {
+      "id": "2603.08477v1",
+      "title": "Behavioral Generative Agents for Power Dispatch and Auction",
+      "abstract": "This paper presents positive initial evidence that generative agents can relax the rigidity of traditional mathematical models for human decision-making in power dispatch and auction settings. We design two proof-of-concept energy experiments with generative agents powered by a large language model (LLM). First, we construct a home battery management testbed with stochastic electricity prices and blackout interventions, and benchmark LLM decisions against dynamic programming. By incorporating an in-context learning (ICL) module, we show that behavioral patterns discovered by a stronger reasoning model can be transferred to a smaller LLM via example-based prompting, leading agents to prioritize post-blackout energy reserves over short-term profit. Second, we study LLM agents in simultaneous ascending auctions (SAA) for power network access, comparing their behavior with an optimization benchmark, the straightforward bidding strategy. By designing ICL prompts with rule-based, myopic, and strategic objectives, we find that structured prompting combined with ICL enables LLM agents to both reproduce economically rational strategies and exhibit systematic behavioral deviations. Overall, these results suggest that LLM-powered agents provide a flexible and expressive testbed for modeling human decision-making in power system applications.",
+      "authors": [
+        "Shaoze Li",
+        "Justin S. Kim",
+        "Cong Chen"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-09T15:11:13+00:00",
+      "link": "https://arxiv.org/pdf/2603.08477v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Generative agents for home battery management and energy experiments",
+      "llm_evidence_cn": "用于家庭电池管理和能源实验的生成式代理",
+      "llm_evidence": "用于家庭电池管理和能源实验的生成式代理",
+      "canonical_evidence": "用于家庭电池管理和能源实验的生成式代理",
+      "llm_tldr_en": "Explores LLM-powered generative agents for energy dispatch and battery management tasks.",
+      "llm_tldr_cn": "探索了基于大语言模型的生成式代理在能源调度和电池管理任务中的应用。",
+      "llm_tldr": "探索了基于大语言模型的生成式代理在能源调度和电池管理任务中的应用。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Application of Generative AI in vehicle energy management systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.08477v1",
+      "carry_days": 1
+    }
+  ]
 }

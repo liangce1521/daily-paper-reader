@@ -1,0 +1,373 @@
+Title: Meta-RL with Shared Representations Enables Fast Adaptation in Energy Systems
+
+URL Source: https://arxiv.org/pdf/2603.08418v1
+
+Published Time: Tue, 10 Mar 2026 02:23:03 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Meta-RL with Shared Representations Enables Fast Adaptation in Energy Systems 
+
+Théo Zangato 1⋆, Aomar Osmani 2, and Pegah Alizadeh 1,3 
+
+> 1
+
+Université Sorbonne Paris Nord, France  
+
+> 2
+
+INSA Rouen, France  
+
+> 3
+
+Université Lumière Lyon 2, Université Claude Bernard Lyon 1, ERIC, 69007, Lyon, France 
+
+Abstract. Meta-Reinforcement Learning addresses the critical limita-tions of conventional Reinforcement Learning in multi-task and non-stationary environments by enabling fast policy adaptation and improved generalization. We introduce a novel Meta-RL framework that integrates a bi-level optimization scheme with a hybrid actor-critic architecture spe-cially designed to enhance sample efficiency and inter-task adaptability. To improve knowledge transfer, we meta-learn a shared state feature extractor jointly optimized across actor and critic networks, providing efficient representation learning and limiting overfitting to individual tasks or dominant profiles. Additionally, we propose a parameter-sharing mechanism between the outer- and inner-loop actor networks, to reduce redundant learning and accelerate adaptation during task revisitation. The approach is validated on a real-world Building Energy Management Systems dataset covering nearly a decade of temporal and structural variability, for which we propose a task preparation method to promote generalization. Experiments demonstrate effective task adaptation and better performance compared to conventional RL and Meta-RL methods. 
+
+Keywords: Reinforcement Learning · Meta Learning · Energy Manage-ment Systems 
+
+# 1 Introduction 
+
+Energy Management Systems (EMS) are central to improving energy efficiency, reducing operational costs, and achieving sustainability goals. As energy sys-tems become increasingly complex, integrating distributed renewables, variable demands, and real-time control, intelligent EMS solutions are essential for adap-tive, scalable, and data-driven decision-making across buildings and grids. Rein-forcement Learning (RL) has shown strong potential for EMS control by learning flexible policies under uncertainty [3]. However, conventional RL methods often struggle to generalize across heterogeneous building environments and temporal variations (e.g., seasonal or occupancy patterns) and require extensive interac-tions, making them impractical for real-world deployments with costly feedback.  
+
+> ⋆
+
+Corresponding author. Email: zangato@lipn.univ-paris13.fr  
+
+> arXiv:2603.08418v1 [cs.LG] 9 Mar 2026 2T. Zangato et al.
+
+Meta-Reinforcement Learning (Meta-RL) addresses these limitations by en-abling agents to transfer prior knowledge and rapidly adapt to new tasks drawn from a shared distribution [6, 11]. Gradient-based approaches such as MAML [6] and Reptile [11] pioneered this direction, while CAVIA [24] introduced context variables to separate shared and task-specific parameters. Subsequent work has explored parameter sharing and meta-gradient strategies. Meta-Gradient RL [19] and Metatrace [20] adapt hyperparameters online, FLAP [12] employs shared lin-ear policies with lightweight adapters and MACAW [10] stabilizes offline learn-ing via advantage-weighted regression. PEARL [13] and RL 2 [5] improve task inference through latent contexts or recurrent policies. However, these methods underexploit shared actor–critic structures across tasks, limiting their ability to leverage inter-task regularities in structured domains. Meta-RL has recently been applied to EMS control. [9] showed improved adaptation for HVAC systems, [15] combined MAML with SAC for microgrid scheduling, and MetaEMS [23] aggregated experiences across buildings for joint updates. [18] demonstrated that meta-trained scheduling policies can generaliz-ing to unseen loads and renewables.While MAML-based approaches dominate, they require costly full-model gradient updates. First-order alternatives such as Reptile are more scalable but often fail to retain task-specific knowledge, focusing on task differentiation rather than knowledge consolidation. In EMS environments, where tasks exhibit high structural similarity and low conflict, maximizing shared information is crucial to improve generalization and reduce sample complexity. We focus on two underexplored EMS Meta-RL challenges: 
+
+– Task selection for robust generalization. In EMS, tasks vary temporally (e.g., day–night cycles) and spatially (eg., across zones). Identifying diverse but representative tasks is crucial to define the learning scope and accelerate adaptation [7]. 
+
+– Architectures for knowledge sharing and policy reuse. Unlike typical Meta-RL benchmarks involving heterogeneous tasks [8], EMS tasks share structural consistency and exhibit low inter-task conflict. We propose: 1) a meta-learned shared feature extractor enabling transferable representation learning, 2) a task-specific actor reuse mechanism that reduces re-dundant exploration and improves sample efficiency, 3) a task selection strategy that balances diversity and similarity. 
+
+# 2 Proposed approach 
+
+2.1 Preliminaries 
+
+Reinforcement Learning (RL) operates in environments modeled as a Markov Decision Process (MDP) M = ⟨S, A, P, R, γ ⟩, where S and A are the state and action spaces, P (s′|s, a ) the transition dynamics, R(s, a ) the reward function, and γ ∈ [0 , 1] the discount factor. The goal is to learn a policy π : S → A
+
+maximizing the expected discounted return: J = Eτ ∼π
+
+hPTt=0 γtrt
+
+i
+
+, where τ =Meta-RL with Shared Representations 3
+
+(st, a t, r t)Tt=0 denotes a trajectory. In real-world scenarios, agents often need to quickly adapt across related tasks. Meta-Reinforcement Learning (Meta-RL) addresses this by sampling N tasks {M i}Ni=1 from a distribution p(M), where each task defines its own MDP. For each task, a dataset Di ∈ (( Si ×Ai ×R)T )H of 
+
+H episodes is collected, and a task-specific learner fi(Di) produces a policy π(a|s)
+
+parameterized by Θi. The meta-learner F is trained to generate such learners, 
+
+F({Di}Ni=1 ) : {(( Si × Ai × R)T )H }Ni=1 → { fi}Ni=1 , enabling fast adaptation to unseen tasks Mnew ∼ p(M) via fnew = F(Dnew ) [2]. 
+
+2.2 Critic Feature Extractor Meta Learning (CFE) 
+
+Fig. 1: Model architecture. Red arrows show interactions between the inner and outer loops where each task knowledge is propagated to the meta-model, dashed arrows indicate gradient flow. We propose a Meta-RL framework (CFE) with task selection to optimize control policies for EMS. Unlike typical Meta-RL settings where tasks differ structurally (e.g., navigation vs. manipulation), our tasks are instances of the same control problem. Variability comes from exogenous factors (e.g., temper-ature, irradiation), temporal patterns (e.g., seasons), and operational contexts, all observable by the agent. Because tasks share similar dynamics and exhibit no inter-task conflict, our objective is to capture shared representations while enabling rapid adaptation to new conditions. Our method includes two key components. First, we meta-learn a shared feature encoder across actor–critic networks. The encoder extracts latent rep-resentations that generalize across tasks, improving critic value estimation and accelerating actor adaptation. Second, we introduce an actor reuse mechanism that stores task-specific actor parameters and reuses them when the same task 4 T. Zangato et al. 
+
+reoccurs, reducing redundant exploration and improving sample efficiency. The overall architecture is depicted in Figure 1. The code is available on github 4.
+
+2.3 Adaptation Stage 
+
+The inner loop treats each task as a standalone RL problem. Its objective is to train a task-specific agent that produces parameters adapted to the current task. For a new task Mi ∼ p(M), the learner fi is initialized with parameters inherited from the meta-learner F based on the sampled task set S = {M j |j sampled }
+
+such as θF 
+
+> i
+
+= F
+
+
+
+{θMi 
+
+> j
+
+}Mj∈S 
+
+
+
+. This initialization holds knowledge from the previously sampled tasks, thus fi is not trained from scratch [6]. Given the high structural similarity of EMS tasks, we leverage shared rep-resentations to promote cross-task generalization. The low inter-task conflict enables learning a common feature space that captures invariant environment dynamics. Inspired by shared model layers [1, 4], we extend this concept to our meta-learning framework through a shared feature extractor, allowing representation-level transfer without full parameter propagation to the meta-learner. Each base learner fi = {ψθψi
+
+, π θπi , Q θQi
+
+} is defined by actor and critic specific layers πθπi and QθQi
+
+respectively and a common Feature Extractor (FE) ψθψi
+
+. The later produces a learned representation z = gψ (s) of the input state, used by both actor and critic networks. The learner fi updates its parameters using task-specific data Di and the objective function J(θF 
+
+> i
+
+, D i) as a standard single-agent RL process that we define generically to be model agnostic: 
+
+θX, new  
+
+> i
+
+= θX, (tϕ) 
+
+> i
+
++ αEτ ∼π
+
+h
+
+∇θXi J X (θX, (tϕ) 
+
+> i
+
+)
+
+i
+
+(1) where X ∈ { π, Q, ψ } represents the actor, critic, or FE, θX, (tϕ) 
+
+> i
+
+its current cor-responding parameters for task i at meta-training step tϕ, and J X its objective function. After K inner-loop updates, the adaptation stage fi(Di; θF 
+
+> i
+
+) = θKi
+
+outputs a task-specific agent with parameters θKi .
+
+2.4 Meta-Training 
+
+The outer loop aims to optimize the meta-learner Fϕ, which provides improved initialization parameters θF 
+
+> i
+
+for the task-specific learners fi, enabling faster and more efficient adaptation. Following prior work [13, 16], we choose to meta-optimize only a subset of model parameters. Specifically, only the parameters corresponding to the shared feature extractor ϕψ and the critic-specific layers ϕQ
+
+are propagated to the meta-learner F = {ψϕψ , Q ϕQ }. This is motivated based on the asymmetry between the actor and critic roles in RL. The critic plays a supporting role by estimating expected returns from stable signals across tasks, while the actor directly affects the specific policy needed to solve the task. The critic benefits more meta-learning given its generic role across all tasks.   
+
+> 4https://github.com/zxnga/meta-rl-ems Meta-RL with Shared Representations 5
+
+The meta-learner F = {ψϕψ , Q ϕQ } maintains and updates the meta-weights allowing the model to generalize across the distribution p(M). For each meta-iteration we sample a batch of M tasks B = {M i}Mi=1 from p(M). Once the updated parameters θKi are obtained for each of the M tasks, we propagate the parameters to the meta-model. The meta-learner Fϕ uses the Reptile update rule, which approximates the first-order gradient of the meta-objective [11]: 
+
+Jmeta (ϕψ , ϕ Q) = EM∼ p(M)
+
+EDM
+
+J (θM) (2) The meta-update is computed as the average difference between the adapted task-specific ( θKi ) and initialization ( ϕ) parameters, across all tasks in B. The meta-learner parameters are updated as: 
+
+∆ϕ = 1
+
+M
+
+> M
+
+X
+
+> i=1
+
+ θKi − ϕ , ϕ ← ϕ + αouter ∆ϕ, (3) At each meta-training step tϕ, a new batch of tasks B(tϕ) is sampled, and the meta-parameters ϕ(tϕ) are updated. Let S = {M j |j < t ϕ} be the set of sampled task up to tϕ, The meta-parameters ϕ(tϕ) reflect the accumulated knowledge from all tasks sampled in previous meta-training steps. Their update is expressed as: 
+
+ϕ(tϕ) = F
+
+n 
+
+θK, (j) 
+
+> i
+
+|i ∈ B (j), j < t ϕ
+
+o 
+
+(4) This ensures the meta-learner accumulates knowledge over time to provide better initialization for future tasks. 
+
+2.5 Inner Loop Actor Weights Reuse (AR) 
+
+While actor weights are not propagated to the meta-model F, we store task-specific actor parameters across meta-training iterations to retain prior knowl-edge. This is particularly beneficial for tasks with long temporal dependen-cies, where effective policies (e.g., charging–discharging cycles) require extensive training. Reusing trained weights 1) improves sample efficiency by focusing ex-ploration on critical states, 2) prevents relearning of common behaviors, and 3) aligns meta-learned parameters with previously optimized task policies. For each task Mi, the adapted actor parameters θπ,K i are stored and reused when the same task reappears: 
+
+θπ, (t∗ϕ) 
+
+> i
+
+=
+
+(
+
+sampled from Pπ , if Mi /∈ S ,Φπ (Mi), if Mi ∈ S , (5) where Φπ : M → R maps each task to its stored actor parameters. After adap-tation, S is updated as S ← S ∪ M i and Φπ (Mi) ← θπ, new  
+
+> i
+
+. This balances 
+
+specialization , via task-specific reuse of Φπ (Mi) for known tasks, and gener-alization , via shared meta-parameters (ϕψ , ϕ Q) that enable rapid adaptation to unseen tasks. 6 T. Zangato et al. 
+
+2.6 Meta-RL Task Selection and Evaluation Protocol 
+
+To promote task diversity, we cluster buildings to identify distinct consumption behavior profiles following the method in [22]. For each time series xi ∈ Rm, we compute a smoothed derivative x′
+
+> i
+
+(t) via cubic spline interpolation and derive its frequency-domain signature as the magnitude of the Fourier transform: ˆxi =
+
+|F [x′
+
+> i
+
+(t)] |. Each spectrum is normalized to unit norm, ˜xi = ˆxi 
+
+> ∥ˆxi∥
+
+, and pairwise similarity is computed using cosine distance Dij = 1 − ˆxi·ˆxj  
+
+> ∥ˆxi∥ ∥ ˆxj∥
+
+. The resulting matrix D ∈ Rn×n serves as input to hierarchical agglomerative clustering 
+
+with average linkage davg (A, B ) = 1
+
+> |A|·| B|
+
+P
+
+> x∈A
+
+P 
+
+> y∈B
+
+D(x, y ).
+
+Fig. 2: Behavioral clustering results. We retain 632 buildings, segmented into weekly episodes, forming indepen-dent RL tasks with shared structure but variable dynamics. Random task sam-pling during training increases meta-update frequency and prevents bias toward specific profiles. Figure 2 visualizes clustering results on a subset of time series. To evaluate generalization, we hold out one behavioral cluster during meta-training and perform meta-testing on its buildings. 
+
+# 3 Experimental Evaluation 
+
+Experiments were conducted on two datasets: 1) a proprietary dataset of energy consumption data from 1,529 buildings collected between 2018 and 2024 ( ≈ 30 million samples). It includes diverse building types (residential, office, indus-trial, and technical facilities) enriched with meteorological, socioeconomic, and electricity market data, and 2) the CityLearn open-source dataset [17]. The goal in Building Energy Management Systems (BEMS) is to minimize energy costs and consumption by efficiently controlling energy flow. We use the publicly available CityLearn environment [17] as the simulation framework. We consider a set of buildings, each equipped with a controller managing the energy stored in or released from its Energy Storage Unit (ESU). At each time step, the building’s demand is met through renewable generation Epv  
+
+> t
+
+, storage exchange Meta-RL with Shared Representations 7
+
+EESU  
+
+> t
+
+, and grid supply Ert , where EESU  
+
+> t
+
+> 0 indicates charging and EESU  
+
+> t
+
+< 0
+
+discharging. For each building, Lt denotes the non-shiftable load, Eth t the thermal energy consumption, Ht the normalized state of charge of the ESU, and v its capacity. Total consumption is thus Et = Lt + Eth t + EESU  
+
+> t
+
++ Epv  
+
+> t
+
+.
+
+States. Each building’s state vector st ∈ R30 includes financial, climatic, and load-related features such as energy prices, temperature, and solar irradiation. 
+
+Actions. We use a discretized action space indicating the proportion of ca-pacity to charge or discharge. Invalid actions are masked using prior system con-straints. The valid range is [0 , vd−Ht 
+
+> vd
+
+] if Epv ≥ Et, otherwise [− max( Et,H t) 
+
+> vd
+
+, vd−Ht 
+
+> vd
+
+].
+
+Rewards. The agent minimizes energy costs and grid ramping fluctuations. With time window h and weights α1, α 2, the reward is: 
+
+rt = − α1Cg Ert + α2
+
+> t
+
+X
+
+> t′=t−h
+
+|Ert′ − Ert′−1|
+
+!
+
+(6) 
+
+3.1 Implementation and Training 
+
+We use the Proximal Policy Optimization (PPO) algorithm [14] as the inner loop RL agent. The agent interacts with the environment for 100k steps, with policy updates performed every 2, 048 steps (fewer than 50 updates per episode). The outer loop consists of N = 600 batch of 3 tasks. Meta-model parameters are optimized using the Adam optimizer and gradient ∇ϕL(ϕ) = ( ϕ − θKi ). To prevent early task oversampling, the probability of revisiting previously seen tasks is set to zero during the first 10% of meta-training steps ( tϕ < 0.1H). Afterward, the revisit probability ηtϕ follows a polynomial growth schedule: 
+
+ηtϕ = η0 + ( ηmax − η0) ·
+
+ tϕ
+
+H
+
+p
+
+, (7) where η0, ηmax , and p denote the initial value, maximum probability, and poly-nomial degree. This encourages exploration early on and gradually increases revisits, allowing reuse of specialized actor knowledge for complex, long-horizon tasks. The shared FE is a three-layer MLP with 64 neurons per layer and ReLU activations. Both actor and critic networks are fully connected with 64 neurons; the actor uses Tanh activation and the critic approximates the value function 
+
+V (s) = g(z; θQ). During meta-testing, the PPO agent is initialized with meta-learned parameters (ϕψ , ϕ Q). Task-specific actor weights from meta-training are not reused, the actor is randomly initialized and adapts via the shared feature extractor ψ, leveraging transferable representations for unseen tasks. 
+
+3.2 Experiments and Results 
+
+We compare our CFE approach against CAVIA [24] and different PPO initial-izations: Random refers to a single-agent randomly initialized and trained from scratch until convergence on a specific building; Pretrained is a single-agent 8 T. Zangato et al.    
+
+> (a) Performance over the full training horizon (Citylearn dataset)
+> (b) Performance during early-stage adaptation (Citylearn dataset)
+> (c) Performance on clusters at various distance from the training group (Proprietary dataset)
+
+Fig. 3: Meta-testing initialization impact on unseen task (mean of 5 runs). The red dashed lines in (a) indicate the end of early meta gains shwon in (b). pretrained on one profile; Reptile refers to the vanilla Reptile without the FE and actor reuse and RL 2 uses a 256 layer LSTM to accumulate experience [5]. Figure 3 presents the meta-testing results in terms of environment and gra-dient steps. Our Meta-RL agent reaches a mean reward of -30 in ≈70k steps, while the Pretrained and Random baselines require about 250k and 400k steps. The vanilla Reptile agent converges faster than both baselines but remains be-low our variant, confirming that our method accelerate convergence, though the slightly larger confidence interval (Fig. 4a) indicates reduced stability. Meta-trained agents benefit from parameters already aligned with the task distribu-tion p(M), requiring fewer updates to achieve strong performance on unseen tasks. In contrast, randomly initialized agents must explore extensively, and pretrained policies adapt more slowly to new dynamics. The CAVIA and RL 2
+
+baseline shows stable performance but little improvement over episodes during meta-testing. They both behave as a robust generalist rather than a fast learner capturing shared structure but lacking effective within-task adaptation. The early gradient-update analysis (Fig. 3b) shows that our method and Reptile learn quickly in the first updates, unlike the Random and Pretrained baselines. Meta-RL with Shared Representations 9
+
+Meta-initialization drives informed exploration, enabling rapid discovery of ef-fective charge–discharge patterns, while the baselines struggle to adjust. This yields an adaptation sample complexity reduction of about four times.   
+
+> (a) Variance analysis (b) Components ablation study
+
+Fig. 4: Left: Variance of meta-trained agents across runs. Right: Ablation of Feature Extractors (FE: MLP or TS) and Actor Reuse (AR). Figure 4b shows the contribution of the Actor Reuse (AR) mechanism and the Feature Extractor (FE) module. We compare four variants: 1) vanilla Reptile, 2) Reptile+AR, 3) Reptile+FE, and 4) our full model (Reptile+AR+FE). Results show that most performance gains come from the FE module. Reptile and Rep-tile+AR achieve similar asymptotic performance, indicating limited impact from actor reuse alone. Adding the FE consistently improves convergence speed and final rewards. Meta-learning transferable representations in early layers allows the agent to extract general features, benefiting both policy and value networks by emphasizing environment-level dynamics over task-specific patterns. To assess the impact of representation learning, we evaluate an alternative FE built on a probabilistic transformer (TS). The transformer is jointly trained from actor–critic gradients and an auxiliary forecasting loss that predicts fu-ture values of a univariate consumption signal, providing a lightweight model-based inductive bias aligned with recent temporal world-model approaches [21]. The TS-based Reptile variant achieves higher asymptotic performance, showing that richer temporal representations benefit long-horizon decision-making. How-ever, adaptation becomes slower, likely due to the larger parameterization and increased depth between input embeddings and decision layers. Its adaptation performance matches the fully pretrained agent, showing that meta-learning still offers a beneficial initialization. Overall, this highlights a trade-off: transformer-based feature extractors can improve final performance but their size reduces the influence of the meta-update, reducing early adaptation speed. Figure 5 analyzes convergence by comparing the evolution of the meta-gradient norm between the Reptile and our CFE variant. Both exhibit high initial gradient norms, reflecting broad task exploration and rapid acquisition 10 T. Zangato et al. 
+
+of general knowledge. Over time, the norm of CFE decreases faster, indicating quicker stabilization of meta-parameters. This confirm that combining feature-level meta-RL with selective actor reuse accelerates convergence and enhances meta-stability, validating the efficiency of our proposed training framework. We also evaluate the framework on our proprietary, more diverse dataset. Figure 3c compares adaptation on building clusters at increasing distances from a reference trainign group (G0). Models trained on closely related clusters (Meta-G1, Meta-G2) achieve the highest performance, rapidly surpassing the random baseline and converging to stable policies with few updates. As cluster distance increases (Meta-G3), performance remains competitive but requires more train-ing steps, indicating reduced transferability due to differing consumption pat-terns. For distant clusters (Meta-G4, Meta-G5), performance drops below the random baseline, suggesting that beyond a certain distance in the task distribu-tion, shared knowledge becomes less relevant. This shows the pattern-dependence of meta-learning: it provides strong benefits when source and target tasks share structural similarity but degrades as their underlying dynamics diverge. To evaluate operational behavior, we analyze early-stage adaptation and per-formance metrics (Table 1). Our agent rapidly adopts strategic charge–discharge cycles, effectively exploring rewarding states and accelerating convergence. After only 15 gradient updates, it executes about five distinct cycles, rising to fifteen after 30 updates, while the randomly initialized agent performs roughly fifty unstructured cycles over the same period. This demonstrates the meta-policy’s capacity for meaningful exploration and adaptive control, in contrast to the rigid Pretrained agent, which exhibits limited flexibility. We further assess per-formance using two operational metrics: (1) Ramping, defined as the absolute change in energy demand between consecutive timesteps, and (2) Financial cost, the electricity expense from grid usage. Results, normalized to a Rule-Based Con-troller baseline [17], show that our method consistently achieves lower ramping and energy costs than all baselines while matching Reptile’s performances.  
+
+> (a) CFE (Reptile+AR+FE) (b) Reptile
+
+Fig. 5: Evolution of the meta-gradient norm across training epochs for the stan-dard Reptile algorithm and the proposed CFE variant. Meta-RL with Shared Representations 11 
+
+Table 1: Number of cycles of charge of the storing system and the final cost after 
+
+K rounds of policy updates.                                                                     
+
+> KRound Mean number of charging cycles
+> of Updates CFE (Ours) Vanilla Reptile RL 2CAVIA Random Pretrain
+> 15 4.8±4.36.2±3.517 .5±5.619 .2±258 .6±12 .4 18 .2±2.8
+> 30 14 .3±5.614 .8±4.117 .3±4.2 19 .8±1.9 45 .3±15 .3 17 .9±1.7
+> 300 20 .5±5.918 .9±3.618 .1±5.4 19 .4±2.4 16 .4±4.617 .8±2.2
+> Final Costs (aRamping, bYearly financial cost) 600 0.9 a,0.86 b0.9 ,0.87 1.10,0.98 1.18, 1.02 1.01 ,0.95 1.03 ±0.96
+
+Accelerated learning and improved final performance during meta-testing high-light the sample efficiency of our method. Meta-learning provide a strong prior that reduces task-specific exploration by encoding shared environment dynamics. 
+
+# 4 Conclusion 
+
+We addressed key challenges in applying RL to EMS, including sample efficiency, policy generalization, and adaptation to dynamic conditions. We proposed a Meta-RL framework for EMS control, integrating a first-order meta-learning al-gorithm into a hybrid actor–critic architecture. The method introduces two key innovations: 1) a shared feature extractor that promotes transferable representa-tion learning across actor and critic networks, and 2) a task-specific actor reuse mechanism that accelerates adaptation to recurring EMS tasks. Experiments demonstrate that our approach reduces adaptation sample complexity by a fac-tor of four compared to standard RL, while achieving faster convergence and higher final performance than existing Meta-RL baselines. The model exhibits rapid early-stage adaptation without compromising long-term stability. Nonethe-less, the approach assumes structural similarity among tasks, which may limit generalization to out-of-distribution scenarios, and maintaining task-specific ac-tor parameters introduces additional computational overhead. Future work will incorporate probabilistic latent task representations to enhance robustness and scalability under diverse conditions. 
+
+# References   
+
+> 1. Andrychowicz, M., Raichuk, A., Stańczyk, P., Orsini, M., Girgin, S., Marinier, R., Hussenot, L., Geist, M., Pietquin, O., Michalski, M., et al.: What matters for on-policy deep actor-critic methods? a large-scale study. In: ICLR (2021) 2. Beck, J., Vuorio, R., Liu, E.Z., Xiong, Z., Zintgraf, L.M., Finn, C., Whiteson, S.: A survey of meta-reinforcement learning. CoRR abs/2301.08028 (2023) 3. Chen, X., Qu, G., Tang, Y., Low, S., Li, N.: Reinforcement learning for selective key applications in power systems: Recent advances and future challenges. IEEE Transactions on Smart Grid (2022)
+
+12 T. Zangato et al. 4. Cobbe, K.W., Hilton, J., Klimov, O., Schulman, J.: Phasic policy gradient. In: ICML. pp. 2020–2027. PMLR (2021) 5. Duan, Y., Schulman, J., Chen, X., Bartlett, P.L., Sutskever, I., Abbeel, P.: Rl 2: Fast reinforcement learning via slow reinforcement learning. arXiv preprint arXiv:1611.02779 (2016) 6. Finn, C., Abbeel, P., Levine, S.: Model-agnostic meta-learning for fast adaptation of deep networks. In: ICML. pp. 1126–1135. PMLR (2017) 7. Jose, S.T., Simeone, O.: An information-theoretic analysis of the impact of task similarity on meta-learning. In: 2021 IEEE ISIT. pp. 1534–1539. IEEE (2021) 8. Kirsch, L., van Steenkiste, S., Schmidhuber, J.: Improving generalization in meta reinforcement learning using learned objectives. In: ICLR (2020) 9. Kurte, K., Munk, J., Kotevska, O., Amasyali, K., Smith, R., McKee, E., Du, Y., Cui, B., Kuruganti, T., Zandi, H.: Evaluating the adaptability of reinforcement learning based hvac control for residential houses. Sustainability 12 (18), 7727 (2020) 10. Mitchell, E., Rafailov, R., Peng, X.B., Levine, S., Finn, C.: Offline meta-reinforcement learning with advantage weighting. In: ICML. PMLR (2021) 11. Nichol, A., Achiam, J., Schulman, J.: On first-order meta-learning algorithms. CoRR abs/1803.02999 (2018) 12. Peng, M., Zhu, B., Jiao, J.: Linear representation meta-reinforcement learning for instant adaptation. arXiv preprint arXiv:2101.04750 (2021) 13. Rakelly, K., Zhou, A., Finn, C., Levine, S., Quillen, D.: Efficient off-policy meta-reinforcement learning via probabilistic context variables. In: ICML. pp. 5331– 5340. PMLR (2019) 14. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., Klimov, O.: Proximal policy optimization algorithms. CoRR abs/1707.06347 (2017) 15. Shen, H., Shen, X., Chen, Y.: Real-time microgrid energy scheduling using meta-reinforcement learning. Energies 17 (10), 2367 (2024) 16. Sung, F., Zhang, L., Xiang, T., Hospedales, T.M., Yang, Y.: Learning to learn: Meta-critic networks for sample efficient learning. CoRR abs/1706.09529 (2017) 17. Vázquez-Canteli, J.R., Kämpf, J., Henze, G., Nagy, Z.: Citylearn v1.0: An openai gym environment for demand response with deep reinforcement learning. In: Pro-ceedings of the 6th ACM International Conference on Systems for Energy-Efficient Buildings, Cities, and Transportation. pp. 356–357 (2019) 18. Xiong, L., Tang, Y., Liu, C., Mao, S., Meng, K., Dong, Z., Qian, F.: Meta-reinforcement learning-based transferable scheduling strategy for energy manage-ment. IEEE Transactions on Circuits and Systems 70 (4), 1685–1695 (2023) 19. Xu, Z., van Hasselt, H.P., Silver, D.: Meta-gradient reinforcement learning. NIPS 
+
+31 (2018) 20. Young, K., Wang, B., Taylor, M.E.: Metatrace actor-critic: Online step-size tuning by meta-gradient descent for reinforcement learning control. In: IJCAI (2019) 21. Zangato, T., Osmani, A., Alizadeh, P.: Enhancing decision-making in energy man-agement systems through action-independent dynamics learning. In: ECAI 2024, pp. 4571–4578. IOS Press (2024) 22. Zangato, T., Osmani, A., Alizadeh, P.: Data-driven policy mapping for safe rl-based energy management systems. Energy Reports 13 , 1888–1909 (2025) 23. Zhang, H., Wu, D., Boulet, B.: Metaems: A meta reinforcement learning-based con-trol framework for building energy management system. CoRR abs/2210.12590 
+
+(2022) 24. Zintgraf, L., Shiarli, K., Kurin, V., Hofmann, K., Whiteson, S.: Fast context adap-tation via meta-learning. In: ICML. pp. 7693–7702. PMLR (2019)

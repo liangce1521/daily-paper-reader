@@ -1,0 +1,685 @@
+Title: A Computationally Efficient and Human Implementable Minimum-lap-time Control Policy for Energy-limited Race Cars
+
+URL Source: https://arxiv.org/pdf/2603.02339v1
+
+Published Time: Wed, 04 Mar 2026 01:05:14 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# A Computationally Efficient and Human Implementable Minimum-lap-time Control Policy for Energy-limited Race Cars 
+
+Erik van den Eshof, Wytze de Vries, Mauro Salazar 
+
+Abstract — This paper presents a provably optimal, real-time capable energy management policy for race cars that provides simple human-driver-implementable control cues. Specifically, we first formulate the energy-constrained minimum-lap-time control problem via Pontryagin’s Minimum Principle (PMP) and derive the optimal policy and costate dynamics using Karush–Kuhn–Tucker (KKT) optimality conditions. We show that the optimal control policy follows a bang-bang structure that is easily implementable by a human driver, eliminating the need for potentially dangerous active throttle pedal overwrites or distracting signals. Moreover, the analytical formulation of the optimal system dynamics allows us to recast the problem as a sequence of boundary-value problems, which can be efficiently solved using root-finding methods. Our results show that our proposed approach can compute the same globally optimal control strategies of existing numerical methods based on direct optimal control, whilst drastically reducing computation time from the order of seconds to milliseconds. 
+
+I. I NTRODUCTION 
+
+The importance of energy management in motorsports is more significant than ever with the introduction of in-race charging in Formula E in 2025 and new 2026 Formula 1 regulations featuring a heavy reliance on battery energy deployment [1], [2]. The high-speed nature of racing calls for computationally efficient energy management algorithms that operate safely with human drivers, minimizing control overrides or distractions. Simultaneously, given the charac-teristically narrow performance margins in motorsports, the use of provably optimal methods is of paramount importance. In situations where energy limitations are minor, optimal en-ergy management strategies involve only small adjustments in deployed power, leading to small and predictable varia-tions in vehicle speed. For safety reasons, however, active overwrites of the driver’s power demand are often subject to strict rate limits or are prohibited entirely, ensuring that the driver remains in control of the vehicle. This constraint becomes limiting when energy availability is tight, such as in fully electric powertrains, where a race-time-optimal strategy may require substantial power reductions, and thus noticeable speed changes, to conserve energy [3]. To maintain safe operation when driving in close proximity to competitors, the driver must stay in control with minimal cognitive load. Unlike tire grip limits, which drivers can physically perceive, energy limits cannot be sensed. Consequently, in races with pronounced battery or fuel limitations, drivers rely on externally provided cues or strategies to manage energy                       
+
+> The authors are with the Control Systems Technology section, Department of Mechanical Engineering, Eindhoven University of Technology (TU/e), Eindhoven, 5600 MB, The Netherlands. E-mails:
+> {r.c.p.v.d.eshof,w.a.b.d.vries,m.r.u.salazar }@tue.nl
+> Fig. 1. Electric endurance racing car (InMotion) [4], typically severely energy-limited. Optimal coasting and regenerative braking points along the circuit are highlighted in blue and gold respectively. The dark and light regions respectively indicate slow and high speeds.
+
+usage: the energy management system instructs the driver when to lift off the throttle or enable regenerative braking, allowing the driver to execute these actions only when it is safe to do so. 
+
+Related Literature: Energy management has become an increasingly important research area in motorsport as reliance on battery-electric energy grows. Unlike in road vehicles, where the primary goal is to minimize energy consump-tion, motorsport focuses on minimizing lap-time under strict energy constraints [5]. Researchers have studied energy-limited racing applications of techniques such as convex optimization [3], [6]–[8], using simplified convex models, and nonlinear-programming (NLP) [9]–[11], capturing more advanced dynamics, but lacking computational efficiency for real-time applications. For real-time optimal control, researchers applied sequential convex programming methods (SCP) [12], [13], and convex models to derive optimal policies using Pontryagin’s minimum principle (PMP) [14], with disturbance rejection through model-predictive control (MPC) [15] and equivalent lap-time minimization strategies (ELTMS) [16], or a combination of both [17]. These methods are mostly limited to hybrid powertrains, where the power split between electric and combustion engine is actively controlled and the driver remains in control of most of the power delivered to the wheels. For more significant energy limitations, as is the case for energy management in races with refueling or (particularly) recharging stops, optimal control requires an active overwrite of the power delivered to the wheels [3], [12]. While suitable for autonomous racing applications, this is typically restricted by racing regulations and difficult to implement in a safe manner when 1
+
+> arXiv:2603.02339v1 [math.OC] 2 Mar 2026
+
+there are human drivers involved [1], [2]. In our previous work [18], we proposed to solve this problem by adapting a smooth, convex optimal control solution to generate close-to-optimal bang-bang control inputs to be executed by the driver, whereby the driver remains in control of the power delivery. However, this method lacks global optimality and only considers a coasting phase for energy saving, meaning regenerative braking is only used in combination with friction brakes, limiting energy recovery potential. To the best of the author’s knowledge, there are no real-time capable methods for provably optimal energy management of racing cars, that are executable by a human driver. 
+
+Statement of Contributions: This paper presents a prov-ably optimal, real-time capable method for energy manage-ment of racing cars. Through an analytical derivation of the Karush–Kuhn–Tucker (KKT) conditions [19], which are sufficient for global optimality of the convex energy man-agement problem, we gain deeper insight into the behavior of the optimal solution. Hereby we find that by selecting linearized powertrain loss models, the optimal solution ex-hibits a desirable bang-bang control policy as a function of the kinetic energy to battery energy costate ratio, which can be followed by human drivers with little distraction and avoids the need for a potentially unsafe active throttle request overwrite. Subsequently, we apply constrained PMP to derive the optimal costate dynamics [20], [21] and frame the problem as a set of sequential boundary value problems, which we can efficiently solve using root-finding methods. II. M ETHODOLOGY 
+
+In this section, we derive the minimum-lap-time control policy and optimal dynamics for the energy limited racing problem using the KKT conditions and PMP. First, we define our optimization problem. In previous work we showed that energy management strate-gies have little influence on the driven spatial trajectory [13]. Therefore, we assume a fixed, pre-computed curvature-based trajectory in the formulation of our energy management problem, significantly simplifying the control problem by exclusively focusing on longitudinal dynamics, without the consideration of spatial trajectory optimization. We operate in the distance domain of a single racing lap s ∈ [s0, s f ], and define our objective lap-time tlap as the inverse of velocity 
+
+v integrated over this distance: 
+
+tlap =
+
+Z sf
+
+> s0
+
+dt
+
+ds (s) d s =
+
+Z sf
+
+> s0
+
+1
+
+v(s) ds =
+
+Z sf
+
+> s0
+
+1
+
+p2 Ekin (s)/m ds, 
+
+(1) 
+
+where Ekin is the kinetic energy and m is the vehicle mass. We select kinetic energy as a state, as this results in favorable linear force-dynamics in the distance domain. Accordingly, our state and dynamics are defined as follows:  
+
+> dEkin
+> ds
+
+(s) = Fm(s) − Fbrk (s) − Fd(s, κ, E kin ), (2)  
+
+> dEb
+> ds
+
+(s) = 
+
+(
+
+Fm(s)/η + + Fb,0, if Fm(s) ≥ 0,Fm(s) · η− + Fb,0, if Fm(s) < 0, (3) 
+
+where Fd is the total drag force acting on the vehicle, κ
+
+is the curvature of the spatial trajectory along the track (known a priori), η+ and η− are the propulsive and regener-ative powertrain efficiencies respectively, and Fb,0 represents auxiliary, stationary energy demands. Fm is the control input corresponding to motor power demand, Fbrk is the braking force, and Eb is the state tracking the cumulative (battery) energy used throughout the lap. Our use case is an electric racing car, but the methodology also applies to fuel-limited combustion engine cars, by considering Eb as the cumulative fuel energy used. We enforce powertrain limits on the battery as 
+
+Fm(s) ≤ F +PT (s, E kin ),Fm(s) ≥ F −
+
+> PT
+
+(s, E kin ), (4) 
+
+where F +PT is the maximum power output, corresponding to full-throttle operation, and F − 
+
+> PT
+
+is the limit for regenerative braking force, set to zero in the case of combustion engine cars. In contrast to closely-related works [6], [14]–[18], we con-strain grip limits by bounding the longitudinal force rather than enforcing a maximum kinetic energy bound to represent tire grip limits, 
+
+Fm(s) − Fbrk (s) ≤ F +grip (s, κ, E kin ),Fm(s) − Fbrk (s) ≥ F −
+
+> grip
+
+(s, κ, E kin ), (5) 
+
+where F ± 
+
+> grip
+
+are the upper and lower grip limits, respec-tively. This approach ensures we exclusively have instan-taneous jumps in our kinetic costate dynamics as control-independent state limits are only reached at corner apexes. We discuss this more thoroughly and explain the benefits in Section II-B. Moreover, this force-limit formulation allows for a straightforward derivation from potentially data-driven 
+
+g-g-v envelope limits [13], [22]–[24], and avoids the pre-solve required to find the maximum kinetic energy bound. Our choices for defining these limits and the drag forces can be found in the Appendix. The full optimal control problem with states x(s) := 
+
+{Ekin , E b} and controls u(s) := {Fm, F brk } reads as fol-lows: 
+
+Problem 1: (Energy-limited Lap-Time Optimization) .The minimum-lap-time control strategy is the solution of 
+
+min 
+
+> u(s),x(s)
+
+Z sf
+
+> s0
+
+1
+
+p2 Ekin (s)/m ds
+
+s.t. Vehicle Dynamics: (2) 
+
+Battery/Fuel Dynamics: (3) 
+
+Powertrain Limits: (4) 
+
+Grip Limits: (5) 
+
+Braking Non-negativity: Fbrk (s) ≥ 0
+
+Energy Limits: Eb(sf ) ≤ ∆Eb,max + Eb(s0),
+
+where ∆Eb,max is the energy budget for the lap. The Hamiltonian of the optimization problem is written as 
+
+H(x, u, λ ) = 1
+
+p2 Ekin (s)/m + λkin · dEkin  
+
+> ds
+
++ λb · dEb
+
+> ds
+
++ μ+grip (Fm − Fbrk − F +grip ) − μ−
+
+> grip
+
+(Fm − Fbrk − F −
+
+> grip
+
+)
+
+2+ μ+PT (Fm − F +PT ) − μ−
+
+> PT
+
+(Fm − F +grip ) − μbrk Fbrk , (6) 
+
+where λ{kin ,b} are the costates and μ±{grip ,PT ,brk } are mul-tipliers for the respective constraints. Note that for brevity’s sake, in this equation and the remainder of this paper, we do not write out the full function notations (dependencies on s, E kin ). Next, in accordance with PMP, we derive our costate dynamics as the negative partial derivatives of the Hamiltonian with respect to the states:  
+
+> dλkin
+> ds
+
+= − ∂H ∂E kin = (2 Ekin /m )− 32 /m + λkin ∂F d
+
+> ∂E kin
+
+− μ+grip   
+
+> ∂F +grip
+> ∂E kin
+
+− μ− 
+
+> grip
+> ∂F −
+> grip
+> ∂E kin
+
+− μ+PT   
+
+> ∂F +PT
+> ∂E kin
+
+− μ−  
+
+> PT
+> ∂F −
+> PT
+> ∂E kin
+
+, 
+
+> dλb
+> ds
+
+= − ∂H ∂E b = 0 ,
+
+(7) 
+
+Using the end conditions, the fact that the battery costate is constant and dual feasiblity of the constraint multipliers (μ ≥ 0), we can derive the battery costate sign: 
+
+λb(sf ) = μb,max =⇒ λb(s) = μb,max ≥ 0 ∀s. (8) 
+
+Next, we define our stationarity conditions as follows: 
+
+0 ∈ ∂H ∂F m =
+
+
+
+λkin + λb ·
+
+
+
+η+ + Fm ∂η +
+
+> ∂F m
+
+
+
+/η +2 
+
++μ+grip − μ− 
+
+> grip
+
++ μ+PT − μ−
+
+> PT
+
+, if Fm ≥ 0,λkin + λb ·
+
+
+
+η− + Fm ∂η −
+
+> ∂F m
+
+
+
++μ+grip − μ− 
+
+> grip
+
++ μ+PT − μ−
+
+> PT
+
+, if Fm < 0,
+
+0 ∈ ∂H ∂F brk = −λkin − μ+grip + μ− 
+
+> grip
+
+− μbrk .
+
+(9) 
+
+Complementary slackness dictates that: 
+
+μ+grip 
+
+ Fm − Fbrk − F +grip 
+
+ = 0 ,μ−
+
+> grip
+
+ −Fm + Fbrk + F +grip 
+
+ = 0 ,μ+PT 
+
+ Fm − F +PT 
+
+ = 0 ,μ−
+
+> PT
+
+ −Fm + F +PT 
+
+ = 0 ,μbrk (−Fbrk ) = 0 .
+
+(10) 
+
+From these two conditions follows a policy for control inputs as a function of costate variables. In motorsport applications, the vehicle operates most of the lap at the fixed operating points of the powertrain limits, corresponding to full-throttle operation or maximum regenerative braking. Therefore, we can assume ∂η ± 
+
+> ∂F m
+
+= 0 , i.e., that the powertrain efficiency is independent of the force demands, by linearizing the loss model around these operating points. Through this assumption, we obtain the following optimal control policy as a function of the costate variables: 
+
+Fm
+
+
+
+= min( F +PT , F +grip ), if λkin /λ b < −1/η +,
+
+∈ [0 , min( F +PT , F +grip )] , if λkin /λ b = −1/η +,
+
+= 0 , if − 1/η + < λ kin /λ b < −η−,
+
+∈ [max( F −
+
+> PT
+
+, F −
+
+> grip
+
+), 0] , if λkin /λ b = −η−,
+
+= max( F −
+
+> PT
+
+, F −
+
+> grip
+
+), if − η− < λ kin /λ b,Fbrk 
+
+
+
+= 0 , if λkin < 0,
+
+= max( F −
+
+> PT
+
+, F −
+
+> grip
+
+) − F −
+
+> grip
+
+, if λkin > 0,
+
+∈ [0 , max( F −
+
+> PT
+
+, F −
+
+> grip
+
+) − F −
+
+> grip
+
+], if λkin = 0 .
+
+(11) 
+
+Fig. 2. Optimal bang-bang control policy as a function of the costate ratio. 
+
+This policy is visualized in Fig. 2 and shows that by selecting linear loss models for the powertrain, the optimal control policy follows a bang-bang strategy with distinct phases: When λkin /λ b < −1/η +, the driver is responsible for maximizing acceleration, following the grip limit by modulating the throttle or activating the powertrain limits by fully depressing the throttle pedal. When −1/η + <λkin /λ b < −η−, the driver should coast, i.e. lift off the throttle without any braking action. When −η− < λ kin /λ b,the driver should maximize regenerative braking, and avoid using the mechanical friction brakes until the latest possible braking point, i.e., where the grip limit activates again, to decelerate and complete the corner. These distinct phases allow for safe usage alongside human drivers, as discrete signals allow the driver to maintain control without requiring an active overwrite of throttle pedal or brake inputs. To finalize our formulations, we derive the equations for our constraint multipliers using the control policy (6) and stationarity conditions (4) as 
+
+μ+grip =
+
+
+
+−(λkin + λb/η +), if λkin /λ b < −1/η +
+
+and F +grip < F +PT 
+
+0, otherwise ,μ− 
+
+> grip
+
+=
+
+
+
+λkin + λb · η−, if − η− < λ kin /λ b
+
+and F − 
+
+> grip
+
+> F −
+
+> PT
+
+,λkin , if 0 < λ kin /λ b
+
+and F − 
+
+> grip
+
+< F −
+
+> PT
+
+,
+
+0, otherwise ,μ+PT =
+
+
+
+−(λkin + λb/η +), if λkin /λ b < −1/η +
+
+and F +PT < F +grip ,
+
+0, otherwise ,μ− 
+
+> PT
+
+=
+
+
+
+−(λkin + λb · η−), if − η− < λ kin /λ b < 0
+
+and F − 
+
+> PT
+
+> F −
+
+> grip
+
+,λb · η−, if 0 < λ kin /λ b
+
+and F − 
+
+> PT
+
+> F −
+
+> grip
+
+,
+
+0, otherwise ,μbrk =
+
+
+
+0, if 0 < λ kin /λ b
+
+and F − 
+
+> PT
+
+> F −
+
+> grip
+
+,λb/η +, if λkin /λ b < −1/η +
+
+and F +grip < F +PT ,λb · η−, if η− < λ kin /λ b < 0
+
+or (0 < λ kin /λ b and F − 
+
+> grip
+
+> F −
+
+> PT
+
+),
+
+−λkin , otherwise .
+
+(12) 
+
+3A. Singularities 
+
+We note that our control policy in (11) is not explicitly de-fined at the distinct switching points, λkin = {− λb/η +, −λb·
+
+η−, 0}. In practice, this indeterminacy occurs only if there are costate equilibria at these points. To form an equilibrium,  
+
+> dλkin
+> ds
+
+= 0 must hold, and solving this for Ekin gives the singular speeds where our policy is not yet explicitly defined: 
+
+Ekin ,sing = m
+
+2
+
+
+
+− ∂F d
+
+∂E kin 
+
+m{− λb/η +, −λb · η−, 0}
+
+− 23
+
+. (13) 
+
+In these costate equilibria, the optimal solution attempts to track this critical kinetic energy. This corresponds to the un-desirable situation where, due to extreme energy limitations, a pure coast-regen strategy is not feasible and the driver is required to modulate throttle application to optimally minimize lap-time. In practice, we avoid this situation either by driving fewer laps and allowing more energy per lap, or by tightening the upper powertrain bound F +PT , i.e. reducing full-throttle power output, such that the critical velocity is not met. In our implementation we therefore use definition (13) to detect infeasible energy limitations, and return a warning to either increase energy budget or reduce full-throttle power output. Alternatively, the car could switch to a speed control mode and override driver power similar to how a road-car cruise control system would, which could still be a safe option if changes to Ekin ,sing are minor. In any case, this consideration completes our definition of the continuous optimal solution dynamics. 
+
+B. Jump Conditions 
+
+Equations (2), (3), (7), (11), and (12) fully define the con-tinuous optimal dynamics. For tire grip there are, however, combinations of kinetic energy and curvature where there exist no feasible values for the longitudinal tire forces Fm
+
+and Fbrk . This is evident from our definitions found in the Appendix, where we also derive a formulation for the kinetic energy where these limits are reached. These limits activate at speeds where all available tire grip is devoted to lateral forces, corresponding to F +grip = F − 
+
+> grip
+
+= 0 , which limits the car’s maximum speed through corners. As these are inherent upper limitations to the kinetic energy state, activating this constraint results in a discontinuous jump in the kinetic costate value [21]. Accordingly, to ensure the longitudinal tire forces are at zero at the jump point, the jump conditions are as follows: 
+
+λkin (s− 
+
+> i
+
+)
+
+(
+
+∈ [λkin (s+ 
+
+> i
+
+), −λb · η−], if Fm(s−) − Fbrk (s−) = 0 ,
+
+= −λb · η−, if Fm(s−) − Fbrk (s−) < 0,λkin (s+ 
+
+> i
+
+)
+
+(
+
+∈ [−λb/η +, λ kin (s− 
+
+> i
+
+)] , if Fm(s+) − Fbrk (s+) = 0 ,
+
+= −λb/η +, if Fm(s+) − Fbrk (s+) > 0,
+
+(14) 
+
+where s± 
+
+> i
+
+are the distances infinitely close before and after the jumping point. Using our continuous dynamics, we can simulate and predict the optimal solution between two subsequent jumping points, as visualized in Fig. 3.  
+
+> Fig. 3. Optimal trajectories for a single straight, between two costate jumping points at the apexes of subsequent corners, found by integrating the optimal solution dynamics. Two discrete signals suffice to instruct the driver to manage energy, minimizing cognitive load and distraction. The result of a direct solving method (NLP) on the problem is shown in a lighter color, matching and verifying the derivation of the costate dynamics.
+
+Algorithm 1 Solving procedure of Problem 1 given λb
+
+ignore energy limits set s0 to highest curvature corner apex 
+
+Ekin (s0) = arg min Ekin |F +grip (s0) − F −
+
+> grip
+
+(s0)|
+
+i ← 0
+
+while si ≤ sf do 
+
+minimize λkin (s+ 
+
+> i
+
+) by repeated integration of s ∈ [si, s f ]
+
+until apex grip limits are violated ▷bisection method 
+
+si+1 = arg min s∈[sisf ]|F +grip − F −
+
+> grip
+
+| ▷next corner apex append {x⋆, u ⋆, λ ⋆
+
+> kin
+
+|s ∈ [si, s i+1 ]} to optimal solution 
+
+i ← i + 1 
+
+end 
+
+C. Solution Algorithm 
+
+By deriving equations for our continuous optimal solution dynamics, we have reduced the optimal control problem to finding the value of our energy limitation, i.e., the energy limit constraint multiplier λb = μb,max , and the magnitude of the instantaneous jumps in kinetic costate at the small number of corner apexes, significantly reducing computa-tional complexity. This reduces the problem to a set of sequential boundary value problems, which we can solve with single shooting methods [21]. Moreover, we can ex-ploit monotonicity and use efficient root-finding methods to quickly derive the optimal solution. Increasing the magnitude of the jump leads to later coasting and later braking, and vice versa. Intuitively, this is analogous to the driver braking too early or too late for the corner, meaning that by checking whether the car violated maximum apex speed, we know whether to increase of reduce the magnitude of the jump. Our proposed solving method is outlined in Algorithm 1, using a bisection method for minimization of the kinetic energy costate value after the jump. Algorithm 1 can be nested within another bisection algorithm that maximizes λb until the Eb(sf ) ≤ ∆Eb,max + Eb(s0) constraint is violated [21], thereby identifying λb and fully solving the problem. 4Fig. 4. Velocity and costate ratio trajectories over a full lap of the Zolder circuit for three different energy budgets. Lap-time-optimal coasting and regenerative braking phases are triggered as the costate ratio passes the thresholds. 
+
+III. R ESULTS 
+
+In this section we evaluate the performance of our pro-posed method. We compare our method to a numerical solution obtained through a nonlinear programming solver, in terms of solving times and accuracy. Next, we explore the potential advantages of an adaptive kinetic costate trajectory for large differences in energy limitations. First, we look at the results for a full lap of the Zolder circuit for three different energy budgets, as visualized in Fig. 4. Dictated by the costate ratio trajectory, optimal coasting and regenerative braking phases are identified and, for the full lap, only seven instantaneous coasting cues, followed by regeneration cues, are required to be passed to the driver per lap for lap-time-optimal energy management. Another visualization of the optimal coast and regeneration points is provided in Fig. 1, showing that the optimal coasting and regeneration points are always near the ends of straight sections, where lap-time sensitivity to varying energy deployment is small. This means that the signals are passed to the driver when the car is vehicle-dynamically stable and the driver is not preoccupied with executing a corner at the limits of the car, where such a signal may be an undesirable distraction. 
+
+A. Comparison to Direct Methods 
+
+Previous works solved the energy management optimal control problem using direct methods like nonlinear pro-gramming. As shown in Fig. 3, the same solution is obtained through our indirect method, verifying our derivations of the costate dynamics. The advantage of our indirect solution methodology is twofold: First, it avoids reliance on third-party solvers. Second, the simplicity of the solving algorithm makes it lightweight and very efficient, bringing the solving time down from the order of seconds [3], [18] to the order of milliseconds, paving the way for real-time adaptations to changing conditions during a race.  
+
+> Fig. 5. Lap-time gains over energy budget for the different approaches. An adaptive costate trajectory is very advantageous, and its benefits are bigger when energy limits are tighter. For fixed costate trajectories and severe energy limitations, a regenerative braking phase may be disadvantageous due to the car slowing down too quickly and early in some corners.
+
+B. Advantages of an Optimal Costate Trajectory 
+
+In previous implementations on cars [16], [18], the costate trajectory was assumed fixed for a simple and lightweight integration, and to avoid reliance on third party solvers. In these implementations, model errors and other disturbances are dealt with by adjusting the costate thresholds using a feedback loop. As we demonstrate in this paper, the costate dynamics are influenced by when and where constraints are activated and depend on λb, i.e., the severity of the energy limitation. Accordingly, assuming an unchanging λkin 
+
+trajectory for a changing λb leads to sub-optimal results. This is visualized in Fig. 5, where we compare our optimized 
+
+λkin method to one using a fixed λkin trajectory based on the nominal case, but with adapted thresholds, and the method from [18], which only considers a coasting phase. The optimized λkin method is globally optimal and serves as a benchmark of the other two methods. The method that exclusively considers a coasting phase is outperformed across the range of energy budgets, but does outperform the method that also includes a regeneration phase for stronger energy limitations. This is because the fixed costate trajectory may lead to premature regeneration signals, causing the driver to slow down too quickly and early for a corner, resulting in unnecessary extra lap-time. IV. C ONCLUSION 
+
+This paper presented a provably optimal, real-time ca-pable method for energy management of racing cars. By deriving the optimal control policy and costate dynamics, we turned the energy management problem into a set of boundary value problems that we could efficiently solve using simple algorithms. Moreover, we explicitly determined the necessary conditions for the optimal control solution to follow a human-executable bang-bang trajectory, with control cues activating as the costate trajectory passes powertrain dependent thresholds. We compared our solution method to a nonlinear programming solution, showing that, whilst the solutions are identical, our proposed method solves orders 5of magnitude faster, paving the way for adaptive on-board implementations. Moreover, we showed that an optimal kinetic costate trajectory can significantly improve lap-time compared to previously proposed fixed-costate approaches. In future work, we plan to validate human-in-the-loop imple-mentation of our method through racetrack testing, whereby adaptive control schemes could be investigated to account for disturbances and changing conditions. Moreover, the approach is not limited to our fully-electric case-study, but can be readily extended and applied to hybrid power units. APPENDIX 
+
+VEHICLE DYNAMIC MODEL AND CONSTRAINTS 
+
+This section includes the vehicle dynamic model parametrizations and formulations we used throughout this paper. More generally, the proposed methodology could also be applied to other formulations. First, we define the total drag force acting on the vehicle as 
+
+Fd(s, κ, E kin ) = cd A ρ E kin (s)/m + cκ|κ(s)|Ekin (s)+ cr Fz(s, E kin ), (15) 
+
+where cd describes air drag coefficient, A is aerodynamic ref-erence area, ρ is the air density, cκ is a coefficient describing cornering resistances, cr describes rolling resistances, and Fz
+
+is the vertical force [6], [25]. The vertical force is defined as 
+
+Fz(s, E kin ) = cl A ρ E kin (s)/m + m g, (16) 
+
+where cl is the downforce coefficient and g is the gravita-tional acceleration. The powertrain limits are defined as power limits: 
+
+F ±
+
+> PT
+
+(s, E kin ) = P ±
+
+> PT
+
+/p2 Ekin (s)/m, (17) 
+
+where P ± 
+
+> PT
+
+are upper and lower motor power limits, respec-tively. Finally, the grip limits are defined as friction ellipses, ac-counting for downforce: 
+
+F ±
+
+> grip
+
+(s, κ, E kin ) = ±μx
+
+pFz(s, E kin )2 − (Fy(s, κ, E kin )/μ y)2,
+
+(18) 
+
+where μ{x,y} are longitudinal and lateral grip coefficient, respectively, and Fy is the lateral (centrifugal) force acting on the vehicle, which is found through the curvature and kinetic energy as 
+
+Fy(s, κ, E kin ) = 2 κ(s) Ekin (s). (19) 
+
+Through these formulations, we can also derive the absolute highest kinetic energy possible without violating grip limits, i.e., the kinetic energy limits where costate jumps occur: 
+
+Ekin ,jump (s, κ ) = 
+
+
+
+mg 
+
+2|κ(s)|
+
+μy
+
+− clAρ m, if 2|κ(s)|
+
+μy
+
+− clAρ m > 0,
+
++∞, otherwise .
+
+(20) 
+
+REFERENCES [1] F´ ed´ eration Internationale de l’Automobile (FIA), “2026 F1 Regula-tions - Section C [Technical] - Iss 15,” Dec. 2026. [2] ——, “Formula E World Championship - Technical Regulations 2025-2026,” Jun. 2025. [3] J. van Kampen, T. Herrmann, T. Hofman, and M. Salazar, “Optimal endurance race strategies for a fully electric race car under thermal constraints,” IEEE Trans. on Control Systems Tech. , 2024. [4] (2023) InMotion fully electric LMP3 car. InMotion. Available at https: //www.inmotion.tue.nl/en/about-us/cars/revolution. [5] O. Borsboom, M. Salazar, and T. Van Keulen, “Joint fuel-optimal control of the velocity and power-split of hybrid electric vehicles,” 
+
+IEEE Transactions on Intelligent Vehicles , vol. 6, pp. 2776–2788, 2024. [6] S. Ebbesen, M. Salazar, P. Elbert, C. Bussi, and C. H. Onder, “Time-optimal control strategies for a hybrid electric race car,” IEEE Trans. on Control Systems Tech. , vol. 26, no. 1, pp. 233–247, 2018. [7] S. Boyd and L. Vandenberghe, Convex optimization . Cambridge Univ. Press, 2004. [8] O. Borsboom, C. A. Fahdzyana, T. Hofman, and M. Salazar, “A convex optimization framework for minimum lap time design and control of electric race cars,” IEEE Transactions on Vehicular Technology ,vol. 70, no. 9, pp. 8478–8489, 2021. [9] X. Liu, A. Fotouhi, and D. Auger, “Optimal energy management for formula-e cars with regulatory limits and thermal constraints,” Applied Energy , vol. 279, 2020. [10] D. Limebeer, G. Perantoni, and A. Rao, “Optimal control of formula one car energy recovery systems,” Int. Journal of Control , vol. 87, no. 10, pp. 2065–2080, 2014. [11] P. Duhr, D. Buccheri, C. Balerna, A. Cerofolini, and C. H. On-der, “Minimum-race-time energy allocation strategies for the hybrid-electric formula 1 power unit,” IEEE Trans. on Vehicular Tech. , 2023. [12] T. Herrmann, F. Sauerbeck, M. Bayerlein, and M. Betz, J. an Lienkamp, “Optimization-based real-time-capable energy strategy for autonomous electric race cars,” SAE International Journal of Connected and Automated Vehicles , 2021, in press. [13] E. van den Eshof, J. van Kampen, and M. Salazar, “A computationally efficient framework for free-trajectory minimum-lap-time optimization of racing cars,” in European Control Conference , 2026, under Review. arXiv preprint arXiv:2511.13522. [14] M. Salazar, P. Elbert, S. Ebbesen, C. Bussi, and C. H. Onder, “Time-optimal control policy for a hybrid electric race car,” IEEE Trans. on Control Systems Tech. , vol. 25, no. 6, pp. 1921–1934, 2017. [15] M. Salazar, C. Balerna, P. Elbert, F. P. Grando, and C. H. Onder, “Real-time control algorithms for a hybrid electric race car using a two-level model predictive control scheme,” IEEE Transactions on Vehicular Technology , vol. 66, no. 12, pp. 10 911–10 922, 2017. [16] M. Salazar, C. Balerna, E. Chisari, C. Bussi, and C. H. Onder, “Equivalent lap time minimization strategies for a hybrid electric race car,” in Proc. IEEE Conf. on Decision and Control , 2018. [17] M.-P. Neumann, G. Fieni, C. Balerna, P. Duhr, A. Cerofolini, and C. H. Onder, “Low-level online control of the formula 1 power unit with feedforward cylinder deactivation,” IEEE Transactions on Vehicular Technology , vol. 72, no. 7, pp. 8382–8397, 2023. [18] E. van den Eshof, J. van Kampen, and M. Salazar, “Human-in-the-loop energy and thermal management for electric racing cars through optimization-based control,” European Journal of Control , vol. 86, p. 101293, 2025. [19] P. Y. Papalambros and D. J. Wilde, Principles of Optimal Design: Modeling and Computation , third edition ed. Cambridge Univ. Press, 2017. [20] D. Bertsekas, Dynamic programming and optimal control , 4th ed. Athena Scientific, 1995. [21] T. van Keulen, J. Gillot, B. de Jager, and M. Steinbuch, “Solution for state constrained optimal control problems applied to power split control for hybrid vehicles,” Automatica , vol. 50, no. 1, pp. 187–192, 2014. [22] P. Duhr, A. Sandeep, A. Cerofolini, and C. H. Onder, “Convex performance envelope for minimum lap time energy management of race cars,” IEEE Trans. on Vehicular Tech. , 2022. [23] M. Piccinini, S. Taddei, M. Piazza, and F. Biral, “Impacts of g-g-v constraints formulations on online minimum-time vehicle trajectory planning,” IFAC-PapersOnLine , vol. 58, no. 10, pp. 87–93, 2024. [24] W. F. Milliken and D. L. Milliken, Race Car Vehicle Dynamics , 1st ed. SAE International, 1995. [25] L. Guzzella and A. Sciarretta, Vehicle propulsion systems: Introduction to Modeling and Optimization , 2nd ed. Springer Berlin Heidelberg, 2007. 
+
+6
