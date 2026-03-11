@@ -1,0 +1,1024 @@
+Title: Diffusion Policy through Conditional Proximal Policy Optimization
+
+URL Source: https://arxiv.org/pdf/2603.04790v1
+
+Published Time: Fri, 06 Mar 2026 01:28:33 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Diffusion Policy through Conditional Proximal Policy Optimization 
+
+Ben Liu * 1 2 Shunpeng Yang * 3 2 Hua Chen 4 2 
+
+Abstract 
+
+Reinforcement learning (RL) has been extensively employed in a wide range of decision-making problems, such as games and robotics. Recently, diffusion policies have shown strong potential in modeling multi-modal behaviors, enabling more diverse and flexible action generation compared to the conventional Gaussian policy. Despite vari-ous attempts to combine RL with diffusion, a key challenge is the difficulty of computing action log-likelihood under the diffusion model. This greatly hinders the direct application of diffu-sion policies in on-policy reinforcement learn-ing. Most existing methods calculate or approxi-mate the log-likelihood through the entire denois-ing process in the diffusion model, which can be memory- and computationally inefficient. To overcome this challenge, we propose a novel and efficient method to train a diffusion policy in an on-policy setting that requires only evaluating a simple Gaussian probability. This is achieved by aligning the policy iteration with the diffusion process, which is a distinct paradigm compared to previous work. Moreover, our formulation can naturally handle entropy regularization, which is often difficult to incorporate into diffusion poli-cies. Experiments demonstrate that the proposed method produces multimodal policy behaviors and achieves superior performance on a variety of benchmark tasks in both IsaacLab and MuJoCo Playground. 
+
+1. Introduction 
+
+Recently, diffusion models have been introduced into re-inforcement learning (RL) as diffusion policies (Chi et al., 2023) and have achieved great success due to their strong 
+
+> 1
+
+Southern University of Science and Technology, Shenzhen, China 2Limx Dynamics 3Hong Kong University of Science and Technology, Hongkong, China 4Zhejiang University-University of Illinois Urbana-Champaign Institute, Haining, China. Correspon-dence to: Hua Chen <huachen@intl.zju.edu.cn >.
+
+Preprint. March 6, 2026. 
+
+generative capabilities. Unlike conventional Gaussian poli-cies, computing gradients of the reward with respect to diffu-sion network parameters is often computationally expensive or even intractable when using standard policy gradient methods, posing significant challenges for policy optimiza-tion. In this work, we focus on the on-policy setting and propose a novel framework that trains diffusion policies efficiently. Early work, such as Wang et al. (2022; 2024), calculates the diffusion policy’s gradient using the reparameterization trick, i.e., applying the chain rule through the Q-value and the entire denoising process. However, this approach is often invalid for on-policy algorithms, where a non-differentiable advantage function estimation is utilized rather than a dif-ferentiable Q-value estimation. To enable gradient com-putation via log-likelihood in the on-policy setting, (Ding et al., 2025) leverages exact diffusion inversion to refor-mulate the diffusion process as an invertible deterministic mapping. The log-likelihood can be directly calculated by the change of variables, like in normalizing flow . However, as they mentioned, such methods are very computationally expensive due to the recursive nature of the multi-step-based transformation. This is also a common issue in normalizing-flow-style transformation method (Ding et al., 2025; Chao et al., 2024; Chen et al., 2018): authors typically keep the number of steps (or the model depth) relatively small to balance accuracy and computational efficiency. Recently, McAllister et al. (2025) proposed to utilize the flow match-ing loss to approximate the log-likelihood ratio; however, this method can not handle the entropy regularization term, which is important for exploration in RL (Haarnoja et al., 2018). Different from the previous work, we overcome the diffi-culty of computing the diffusion policy’s log-likelihood by a different diffusion policy parameterization method. We argue that the policy iteration and the diffusion generative process can be well-aligned. Every policy iteration can be regarded as a denoising step in the diffusion model, and the whole policy iteration process forms the whole denoising process. To this end, we propose a novel framework to train a diffusion policy in an on-policy setting; every policy itera-tion only requires solving a Gaussian policy improvement problem, followed by a diffusion policy fitting with known samples, see Fig. 1 for an overview. The proposed method 1
+
+> arXiv:2603.04790v1 [cs.LG] 5 Mar 2026 Diffusion Policy through Conditional Proximal Policy Optimization
+
+Diffusion Generative Process Proposed Policy Iteration in RL  
+
+> determined by
+> Reverse SDE or Langevin Dynamics
+> Conditional PPO
+> determined by
+> Figure 1. Overview of the proposed method. We align reinforcement learning policy iteration with the diffusion generative process through a novel policy parameterization. Unlike standard diffusion, where the probability density function is updated via a pre-defined SDE Euler–Maruyama step, our method employs conditional PPO to determine the Gaussian kernel for policy updates.
+
+avoids directly computing the log-likelihood of the diffu-sion model; instead, it only requires the log-likelihood of a Gaussian distribution, making the implementation highly efficient. The contribution of this work can be summarized as follows: 1. We propose an on-policy reinforcement learning frame-work with a novel diffusion policy parameterization method, which closely couples the policy iteration with the diffusion generative process, providing a new per-spective to train a diffusion policy. 2. Every policy iteration is converted into a conventional Gaussian policy improvement problem, which can be solved very efficiently, avoiding the expensive compu-tation of a log-likelihood for a diffusion model. Based on such a conversion, the proposed framework can naturally handle the entropy regularization. 3. We evaluate our method in multiple simulation scenar-ios, illustrating the multi-modality expressive capabil-ity and superior performance in multiple benchmark problems. 
+
+2. Background 
+
+2.1. Reinforcement Learning 
+
+Reinforcement learning is formalized as a Markov Deci-sion Process (MDP). The objective is to learn a policy 
+
+π(a|s) that determines actions conditioned on states to max-imize the expected discounted return Eτ ∼π [R(τ )] , where 
+
+τ := ( sk, a k)k≥0 denotes a trajectory generated by the agent interacting with the environment under policy π. This problem can be solved by policy improvement, that is, find a new policy π(a|s) compared to a reference policy ˜π(a|s)
+
+such that the objectives of the RL problem do not decrease. The new policy can be obtained by solving the following optimization: 
+
+max  
+
+> π
+
+Es∼pπ (s),a ∼π(a|s)
+
+A˜π (s, a ) (1) where pπ (s) is the discounted state visitation distribution under policy π (Schulman et al., 2015a; Frans et al., 2025a). 
+
+A˜π (s, a ) = Q˜π (s, a ) − V ˜π (s) is the advantage function, which is the Q function minus the value function under the reference policy. In practice, we usually utilize p˜π(s)
+
+instead of pπ (s) due to the difficulty of obtaining unknown 
+
+pπ (s). This approximation requires that the new policy be close to the reference policy, resulting in the following optimization, which is the Proximal Policy Optimization (PPO) (Schulman et al., 2017): 
+
+max  
+
+> π
+
+Es∼p˜π(s),a ∼˜π(a|s)
+
+
+
+min 
+
+ π(a|s)˜π(a|s) ˆA˜π (s, a ) ,
+
+clip ( π(a|s)˜π(a|s) , 1 − ε, 1 + ε) ˆA˜π (s, a )
+
+ 
+
+.
+
+(2) The clip trick aims to keep the new policy close to the ref-erence policy in policy improvement. ˆA˜π is the estimated advantage function using methods like generalized advan-tage estimation (GAE) (Schulman et al., 2015b). Repeating solving optimization (2) until convergence leads to an on-policy learning procedure. However, this formulation typ-ically requires the policy to have an analytical form, since solving the optimization involves evaluating the gradient of πθ (a|s). This results in a challenge for diffusion-based policies, as evaluating the probability or its gradient of a 2Diffusion Policy through Conditional Proximal Policy Optimization 
+
+diffusion model is often computationally expensive or even intractable. 
+
+2.2. Diffusion Generative Model 
+
+Diffusion models generate samples from the target distri-bution by a denoising process. This can be described by a stochastic differential equation (SDE) with both the forward and the corresponding reverse processes (Song et al., 2021). A data distribution pdata (x) can be diffused via the following SDE to a prior distribution pprior (x):
+
+dx = f (t)xdt + g(t)dw. (3) where dw is the Wiener process, f (t) and g(t) are prede-fined coefficients to let the distribution usually converge or be close to a Gaussian distribution xT ∼ pprior (x). In this process, the score function ∇x log pt(x) can be learned using a network by score matching (Song & Ermon, 2019; Song et al., 2021). Then solving the corresponding reversed SDE 
+
+dx = [ f (t)x − g(t)2∇x log pt(x)] dt + g(t)d ¯w (4) from xT to x0 ∼ pdata (x) results in target sample generation. When solving the reverse SDE by the Euler–Maruyama method (Kloeden & Pearson, 1977), the generative process can be expressed as 
+
+ptk (xk) = 
+
+Z
+
+p(xk|xtk+1 )p(xtk+1 )dx tk+1 (5) where tk represents the discrete time step, p(xk|xtk+1 ) is a Gaussian distribution determined by the score function and predefined coefficients. This can be regarded as the case of DDPM (Ho et al., 2020). In the generative process, since the score function is known, we can also utilize the Langevin dynamics to correct the solution of a numerical SDE solver (Song et al., 2021). This can be expressed by 
+
+xtk ← xtk + ∆ t · 12 ∇x log ptk (xtk ) + √∆t · z, (6) where z ∼ N (0, I ). With a sufficiently small ∆t and enough steps, the distribution will gradually converge to 
+
+ptk . This correction process can be applied at any time step tk in the reverse SDE to adjust the distribution ptk ,compensating for the numerical error in solving the SDE. Therefore, the diffusion process can be a combination of the reversed SDE and the Langevin correct steps. In both processes of (5) and (6) , we can observe that the distribution is updated via a conditional Gaussian kernel determined by the score function, which can be unified in Fig. 1. This in-sight provides a foundation for constructing diffusion policy in reinforcement learning, see Sec. 3.1. 
+
+3. Conditional Proximal Policy Optimization 
+
+This section introduces our main contribution. We first propose a novel diffusion policy parameterization that aligns policy iteration with the diffusion process, and then leverage this parameterization to realize policy improvement through a conditional PPO framework. 
+
+3.1. Diffusion Policy parametrization 
+
+Inspired by the diffusion model, we argue that the multiple policy improvement processes can be aligned with the dif-fusion generative process. To see this, we parameterize the new policy based on the reference policy: 
+
+πθ (a|s) = 
+
+Z
+
+˜π(a0|s)pθ (a|a0, s )da 0. (7) The reference policy ˜π(a0|s) can be any distribution, not restricted to a Gaussian distribution, as long as it can be sampled, such as a diffusion model. pθ (a|a0, s ) is modeled as a Gaussian distribution that has the form of 
+
+pθ (a|a0, s ) = N (a; a0 + μθ (a0, s ), Σθ (a0, s )) . (8) The residual formulation mimics the procedure of numeri-cally solving the SDE. In this sense, the mean and covari-ance of the Gaussian kernel correspond to the score function-related term and the Wiener process term, respectively, in the reverse SDE or Langevin dynamics. The idea is shown in Fig. 1, we try to model the policy iteration process as a diffusion generative process, with the policy update being realized by a Gaussian kernel convolution. The difference is that in policy iteration, the Gaussian kernel is learned by a conditional PPO (see Sec. 3.2), which only tells how to improve the policy, while in the diffusion model, the Gaussian kernel is predefined to transfer the distribution to a predesignated one. 
+
+3.2. Policy Improvement 
+
+With the policy parameterization in (7) , we consider the fol-lowing optimization to achieve policy improvement (Schul-man et al., 2015a) in RL: 
+
+max  
+
+> θ
+
+Es∼pπθ ,a ∼πθ (a|s)
+
+h ˆAπθsample (s, a )
+
+i
+
+(9) where πθsample denotes the policy used for data collection. However, directly optimizing this objective using impor-tance sampling like (2) poses a challenge: computing the gradient of the loss is difficult due to the intractability of evaluating ∇θ πθ (a|s) under the parameterization in (7) . To address this issue, we propose solving a simpler optimiza-tion as follows to get the same optimal solution as (9): 
+
+max  
+
+> θ
+
+Es∼pπθ ,a 0∼˜π,a ∼pθ (a|a0,s )
+
+h ˆAπθsample (s, a )
+
+i
+
+. (10) 3Diffusion Policy through Conditional Proximal Policy Optimization 
+
+In this formulation, actions a ∼ πθ (a|s) are sampled by first sampling via a0 ∼ ˜π, followed by sampling a from the conditional distribution pθ (a|a0, s ). An immediate advan-tage of this formulation is that the gradient of the objective becomes easy to compute, due to the Gaussian parameteriza-tion of pθ (a|a0, s ). Notably, the objective function defined in (10) is identical to that in (9) (see Appendix A for proof). This equivalence allows us to obtain the improved policy through a simple optimization instead of the original in-tractable formulation. Based on the objective function in (10) , we can then construct the corresponding surrogate loss as follows: 
+
+max  
+
+> θ
+
+Es∼pπθsample ,a 0∼˜π,a ∼pθsample (a|a0,s )
+
+
+
+CLIP 
+
+ pθ (a|a0, s )
+
+pθsample (a|a0, s ) ˆAπθsample (s, a )
+
+ 
+
+, (11) where CLIP is a shorthand for clipped loss defined in (2) .The clip trick here aims to constrain pθ (a|a0, s ) not to be far away from pθsample (a|a0, s ). In our approach, actions are sampled from a conditional Gaussian distribution, effec-tively transforming the original policy optimization problem into the standard PPO framework. We hereby name this formulation as Conditional Proximal Policy Optimization 
+
+(CPPO). Once we learn the pθ∗ (a|a0, s ), we can collect every Gaus-sian kernel in each policy improvement to form the final dif-fusion policy. However, this approach becomes increasingly inefficient since the number of diffusion steps grows with the number of policy iterations. To address this issue, we in-stead utilize a single diffusion model to fit πθ∗ (a|s) in (7) af-ter every policy improvement. Although fitting the diffusion model introduces numerical errors (i.e., πdiffusion ≈ πθ∗ ), the subsequent policy iteration always samples based on 
+
+πdiffusion . As a result, each policy improvement is based on the fitted diffusion model itself. This prevents the fitting er-ror from accumulating to next iteration. In our experiments, we also observe that the proposed method is robust to this fitting error, see Appendix C.3. For simplicity, we use a flow matching (Lipman et al., 2023) instead of a diffusion model to train the policy in this work. The condition s is encoded in a classifier-free style, i.e., we directly embed the state into a network to approximate the vector field uη (a, t, s ), then use the following optimization to train the flow matching: 
+
+min  
+
+> η
+
+Es,a 1∼D ,t ∼U (0 ,1) [∥uη (at, t, s ) − (a1 − an)∥22] (12) where at = (1 − t)an + ta 1, an is the sample from N (0, I ),
+
+(s, a 1) are sampled from πθ∗ . The generating process can be achieved by solving the ODE da = uη (at, t, s )dt from 
+
+t = 0 to t = 1 , where at=0 ∼ N (0, I ).Repeating policy parameterization and solving the policy improvement constructs the whole policy iteration process. However, the proposed CPPO only improves the policy from 
+
+πθsample to πθ∗ , rather than from the last optimal ˜π to the cur-rent optimal πθ∗ . This breaks the monotonically increasing properties in the entire policy iteration, as we cannot ensure whether πθsample is better than ˜π. To address this issue, we utilize the exponential moving average (EMA) technique on diffusion policy and initialize pθsample as the last optimal 
+
+pθk−1 to ensure πθsample ≈ ˜π. The parameters of the diffusion policy are updated by θ− ← (1 − α)θ + αθ −, where θ− is the EMA model parameter and θ is the current parameters of the diffusion model. The EMA technique ensures the model parameter will not update far away from the previ-ous one, that is, πk ≈ πk−1. Therefore, after we obtain a diffusion policy πk = R πk−1(a0|s)pθ∗ 
+
+> k−1
+
+(a|a0, s )da 0, the initial sampling policy for next iteration is 
+
+πθsample =
+
+Z
+
+πk(a0|s)pθ∗ 
+
+> k−1
+
+(a|a0, s )da 0
+
+≈
+
+Z
+
+πk−1(a0|s)pθ∗ 
+
+> k−1
+
+(a|a0, s )da 0
+
+= πk(a0|s).
+
+(13) The final equality in (13) is formally an approximation due to the EMA update; it is presented here solely to aid under-standing. By utilizing the EMA technique, the proposed policy iteration can be approximately regarded as mono-tonically increasing. Moreover, we find this monotonically increasing can emperically holds in our experiments, see details in Appendix C.3. 
+
+3.3. Regularizations Entropy regularization. Adding an entropy regularization (Haarnoja et al., 2018) in the loss is essential in reinforce-ment learning, as it encourages exploration and helps avoid getting trapped in local minima. In our formulation, we need to maximize the entropy H(πθ ). However, unlike a Gaussian policy whose entropy can be analytically calcu-lated, it is usually difficult to directly calculate the entropy of a diffusion policy. Existing methods that approximate (Wang et al., 2024; Dong et al., 2025) or directly calculate (Chao et al., 2024; Ding et al., 2025) the entropy are compu-tationally complex in general. Fortunately, in our proposed framework, we can effectively maximize a lower bound of 
+
+H(πθ ), rather than the intractable entropy itself, by 
+
+H(πθ (a|s)) = I(p(a, a 0|s)) + H(pθ (a|a0, s )) 
+
+⇒ H (πθ ) ≥ H (pθ ), (14) where we leverage the the mutual information identity 
+
+I(qx,y ) = H(qx) − H (qx|y ), with the property that 
+
+I(qx,y ) ≥ 0 (Cover, 1999). Consequently, instead of di-rectly maximizing the intractable H(πθ ), we maximize its computable lower bound H(pθ ), which only requires evalu-ating the entropy of a Gaussian distribution. This is more 4Diffusion Policy through Conditional Proximal Policy Optimization 
+
+efficient compared to the previous methods for handling the entropy of a diffusion policy. 
+
+Score-Based Regularization. Although diffusion policy has strong expression ability, its training can be slow and unstable due to the diffusion policy distribution lying in an infinite-dimensional functional space. To address this issue, we introduce an empirical regularization term to accelerate the convergence of the diffusion policy, which is given by 
+
+min  
+
+> θ
+
+Rθ = Es,a 0∼˜π [∥μθ (a0, s ) − 12 Σθ (a0, s )( −a0)∥22]
+
+(15) where μθ and Σθ are defined in (8) , −a0 is the score func-tion ∇x log N (0, I ). This regularization term aims to let the diffusion policy converge to a standard Gaussian dis-tribution. The basic idea is to let μθ align with the score function of a standard Gaussian such that the sample path 
+
+a = a0 + δa 0 in (8) be a Langevin dynamics update toward the standard Gaussian, see Appendix B for details. This reg-ularization imposes a KL-like constraint that prevents the policy from drifting too far from the prior distribution. We illustrate that this regularization accelerates and stabilizes the training process in Sec. 4.4. Although this score-based regularization introduces an inductive bias to the diffusion policy, the multi-modality expression ability will not degen-erate since the major objective function is reinforcement learning objectives, which can be illustrated in Fig. 2, where the task is trained by incorporating this regularization. By arranging all regularization terms into the RL objectives, we can obtain the final optimization as 
+
+max  
+
+> θ
+
+Et
+
+h ˆAπθsample (s, a ) + αH(pθ ) − βRθ
+
+i
+
+, (16) where α and β are the coefficients of the regularizations. The proposed method can be summarized in Algorithm 1. 
+
+Algorithm 1 DP-CPPO 
+
+Input: Initial flow policy parameters η, value function parameters ϕ, residual policy parameters θ
+
+for i = 1 to N do 
+
+Collect date {s, a 0, a } using ˜πη and pθ ; estimate ˆA.Update the residual policy pθ via       
+
+> max
+> θE{s,a 0,a }
+> h
+> CLIP
+> 
+> rθˆA(s, a )
+> 
+> +αH(pθ)−βRθ
+> i
+
+Sample a1 via ˜πη and pθ , update flow policy by: 
+
+min  
+
+> η
+
+Es,a 1∼D ,t ∼U (0 ,1) [∥uη (at, t, s ) − (a1 − an)∥22]
+
+Update value function parameters ϕ.
+
+end for Output: Flow policy ˜πη .
+
+4. Experiments 
+
+In this section, we aim to illustrate that 1) the proposed method is able to learn a diffusion policy with multi-modal expressiveness; 2) the proposed method can be trained ef-ficiently, and the entropy regularization benefits the per-formance; 3) the proposed method shows superior results on several IsaacLab (Mittal et al., 2023) and Playground (Zakka et al., 2025) benchmarks. For comparison, we re-strict our comparison to other on-policy algorithms: (a) the standard Gaussian PPO, and (b) a diffusion policy named FPO (McAllister et al., 2025). Our method is denoted as DP-CPPO. 
+
+4.1. Multi-Modality Illustration 
+
+An environment named “Multi-Goal” (Haarnoja et al., 2017; Dong et al., 2025) is used to demonstrate that the proposed diffusion policy achieves multimodal behavior. The ob-jective for the agent is to reach any goal in the map, see Fig. 2. The main reward is defined by the distance cost of the agent’s position to the nearest goal. Besides, when the agent reaches any goal, an extra single reward will be assigned. As the goals are set symmetrically, an agent starting at a saddle point should naturally exhibit a multimodal action distribution to represent the possibility of moving toward any goal. The actions at these saddle points, visualized in Fig. 2, demonstrate the multimodal behavior captured by our diffusion policy, overcoming the limitations of unimodal dis-tributions. Moreover, we utilize a Gaussian mixture model analysis that confirms that the number of modes in these action distributions is consistently greater than one.           
+
+> Table 1. Reward at saddle points, higher is better. Method Initial Position (0.0,0.0) (2.5,2.5) (-2.5,2.5) Gaussian PPO -41.80 -16.47 -6.47 DP-CPPO -11.94 1.82 1.49
+
+Multi-modality and Reward. Compared to unimodal poli-cies such as the Gaussian policy, a key advantage of the diffusion policy is that its inherent multimodality can lead to higher rewards at saddle points. The rewards are shown in Tab. 1. At these points, actions directed toward opposite goals provide identical rewards. A unimodal distribution, however, tends to average the gradients toward each goal, collapsing into a degenerate solution (e.g., no movement; see Fig. 2). In contrast, the diffusion policy maintains multi-modal behavior, preventing collapse and enabling diverse trajectories that align with the different goals, thereby di-rectly increasing rewards. However, this advantage becomes less pronounced when the true optimal policy is unimodal. 5Diffusion Policy through Conditional Proximal Policy Optimization Diffusion Policy (Proposed) Gaussian Policy 
+
+Figure 2. Left. Multi-Goal environments, where different trajectories starting from the origin under the diffusion policy are illustrated. Contour lines in the figure are drawn based on the distance cost. Right. The positions after taking the first action from different saddle points are shown, visualizing the distribution of the policy π(a|s). The diffusion policy exhibits multimodal behavior, whereas the Gaussian policy collapses to near-zero movement due to the averaging effect of opposite goals. 
+
+4.2. Efficiency and Entropy Regularization Computational Efficiency. Unlike GenPo (Ding et al., 2025), which computes the diffusion log-likelihood by back-propagating through the entire denoising process, our frame-work reduces each update to a conditional Gaussian PPO step followed by flow matching. This formulation provides a lightweight and efficient training pipeline for diffusion policies. As shown in Tab. 2, training for 1K epochs in the IsaacLab Ant task only requires a computational cost comparable to standard PPO. The crucial difference is that our diffusion model is optimized via flow matching, which is simulation-free (Lipman et al., 2023), rather than through a recursive normalizing-flow-style inversion. Memory con-sumption remains unchanged as the number of flow steps increases, further illustrating this point. 
+
+Table 2. Computational cost for Ant task in IsaacLab. Training time and GPU Memory consumption are displayed, less is better. DP-CPPO ( k) indicates DP-CPPO with k flow steps. Method PPO DP-CPPO (8) DP-CPPO (16) Time (min) 4.68 8.05 (+71.9%) 9.31 (+99.9%) Mem (MB) 4202 4306 (+2.5%) 4306 (+2.5%) 
+
+Entropy Regularization. The entropy term encourages exploration during RL training, helping the policy avoid get-ting trapped in local minima and enabling higher rewards. Unlike diffusion policies such as FPO (McAllister et al., 2025), which cannot directly incorporate entropy regulariza-tion, our method naturally supports it, allowing exploration to be adjusted for improved performance. To demonstrate this, we report results on the Playground FingerSpin task. As shown in Fig. 3, removing the entropy term yields results similar to FPO. However, with a properly chosen scale, the reward increases significantly. In contrast, an excessively large scale (e.g., 0.05) will destabilize the training, resulting in near-zero rewards as the policy diverges in this case. 0.0 0.2 0.4 0.6 0.8 1.0  
+
+> Environment Steps ×10 8
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> Average Reward
+> Entro 0.05
+> Entro 0.005
+> Entro 0.001
+> Entro 0.0
+> FPO
+
+Figure 3. Rewards on Playground FingerSpin. 
+
+4.3. Results on Benchmarks 
+
+We also evaluate the proposed method in several other bench-mark control tasks in IsaacLab and Mujoco Playground. Since FPO is implemented in JAX , making it inconvenient to deploy directly in Torch-based IsaacLab environments, we compare with PPO in IsaacLab and FPO in Playground. In addition, we include the results of a diffusion policy method DPPO (Ren et al., 2024) in both platforms, which are only provided as a reference since it was originally de-signed to be fine-tuned on pretrained diffusion policy rather than learning from scratch. 
+
+IssacLab. We evaluate algorithms on eight benchmarks in IsaacLab. For the Gaussian PPO baseline, we adopt the default RSL-RL implementation (Rudin et al., 2022), using its default hyperparameter settings in IsaacLab. Since our method is built upon PPO, we implement it within the RSL-RL framework, keeping most hyperparameters consistent with the defaults and trying to minimize additional tuning. 6Diffusion Policy through Conditional Proximal Policy Optimization 0 2000 4000 6000                                 
+
+> Training Steps
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> Average Reward
+> Ant
+> 01000 2000 3000 4000
+> Training Steps
+> 25
+> 0
+> 25
+> 50
+> 75
+> 100
+> 125
+> 150
+> Average Reward
+> Franka-Cube-Lift
+> 0500 1000 1500 2000 2500 3000
+> Training Steps
+> 25
+> 0
+> 25
+> 50
+> 75
+> 100
+> 125
+> 150
+> Average Reward
+> Quadcopter-Direct
+> 02000 4000 6000
+> Training Steps
+> 30
+> 20
+> 10
+> 0
+> 10
+> 20
+> Average Reward
+> AnymalD-Flat
+> 01000 2000 3000 4000
+> Training Steps
+> 10
+> 5
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> 35
+> Average Reward
+> H1-Rough
+> 01000 2000 3000 4000
+> Training Steps
+> 10
+> 0
+> 10
+> 20
+> 30
+> Average Reward
+> Go2-Rough
+> 0500 1000 1500 2000 2500 3000
+> Training Steps
+> 20
+> 15
+> 10
+> 5
+> 0
+> 5
+> 10
+> Average Reward
+> Navigation-AnymalC
+> 02000 4000 6000
+> Training Steps
+> 10
+> 0
+> 10
+> 20
+> 30
+> 40
+> Average Reward
+> G1-Rough
+> PPO DPPO DP-CPPO (Ours)
+
+Figure 4. Training rewards across eight environments in IsaacLab. Results show the mean and standard deviation over 5 runs with different seeds (higher is better). For better visualization, we have smoothed the reward data. The proposed method outperforms Gaussian PPO in most tasks. 
+
+Table 3. Evaluating rewards on IsaacLab tasks, higher is better. 
+
+Ant Franka Quadcopter AnymalD H1 Go2 Navigation G1 Flow 220.74 ±33.31 159.43 ±0.37 141.34 ±0.77 25.33 ±0.10 29.40 ±0.41 34.71 ±0.15 4.58 ±0.10 43.89 ±1.32 
+
+Flow+Res 248.47 ±37.03 159.48 ±0.42 141.88 ±0.36 25.34 ±0.14 29.41 ±0.42 34.97 ±0.28 4.59 ±0.09 44.17 ±1.21 
+
+PPO 199.09 ±10.58 156.46 ±2.28 138.44 ±4.71 24.64 ±0.07 30.63 ±0.35 32.56 ±0.20 4.31 ±0.11 28.48 ±1.28 
+
+DPPO 192.73 ±16.16 7.76 ±6.34 141.64 ±0.22 23.65 ±0.46 9.07 ±3.70 16.59 ±0.00 2.13 ±2.49 2.87 ±1.43 
+
+Table 4. Evaluating rewards on Playground tasks, higher is better. 
+
+BallCup Cheetah FingerSpin PointMass Reach-E Reach-H WlkWalk WlkRun Flow 846.8 ±57.7 822.6 ±26.0 868.2 ±92.0 860.3 ±6.0 918.9 ±11.4 857.2 ±24.7 865.9 ±89.0 641.4 ±27.3 
+
+Flow+Res 866.2 ±44.6 848.1 ±19.1 912.5 ±49.1 853.1 ±2.9 898.4 ±34.5 873.4 ±28.7 894.0 ±43.5 660.5 ±22.3 
+
+FPO 879.4 ±45.7 890.2 ±7.8 655.2 ±147.9 712.6 ±85.3 902.5 ±10.4 870.1 ±35.8 880.1 ±28.4 613.2 ±29.2 
+
+DPPO 558.3 ±319.7 401.6 ±17.1 465.5 ±57.1 546.3 ±136.4 828.2 ±29.3 742.1 ±49.8 116.2 ±6.4 49.7 ±4.6 
+
+The final evaluating reward is reported in Tab. 3 and the train-ing curve is in Fig. 4. To ensure statistical reliability, the results are the average of 5 trainings with different random seeds, with the standard deviation reported. In the training process, we utilize a diffusion policy πflow to fit a com-bined optimal policy πθ∗ (a|s) = R ˜π(a0|s)pθ∗ (a|a0, s )da 0
+
+in each iteration. To verify that this fitting ultimately con-verges, we report results for both the diffusion-only pol-icy πflow (denotes “Flow”) and the optimal policy πθ∗ (a|s)
+
+(denotes “Flow+Res”) in Tab. 3. The results show that diffusion-only and combined policies are very close, illus-trating that our method enables the diffusion policy to con-verge. Moreover, the reward results show that our method achieves slightly higher or comparable final rewards to RSL-RL PPO across most tasks, demonstrating the effectiveness of the proposed method. Additional results and details can be found in Appendix C.1 and C.3. 
+
+Playground. We further evaluate the proposed method against another diffusion-based approach, FPO. For a fair comparison, we directly adopt their open-source implemen-tation on Playground as the baseline, while our method is implemented on Playground through a JAX-to-Torch inter-face. The results are presented in Tab. 4. Our method also achieves slightly higher rewards than FPO in most tasks. The difference between the diffusion-only and combined results appears larger than in IsaacLab. This is mainly due to the restricted number of training epochs for a fair com-parison with FPO; with longer training, the diffusion policy converges in the same manner as in IsaacLab. Additional results and details can be found in Appendix C.2. 
+
+4.4. Ablation on Score-based Regularization 
+
+To demonstrate the effectiveness of the regularization term in (15) , we conduct an ablation study evaluating its contri-7Diffusion Policy through Conditional Proximal Policy Optimization 
+
+bution to performance. We present the results of different scale settings in the AnymalB-Flat and Quadcopter tasks of the IsaacLab environment. As shown in Fig. 5a, us-ing a relatively large scale for this term accelerates reward improvement, and we find that a value of 0.1 works well across nearly all tasks. We also observe that removing this term makes training less stable, sometimes resulting in di-vergence (Fig. 5a) and at other times in collapse (Fig. 5b). Overall, these results highlight the importance of this term for training stability and efficiency. 0 1000 2000 3000 4000 5000 6000 7000 
+
+> Training Steps
+> 5
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> Average Reward
+> (one run diverged here, reg=0.0)
+> ScoreReg 0.1
+> ScoreReg 0.01
+> ScoreReg 0.001
+> ScoreReg 0.0
+
+(a) Rewards on AnymalB-Flat. 0 500 1000 1500 2000 2500 3000 
+
+> Training Steps
+> 20
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> Average Reward
+> ScoreReg 0.5
+> ScoreReg 0.0
+
+(b) Rewards on Quadcopter. 
+
+Figure 5. Ablation study on score-based regularization. 
+
+5. Related Work 
+
+Generative models, particularly diffusion models and flow matching (Song et al., 2021; Lipman et al., 2023; Karras et al., 2022), have demonstrated remarkable expressiveness across diverse domains. Motivated by these successes, re-searchers have increasingly explored integrating diffusion models into RL, yielding promising results such as Diffu-sion Policy (Chi et al., 2023). In the following, we review prior works that combine diffusion models with RL. 
+
+Diffusion policy for online RL. Online RL algorithms aim to optimize a policy by repeatedly interacting with the envi-ronment during training. For this category method, most pre-vious works focus on off-policy methods, which rely on Q-value estimation. With the Q-value estimated by a network, work like DACER (Wang et al., 2024) directly optimizes the diffusion policy throughout the entire diffusion process via the reparameterization trick, i.e., ∂a/∂θ . In contrast, works like DIPO (Yang et al., 2023), QVPO (Ding et al., 2024), QSM (Psenka et al., 2023), and MaxEntDP (Dong et al., 2025) incorporate the Q-value information into the diffusion loss to train the diffusion model. These meth-ods heavily rely on the Q-value estimation, whose training process is not always stable. Recently, researchers have tried to train the diffusion policy in an on-policy setting, which requires calculating the log-likelihood under a dif-fusion model. GenPo (Ding et al., 2025) utilizes the exact diffusion inversion, enabling the log-likelihood computation via change of variables. However, this method is compu-tationally expensive due to its recursive nature, which is similar to propagating the gradient through the whole dif-fusion process (Wang et al., 2024). FPO (McAllister et al., 2025) approximates the log-likelihood via flow matching loss, which introduces an extra bias. In addition, this method can not handle the entropy regularization. Other work, such as DPPO (Ren et al., 2024), trains diffusion policies by em-bedding the diffusion MDP directly into the RL MDP. In contrast, our approach seeks to align the two MDPs, repre-senting a fundamentally different formulation. 
+
+Diffusion policy for offline RL. Offline RL algorithms aim to learn a policy solely from a pre-collected dataset, without any further interaction with the environment. Early work (Peng et al., 2019) proposed an analytical solution of an optimal policy for offline RL. Building on this result, sfBC (Chen et al., 2022) selects desirable samples through Q-value weighting and subsequently trains a diffusion pol-icy with the resampled data. More recently, several works have explored leveraging diffusion models with guidance (Dhariwal & Nichol, 2021; Ho & Salimans, 2022) to obtain effective diffusion policies for RL (Lu et al., 2023; Fang et al., 2024; Frans et al., 2025b). 
+
+6. Conclusion 
+
+In this work, we propose a novel on-policy algorithm to train the diffusion policy. By aligning the policy iteration with the diffusion process, the diffusion policy is obtained via solving multiple conditional Gaussian PPO problems. This method avoids the log-likelihood computation of a dif-fusion model, which can be computationally inefficient and even intractable. Within the proposed method, the entropy regularization that encourages exploration also requires only Gaussian entropy calculation. The proposed method pro-vides a simple and efficient way to train a diffusion policy. Experiments show the multimodal behavior of the diffusion policy, which is the key advantage of the diffusion model. We also evaluate the proposed method in multiple bench-marks in IsaacLab and Playground, and the results show that higher rewards can be obtained for the proposed method compared to other on-policy methods. 8Diffusion Policy through Conditional Proximal Policy Optimization 
+
+Impact Statement 
+
+This paper presents work whose goal is to advance the field of Machine Learning. There are many potential societal consequences of our work, none of which we feel must be specifically highlighted here. 
+
+References 
+
+Chao, C.-H., Feng, C., Sun, W.-F., Lee, C.-K., See, S., and Lee, C.-Y. Maximum entropy reinforcement learning via energy-based normalizing flow. Advances in Neural Information Processing Systems , 37:56136–56165, 2024. Chen, H., Lu, C., Ying, C., Su, H., and Zhu, J. Offline rein-forcement learning via high-fidelity generative behavior modeling. arXiv preprint arXiv:2209.14548 , 2022. Chen, R. T., Rubanova, Y., Bettencourt, J., and Duvenaud, D. K. Neural ordinary differential equations. Advances in neural information processing systems , 31, 2018. Chi, C., Xu, Z., Feng, S., Cousineau, E., Du, Y., Burchfiel, B., Tedrake, R., and Song, S. Diffusion policy: Visuomo-tor policy learning via action diffusion. The International Journal of Robotics Research , pp. 02783649241273668, 2023. Cover, T. M. Elements of information theory . John Wiley & Sons, 1999. Dhariwal, P. and Nichol, A. Diffusion models beat gans on image synthesis. Advances in neural information processing systems , 34:8780–8794, 2021. Ding, S., Hu, K., Zhang, Z., Ren, K., Zhang, W., Yu, J., Wang, J., and Shi, Y. Diffusion-based reinforcement learning via q-weighted variational policy optimization. 
+
+Advances in Neural Information Processing Systems , 37: 53945–53968, 2024. Ding, S., Hu, K., Zhong, S., Luo, H., Zhang, W., Wang, J., Wang, J., and Shi, Y. Genpo: Generative diffusion models meet on-policy reinforcement learning. arXiv preprint arXiv:2505.18763 , 2025. Dong, X., Cheng, J., and Zhang, X. S. Maximum entropy re-inforcement learning with diffusion policy. arXiv preprint arXiv:2502.11612 , 2025. Fang, L., Liu, R., Zhang, J., Wang, W., and Jing, B.-Y. Diffu-sion actor-critic: Formulating constrained policy iteration as diffusion noise regression for offline reinforcement learning. arXiv preprint arXiv:2405.20555 , 2024. Frans, K., Park, S., Abbeel, P., and Levine, S. Diffusion guidance is a controllable policy improvement operator. 
+
+arXiv preprint arXiv:2505.23458 , 2025a. Frans, K., Park, S., Abbeel, P., and Levine, S. Diffusion guidance is a controllable policy improvement operator. 
+
+arXiv preprint arXiv:2505.23458 , 2025b. Haarnoja, T., Tang, H., Abbeel, P., and Levine, S. Rein-forcement learning with deep energy-based policies. In 
+
+International conference on machine learning , pp. 1352– 1361. PMLR, 2017. Haarnoja, T., Zhou, A., Abbeel, P., and Levine, S. Soft actor-critic: Off-policy maximum entropy deep reinforce-ment learning with a stochastic actor. In International conference on machine learning , pp. 1861–1870. Pmlr, 2018. Ho, J. and Salimans, T. Classifier-free diffusion guidance. 
+
+arXiv preprint arXiv:2207.12598 , 2022. Ho, J., Jain, A., and Abbeel, P. Denoising diffusion proba-bilistic models. Advances in neural information process-ing systems , 33:6840–6851, 2020. Karras, T., Aittala, M., Aila, T., and Laine, S. Elucidating the design space of diffusion-based generative models. 
+
+Advances in neural information processing systems , 35: 26565–26577, 2022. Kloeden, P. E. and Pearson, R. The numerical solution of stochastic differential equations. The ANZIAM Journal ,20(1):8–12, 1977. Lipman, Y., Chen, R. T. Q., Ben-Hamu, H., Nickel, M., and Le, M. Flow matching for generative modeling. In The Eleventh International Conference on Learning Repre-sentations, ICLR 2023, Kigali, Rwanda, May 1-5, 2023 .OpenReview.net, 2023. URL https://openreview. net/forum?id=PqvMRDCJT9t .Lu, C., Chen, H., Chen, J., Su, H., Li, C., and Zhu, J. Con-trastive energy prediction for exact energy-guided diffu-sion sampling in offline reinforcement learning. In Inter-national Conference on Machine Learning , pp. 22825– 22855. PMLR, 2023. McAllister, D., Ge, S., Yi, B., Kim, C. M., Weber, E., Choi, H., Feng, H., and Kanazawa, A. Flow matching policy gradients. arXiv preprint arXiv:2507.21053 , 2025. Mittal, M., Yu, C., Yu, Q., Liu, J., Rudin, N., Hoeller, D., Yuan, J. L., Singh, R., Guo, Y., Mazhar, H., Man-dlekar, A., Babich, B., State, G., Hutter, M., and Garg, A. Orbit: A unified simulation framework for inter-active robot learning environments. IEEE Robotics and Automation Letters , 8(6):3740–3747, 2023. doi: 10.1109/LRA.2023.3270034. Peng, X. B., Kumar, A., Zhang, G., and Levine, S. Advantage-weighted regression: Simple and scalable 9Diffusion Policy through Conditional Proximal Policy Optimization 
+
+off-policy reinforcement learning. arXiv preprint arXiv:1910.00177 , 2019. Psenka, M., Escontrela, A., Abbeel, P., and Ma, Y. Learn-ing a diffusion model policy from rewards via q-score matching. arXiv preprint arXiv:2312.11752 , 2023. Ren, A. Z., Lidard, J., Ankile, L. L., Simeonov, A., Agrawal, P., Majumdar, A., Burchfiel, B., Dai, H., and Simchowitz, M. Diffusion policy policy optimization. arXiv preprint arXiv:2409.00588 , 2024. Rudin, N., Hoeller, D., Reist, P., and Hutter, M. Learn-ing to walk in minutes using massively parallel deep reinforcement learning. In Proceedings of the 5th Con-ference on Robot Learning , volume 164 of Proceed-ings of Machine Learning Research , pp. 91–100. PMLR, 2022. URL https://proceedings.mlr.press/ v164/rudin22a.html .Schulman, J., Levine, S., Abbeel, P., Jordan, M., and Moritz, P. Trust region policy optimization. In International conference on machine learning , pp. 1889–1897. PMLR, 2015a. Schulman, J., Moritz, P., Levine, S., Jordan, M., and Abbeel, P. High-dimensional continuous control using generalized advantage estimation. arXiv preprint arXiv:1506.02438 ,2015b. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., and Klimov, O. Proximal policy optimization algorithms. 
+
+arXiv preprint arXiv:1707.06347 , 2017. Song, Y. and Ermon, S. Generative modeling by estimating gradients of the data distribution. Advances in neural information processing systems , 32, 2019. Song, Y., Sohl-Dickstein, J., Kingma, D. P., Kumar, A., Er-mon, S., and Poole, B. Score-based generative modeling through stochastic differential equations. In 9th Interna-tional Conference on Learning Representations, ICLR 2021, Virtual Event, Austria, May 3-7, 2021 . OpenRe-view.net, 2021. URL https://openreview.net/ forum?id=PxTIG12RRHS .Wang, Y., Wang, L., Jiang, Y., Zou, W., Liu, T., Song, X., Wang, W., Xiao, L., Wu, J., Duan, J., et al. Diffusion actor-critic with entropy regulator. Advances in Neural Information Processing Systems , 37:54183–54204, 2024. Wang, Z., Hunt, J. J., and Zhou, M. Diffusion policies as an expressive policy class for offline reinforcement learning. 
+
+arXiv preprint arXiv:2208.06193 , 2022. Yang, L., Huang, Z., Lei, F., Zhong, Y., Yang, Y., Fang, C., Wen, S., Zhou, B., and Lin, Z. Policy representation via diffusion probability model for reinforcement learning. 
+
+arXiv preprint arXiv:2305.13122 , 2023. Zakka, K., Tabanpour, B., Liao, Q., Haiderbhai, M., Holt, S., Luo, J. Y., Allshire, A., Frey, E., Sreenath, K., Kahrs, L. A., Sferrazza, C., Tassa, Y., and Abbeel, P. Mujoco playground: An open-source frame-work for gpu-accelerated robot learning and sim-to-real transfer., 2025. URL https://github.com/ google-deepmind/mujoco_playground .10 Diffusion Policy through Conditional Proximal Policy Optimization 
+
+We present additional derivation, analysis, and experimental results in the Appendix. 
+
+A. Conditional PPO Objective Equivalence 
+
+The key point of this work is to transform a complicated policy optimization problem into a standard PPO formulation, which can be effectively solved (see Sec. 3.2). The equivalence of two objectives can be given by following the idea of Law of total expectation :
+
+Es∼pπθ ,a ∼πθ (a|s)
+
+h ˆAπθsample (s, a )
+
+i
+
+=
+
+Z
+
+pπθ (s)
+
+Z
+
+πθ (a) ˆAπθsample (s, a )dads 
+
+=
+
+Z
+
+pπθ (s)
+
+Z Z 
+
+˜π(a0|s)pθ (a|a0, s )da 0
+
+
+
+ˆAπθsample (s, a )dads 
+
+=
+
+Z
+
+pπθ (s)
+
+Z Z
+
+˜π(a0|s)pθ (a|a0, s ) ˆAπθsample (s, a )dada 0ds 
+
+=
+
+Z
+
+pπθ (s)
+
+Z
+
+˜π(a0|s)
+
+Z
+
+pθ (a|a0, s ) ˆAπθsample (s, a )dada 0ds 
+
+= Es∼pπθ ,a 0∼˜π,a ∼pθ (a|a0,s )
+
+h ˆAπθsample (s, a )
+
+i
+
+.
+
+(17) 
+
+B. Score-Based Regularization 
+
+We propose a score-based regularization term in 15 to stabilize and accelerate the diffusion policy training process. Here we explain the motivation and how it works. In the policy improvement formulation, the policy is given by 
+
+πθ (a|s) = 
+
+Z
+
+˜π(a0|s)pθ (a|a0, s )da 0, (18) where pθ (a|a0, s ) is defined by 
+
+pθ (a|a0, s ) = N (a; a0 + μθ (a0, s ), Σθ (a0, s )) . (19) Therefore, the samples ak+1 ∼ πθ (a|s) can be obtained by (we add a superscript to indicate the iteration step) 
+
+ak+1 = ak + ∆ a, (20) where ak ∼ ˜π(a0|s) and ∆a|ak ∼ N (∆ a; μθ (ak, s ), Σθ (ak, s )) . Note ∆a is sampled giving ak. Here, we consider the state s as a constant parameter. The process of obtaining samples ak+1 can be regarded as an Euler–Maruyama step as follows: 
+
+ak+1 = ak + ∆ t μθ (ak, s )∆t + √∆t Σ 12 
+
+> θ
+
+(ak, s )
+
+√∆t z z ∼ N (z; 0, I ). (21) where ∆t is a discrete time step. We aim to design this formula such that it becomes a Langevin discrete step that leads ak
+
+to converge to N (0, I ) as k → ∞ . To achieve this, let 
+
+μθ (ak, s ) = 12 Σθ (ak, s )∇ak log N (ak; 0, I ) = 12 Σθ (ak, s )( −ak) (22) Substitue (22) into (21) and consider ∆t as a selected constant, we can regarded (21) is the discretization of the following SDE: 
+
+da = Σθ (a, s )2∆ t (−a) + 
+
+ Σθ (a, s )∆t
+
+ 12
+
+dw (23) In the practical implementation, Σθ (ak, s ) is always set being independent of a and s, such as RSL-RL (Rudin et al., 2022). We adopt this common parameterization method in our method. In this case, we rewrite the SDE in (23) as 
+
+da = 12 GG T ∇a log N (a; 0, I ) + Gdw G := 
+
+ Σθ
+
+∆t
+
+ 12
+
+, (24) 11 Diffusion Policy through Conditional Proximal Policy Optimization 
+
+which can be regarded as the Langevin dynamics with non-unit drift coefficients that drive the distribution into a standard Gaussian. Formally, this can be verified by the Fokker-Planck equation that the standard Gaussian is the stationary distribution: 
+
+0 = −∇ · (GG T ∇a log N (a; 0, I )p∗(a)) + ∇ · (GG T ∇ap∗(a)) (25) where p∗(a) = N (a; 0, I ). Note G being independent of a is used. One potential problem is that regarding (21) being a discrete Euler-Maruyama step may introduce large numerical error due to G may be relatively large. However, in our implementation, we find that this will not cause a large error. As a summary, by considering the policy iteration process as the diffusion generative process, this regularization term tends to let the whole policy iteration process be a Langevin dynamics that makes policy converge to a standard Gaussian N (0, I ).
+
+C. Experiment Details 
+
+C.1. IssacLab Training Setup. We evaluate the algorithms on IssacLab (IsaacSim 5.0.0). Its default installation includes the RSL-RL package, which is the PPO baseline used in this work. All dependencies are installed according to IsaacLab’s documents. The training platform is one Nvidia-RTX-4090. 
+
+Hyperparameters. We adopt the default hyperparameters of RSL-RL PPO, which already provide strong performance across tasks. Our method consists of two components: (i) a conditional PPO (CPPO) for policy improvement, and (ii) a flow matching to fit the new diffusion policy. Since CPPO largely follows standard PPO, we keep the settings identical wherever possible and introduce only minor adjustments. The necessary adjustments are made because CPPO serves a different role than standard PPO, requiring different scaling. For the flow-matching component, we keep all parameters the same as in prior settings, except for the network size (see Tab. 5). The number of training epochs per policy iteration is deliberately kept small, as we find that increasing it does not improve performance much. We therefore set it to a suitable value to reduce computational cost. Other detailed parameters for each task are shown in Tab. 6 to 13. 
+
+Results. We evaluate the algorithms in eight tasks: Isaac-Ant-v0; Isaac-Lift-Cube-Franka-v0; Isaac-Quadcopter-Direct-v0; Isaac-Velocity-Flat-Anymal-D-v0; Isaac-Velocity-Rough-H1-v0; Isaac-Velocity-Rough-Unitree-Go2-v0; Isaac-Navigation-Flat-Anymal-C-v0; Isaac-Velocity-Rough-G1-v0. From the training curve Fig. 4, we find that the diffusion policy increases at a slightly slower rate than Gaussian PPO, which can be attributed to the diffusion model lying in an infinite functional space that is more difficult to train. For computational comparison in Tab. 2, we report PPO results from our own implementation instead of RSL-RL PPO, in order to maintain consistent experimental settings. This ensures that the percentage comparison with our method is more accurate and reliable. 
+
+C.2. Playground Training Setup. We evaluate the algorithms on Playground 0.0.5. All dependencies are installed according to the Playground’s default documents. The training platform is the same as in IsaacLab. 
+
+Hyperparameters. We adopt parameter settings similar to those in IsaacLab, with minor adjustments when necessary. The metric recording in FPO differs slightly from our convention; we have made them consistent for a fair comparison. The detailed parameters used in Playground are reported in Tab. 14. The network size we set is the same or less than FPO. 
+
+Results. We evaluate the algorithms in eight tasks: BallinCup; CheetahRun; FingerSpin; PointMass; ReacherEasy; ReacherHard; WalkerRun; WalkerWalk. The final evaluation rewards are already shown in Tab. 4. Here, we provide the training curves. In the comparison with FPO, since the data collection procedure per iteration differs significantly between the two methods, we report the reward curves with respect to the number of environment steps (see Fig. 6). Note that we extend the number of samples in CheetahRun and FingerSpin for our method, since in these two tasks the policy converges more slowly and requires additional training steps for the diffusion policy to stabilize. For fairness, however, we still report the results in Tab. 4 under their default settings. 
+
+C.3. Additional Results Diffusion Policy Fitting Error. In the proposed method, we utilize a single flow policy πflow to fit the optimal policy 
+
+πθ∗ (a|s) = R ˜π(a0|s)pθ∗ (a|a0, s )da 0 in each policy improvement. In Sec. 3.2, we have pointed out that this fitting will 12 Diffusion Policy through Conditional Proximal Policy Optimization 0 1 2 3 4 5 6 
+
+> Environment Steps ×10 7
+> 0
+> 200
+> 400
+> 600
+> 800
+> Average Reward
+
+BallinCup       
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 5 epochs/batch
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Environment Steps ×10 8
+> 0
+> 200
+> 400
+> 600
+> 800
+> Average Reward
+
+CheetahRun       
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 10 epochs/batch
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Environment Steps ×10 8
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> Average Reward
+
+FingerSpin        
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 10 epochs/batch
+> 0123456
+> Environment Steps ×10 7
+> 0
+> 200
+> 400
+> 600
+> 800
+> Average Reward
+
+PointMass        
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 5 epochs/batch
+> 0123456
+> Environment Steps ×10 7
+> 0
+> 200
+> 400
+> 600
+> 800
+> Average Reward
+
+ReacherEasy        
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 5 epochs/batch
+> 0123456
+> Environment Steps ×10 7
+> 0
+> 200
+> 400
+> 600
+> 800
+> Average Reward
+
+ReacherHard        
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 5 epochs/batch
+> 0123456
+> Environment Steps ×10 7
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> Average Reward
+
+WalkerWalk        
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 5 epochs/batch
+> 0123456
+> Environment Steps ×10 7
+> 0
+> 100
+> 200
+> 300
+> 400
+> 500
+> 600
+> 700
+> Average Reward
+
+WalkerRun 
+
+> 16 epochs/batch
+> 16 epochs/batch
+> 5 epochs/batch
+
+FPO DPPO DP-CPPO (Ours) 
+
+Figure 6. Training rewards across eight environments in Playground. Results show the mean and standard deviation over 5 runs with different seeds (higher is better). For better visualization, we have smoothed the reward data. Here, ‘epoch/batch’ denotes how many times each rollout is reused; smaller values indicate higher data efficiency. Our method achieves superior data efficiency. 
+
+not introduce an accumulated error since every policy improvement is based on πflow rather than the πθ∗ (a|s). Here, we investigate how large this fitting error is in experiments and whether this error will impact the performance of the method. We present training curves for different numbers of flow-matching training epochs on the Isaac-Lift-Cube-Franka-v0 task, which exhibit only small variance across multiple runs. As shown in Fig. 7a, using fewer flow-matching epochs generally leads to larger fitting errors, reflected by lower rewards. However, these errors diminish as training progresses and the policy converges. From Fig. 7b, we observe that the primary effect of reduced flow-matching epochs is a slower improvement rate; the final performance converges to nearly the same reward across all settings. This indicates that our method is robust to the fitting errors induced by limited flow-matching training. 0 250 500 750 1000 1250 1500 1750 2000 
+
+Training Steps 
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> Average Error
+
+( * fitting ) 5 epochs 
+
+10 epochs 
+
+15 epochs 
+
+30 epochs 
+
+(a) Reward difference on Isaac-Lift-Cube-Franka-v0. 0 250 500 750 1000 1250 1500 1750 2000 
+
+Training Steps 
+
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 160
+> Average Reward
+
+5 epochs 
+
+10 epochs 
+
+15 epochs 
+
+30 epochs (b) Rewards on Isaac-Lift-Cube-Franka-v0. 
+
+Figure 7. Ablation study on the number of flow-matching training epochs. (a) Reward difference between the optimal policy and the flow-matched policy (denoted by (π∗ − πfitting )), showing that the fitting error gradually decreases and converges to a small value. (b) Training rewards of the flow-matched policy across different epoch settings, all of which converge to nearly the same final performance. 
+
+Policy Monotonically Increasing. In the proposed method, the policy monotonically increasing is approximately ensured by an EMA trick. In this section, we investigate whether monotonically increasing empirically holds and what the impact 13 Diffusion Policy through Conditional Proximal Policy Optimization 
+
+of EMA is. In the policy improvement phase, the policy is parameterized by πθ (a|s) = R ˜π(a0|s)pθ (a|a0, s )da 0. The CPPO formulation can only improve the πθsampling (a|s) to πθ∗ (a|s), the relationship between πθsampling (a|s) and last diffusion policy ˜π(a0|s) is unclear. Thus, it is not theoretically guaranteed that πθ∗ (a|s) is better than ˜π(a0|s). To study this, we presents the reward difference of πθsampling (a|s) and ˜π(a0|s) in Fig. 8a. We observe that πθsampling (a|s) is consistently better than the reference policy ˜π(a0|s), providing empirical evidence that the proposed method achieves monotonic improvement under fitting errors and with EMA enabled. Note that the approximation in (13) describes the idealized case, whereas the experiment reflects the practical setting. In addition, we find that EMA greatly stabilizes training. Without EMA, the training process can diverge; only 1 out of 6 runs succeeds. However, in the one successful trial, the final return is nearly the same as the case using EMA, as shown in Fig. 8b. 0 250 500 750 1000 1250 1500 1750 2000   
+
+> Training Steps
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> 14
+> Average Error
+> (sampling flow )
+
+(a) Reward difference on Isaac-Lift-Cube-Franka-v0. 0 500 1000 1500 2000 2500 3000 3500 4000  
+
+> Training Steps
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 160
+> Average Reward
+> With EMA
+> Without EMA
+
+(b) Rewards on Isaac-Lift-Cube-Franka-v0. 
+
+Figure 8. (a) Reward difference between the sampling policy and the reference policy. The consistently positive values indicate that the sampling policy is better than the reference policy throughout training. (b) Training rewards with and without the EMA trick. Although the final performance is similar, the version without EMA succeeds in only 1 out of 6 runs, indicating it has reduced stability. 
+
+Entropy and Score-Based Regularization. We propose an entropy regularization to benefit exploration and an empirical score-based regularization term that improves optimization by preventing the policy from drifting too far from a prior distribution. Here, we provide a further joint ablation for score-based and entropy regularization to investigate how they impact each other. The results on Isaac-Quadcopter-Direct-v0 and Isaac-Velocity-Flat-Anymal-B-v0 tasks are shown in Fig. 9a and Fig. 9b, respectively. The training remains stable and converges more rapidly when both entropy regularization and score-based regularization are applied, indicating that these two regularizations complement each other. In the Quadcopter tasks, removing the score-based regularization leads to training failure due to policy divergence. In contrast, using only the score-based regularization (without entropy regularization) is sufficient for successful training, although the training process exhibits some oscillation. This highlights the strong stabilizing effect of the score-based term. In the Anymal-B task, training remains relatively stable across settings. However, without a score-based regularization, the reward improvement is significantly slower, and the policy becomes trapped in a local minimum. Interestingly, the score-based regularization alone enables the policy to escape this local minimum. A possible explanation is that locomotion in this environment admits a largely unimodal optimal policy, and encouraging the diffusion policy to remain close to a Gaussian prior improves convergence. Overall, we find that combining entropy regularization with score-based regularization consistently benefits the training process, though the full underlying mechanism needs further investigation. Because entropy regularization maximizes only a lower bound of the true policy entropy, it is natural to ask how strongly maximizing this lower bound influences the actual entropy. In Fig. 10, we plot both the true entropy of the policy and its lower bound at the saddle point (0,0) over training epochs. The true entropy of the diffusion policy is numerically approximated using the mixed Gaussian method proposed by Wang et al. (2024). We observe that the two entropy curves exhibit generally consistent trends: increasing the weight of the lower-bound regularization reliably leads to higher true entropy. This holds both with and without score-based regularization. These results suggest that, in practice, maximizing the entropy lower bound is an effective surrogate for increasing the true policy entropy. 
+
+Ablation on Flow Steps. We also provide an ablation study on the number of flow-matching steps (i.e., ODE discretization steps). Since our method avoids embedding the recursive structure of the flow into the optimization gradient chain, the number of flow steps affects only the sampling quality and sampling speed during generation. We report the results on the 14 Diffusion Policy through Conditional Proximal Policy Optimization 0 500 1000 1500 2000 2500 3000 
+
+Training Steps 
+
+> 25
+> 0
+> 25
+> 50
+> 75
+> 100
+> 125
+> 150
+> Average Reward
+
+Score , Entropy 
+
+Score , Entropy 
+
+Score , Entropy 
+
+Score , Entropy 
+
+(a) Rewards on Isaac-Quadcopter-Direct-v0. 0 500 1000 1500 2000 2500 3000 3500 4000 
+
+Training Steps 
+
+> 5
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> Average Reward
+
+Score , Entropy 
+
+Score , Entropy 
+
+Score , Entropy 
+
+Score , Entropy (b) Rewards on Isaac-Velocity-Flat-Anymal-B-v0. 
+
+Figure 9. Joint ablation on entropy and score-based regularization. In the figure, the check mark indicates that a suitable parameter is selected, while the cross indicates that this option is not applied. 0 200 400 600 800 1000 1200 
+
+Training Steps 
+
+> 2
+> 1
+> 0
+> 1
+> 2
+> Average Entropy
+
+True Entropy 
+
+Entropy Lower Bound 
+
+Entropy = 0.1 
+
+Entropy = 0.05 
+
+Entropy = 0.01 
+
+(a) Entropy without score-based regularization. 0 200 400 600 800 1000 1200 
+
+Training Steps 
+
+> 2
+> 1
+> 0
+> 1
+> 2
+> Average Entropy
+
+True Entropy 
+
+Entropy Lower Bound 
+
+Entropy = 0.1 
+
+Entropy = 0.05 
+
+Entropy = 0.01 (b) Entropy with score-based regularization. 
+
+Figure 10. Entropy in Multi-Goal environment. The trends of the two entropy measures are generally consistent. 
+
+Isaac-Lift-Cube-Franka-v0 task. As shown in Fig. 11, different flow steps result in nearly identical performance. 
+
+Table 5. Hyperparameters for Flow Matching (IsaacLab and Playground). 
+
+Hyperparameters Value Flow steps 16 Learning rate 0.001 Ema rate 0.999 Mini batches 4Training epochs 15 Optimizer Adam 15 Diffusion Policy through Conditional Proximal Policy Optimization 0 500 1000 1500 2000 2500 3000 3500 4000 
+
+Training Steps 
+
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> 160
+> Average Reward
+
+5 steps 
+
+10 steps 
+
+16 steps 
+
+Figure 11. Reward on Isaac-Lift-Cube-Franka-v0 with different numbers of flow steps. All configurations achieve similar final performance. 
+
+Table 6. Hyperparameters for Isaac-Ant-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.01 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.0005 0.0005 Entropy loss scale 0.005 0.01 Score regularization loss scale 0.1 -Rollouts 32 32 Num envs 4096 4096 Flow hidden dims [400, 200, 100] -Gaussian policy hidden dims [400, 200, 100] [400, 200, 100] Critic hidden dims [400, 200, 100] [400, 200, 100] Activation elu elu 
+
+Table 7. Hyperparameters for Isaac-Lift-Cube-Franka-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.008 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.0001 0.0001 Entropy loss scale 0.004 0.006 Score regularization loss scale 0.1 -Rollouts 24 24 Num envs 4096 4096 Flow hidden dims [256, 128, 64] -Gaussian policy hidden dims [256, 128, 64] [256, 128, 64] Critic hidden dims [256, 128, 64] [256, 128, 64] Activation elu elu 
+
+16 Diffusion Policy through Conditional Proximal Policy Optimization 
+
+Table 8. Hyperparameters for Isaac-Quadcopter-Direct-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.01 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.0005 0.0005 Entropy loss scale 0.01 0.01 Score regularization loss scale 0.5 -Rollouts 24 24 Num envs 4096 4096 Flow hidden dims [64, 64] -Gaussian policy hidden dims [64, 64] [64, 64] Critic hidden dims [64, 64] [64, 64] Activation mish elu 
+
+Table 9. Hyperparameters for Isaac-Velocity-Flat-Anymal-D-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.01 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.001 0.001 Entropy loss scale 0.001 0.005 Score regularization loss scale 0.1 -Rollouts 24 24 Num envs 4096 4096 Flow hidden dims [128, 128, 128] -Gaussian policy hidden dims [128, 128, 128] [128, 128, 128] Critic hidden dims [128, 128, 128] [128, 128, 128] Activation elu elu 
+
+Table 10. Hyperparameters for Isaac-Velocity-Rough-H1-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.01 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.0005 0.001 Entropy loss scale 0.005 0.01 Score regularization loss scale 0.1 -Rollouts 24 24 Num envs 4096 4096 Flow hidden dims [512, 256, 128] -Gaussian policy hidden dims [512, 256, 128] [512, 256, 128] Critic hidden dims [512, 256, 128] [512, 256, 128] Activation elu elu 
+
+17 Diffusion Policy through Conditional Proximal Policy Optimization 
+
+Table 11. Hyperparameters for Isaac-Velocity-Rough-Unitree-Go2-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.01 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.001 0.001 Entropy loss scale 0.005 0.01 Score regularization loss scale 0.1 -Rollouts 24 24 Num envs 4096 4096 Flow hidden dims [512, 256, 128] -Gaussian policy hidden dims [512, 256, 128] [512, 256, 128] Critic hidden dims [512, 256, 128] [512, 256, 128] 
+
+Table 12. Hyperparameters for Isaac-Navigation-Flat-Anymal-C-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.01 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.001 0.001 Entropy loss scale 0.001 0.005 Score regularization loss scale 0.1 -Rollouts 8 8Num envs 4096 4096 Flow hidden dims [128, 128] -Gaussian policy hidden dims [128, 128] [128, 128] Critic hidden dims [128, 128] [128, 128] Activation mish elu 
+
+Table 13. Hyperparameters for Isaac-Velocity-Rough-G1-v0. 
+
+Hyperparameters DP-CPPO PPO GAE Smoothing 0.95 0.95 Desired kl 0.01 0.01 Ratio clip 0.2 0.2 Max gradient clip 1.0 1.0 Value loss scale 1.0 1.0 Value clip True True Num learning epochs 5 5Num mini batches 4 4LR schedule adaptive adaptive Learning rate 0.001 0.001 Entropy loss scale 0.001 0.008 Score regularization loss scale 0.1 -Rollouts 24 24 Num envs 4096 4096 Flow hidden dims [512, 256, 128] -Gaussian policy hidden dims [512, 256, 128] [512, 256, 128] Critic hidden dims [512, 256, 128] [512, 256, 128] Activation elu elu 
+
+18 Diffusion Policy through Conditional Proximal Policy Optimization 
+
+Table 14. Hyperparameters for Playground tasks. 
+
+Hyperparameters Value GAE Smoothing 0.95 Desired kl 0.01 Ratio clip 0.2 0.05 (BallinCup) Max gradient clip 1.0 Value loss scale 1.0 Value clip True False (BallinCup CheetahRun) Num learning epochs 510 (CheetahRun FingerSpin) Num mini batches 4LR schedule adaptive fix (PointMass) Learning rate 0.001 0.0001 (BallinCup) 0.0005 (PointMass) Entropy loss scale 0.001 0.005 (FingerSpin ReachEasy ReachHard) Score regularization loss scale 0.1 Rollouts 32 Num envs 4096 Flow hidden dims [128, 64, 32] Gaussian policy hidden dims [512, 256, 128] Critic hidden dims [512, 256, 128] Activation elu 
+
+19

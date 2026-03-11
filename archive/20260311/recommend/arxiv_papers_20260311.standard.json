@@ -1,0 +1,663 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-11T19:30:25.592895+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 7,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 57,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.03848v1",
+      "title": "Dual-Interaction-Aware Cooperative Control Strategy for Alleviating Mixed Traffic Congestion",
+      "abstract": "As Intelligent Transportation System (ITS) develops, Connected and Automated Vehicles (CAVs) are expected to significantly reduce traffic congestion through cooperative strategies, such as in bottleneck areas. However, the uncertainty and diversity in the behaviors of Human-Driven Vehicles (HDVs) in mixed traffic environments present major challenges for CAV cooperation. This paper proposes a Dual-Interaction-Aware Cooperative Control (DIACC) strategy that enhances both local and global interaction perception within the Multi-Agent Reinforcement Learning (MARL) framework for Connected and Automated Vehicles (CAVs) in mixed traffic bottleneck scenarios. The DIACC strategy consists of three key innovations: 1) A Decentralized Interaction-Adaptive Decision-Making (D-IADM) module that enhances actor's local interaction perception by distinguishing CAV-CAV cooperative interactions from CAV-HDV observational interactions. 2) A Centralized Interaction-Enhanced Critic (C-IEC) that improves critic's global traffic understanding through interaction-aware value estimation, providing more accurate guidance for policy updates. 3) A reward design that employs softmin aggregation with temperature annealing to prioritize interaction-intensive scenarios in mixed traffic. Additionally, a lightweight Proactive Safety-based Action Refinement (PSAR) module applies rule-based corrections to accelerate training convergence. Experimental results demonstrate that DIACC significantly improves traffic efficiency and adaptability compared to rule-based and benchmark MARL models.",
+      "authors": [
+        "Zhengxuan Liu",
+        "Yuxin Cai",
+        "Yijing Wang",
+        "Xiangkun He",
+        "Chen Lv",
+        "Zhiqiang Zuo"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.MA",
+        "cs.RO"
+      ],
+      "published": "2026-03-04T09:00:49+00:00",
+      "link": "https://arxiv.org/pdf/2603.03848v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multi-Agent Reinforcement Learning for Connected and Automated Vehicles",
+      "llm_evidence_cn": "用于联网自动驾驶车辆的多智能体强化学习",
+      "llm_evidence": "用于联网自动驾驶车辆的多智能体强化学习",
+      "canonical_evidence": "用于联网自动驾驶车辆的多智能体强化学习",
+      "llm_tldr_en": "Uses MARL to coordinate CAVs in mixed traffic to alleviate congestion and improve flow.",
+      "llm_tldr_cn": "利用多智能体强化学习协调混合交通中的自动驾驶车辆，以缓解拥堵并优化车流。",
+      "llm_tldr": "利用多智能体强化学习协调混合交通中的自动驾驶车辆，以缓解拥堵并优化车流。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Deep reinforcement learning for eco driving in connected and automated vehicles",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.04868v1",
+      "title": "K-Gen: A Multimodal Language-Conditioned Approach for Interpretable Keypoint-Guided Trajectory Generation",
+      "abstract": "Generating realistic and diverse trajectories is a critical challenge in autonomous driving simulation. While Large Language Models (LLMs) show promise, existing methods often rely on structured data like vectorized maps, which fail to capture the rich, unstructured visual context of a scene. To address this, we propose K-Gen, an interpretable keypoint-guided multimodal framework that leverages Multimodal Large Language Models (MLLMs) to unify rasterized BEV map inputs with textual scene descriptions. Instead of directly predicting full trajectories, K-Gen generates interpretable keypoints along with reasoning that reflects agent intentions, which are subsequently refined into accurate trajectories by a refinement module. To further enhance keypoint generation, we apply T-DAPO, a trajectory-aware reinforcement fine-tuning algorithm. Experiments on WOMD and nuPlan demonstrate that K-Gen outperforms existing baselines, highlighting the effectiveness of combining multimodal reasoning with keypoint-guided trajectory generation.",
+      "authors": [
+        "Mingxuan Mu",
+        "Guo Yang",
+        "Lei Chen",
+        "Ping Wu",
+        "Jianxun Cui"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-05T06:48:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.04868v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Generative trajectory generation for autonomous driving simulation",
+      "llm_evidence_cn": "自动驾驶仿真的生成式轨迹生成",
+      "llm_evidence": "自动驾驶仿真的生成式轨迹生成",
+      "canonical_evidence": "自动驾驶仿真的生成式轨迹生成",
+      "llm_tldr_en": "Uses multimodal LLMs to generate interpretable keypoints and trajectories for autonomous driving scenarios.",
+      "llm_tldr_cn": "利用多模态大模型生成可解释的关键点和轨迹，用于自动驾驶仿真。",
+      "llm_tldr": "利用多模态大模型生成可解释的关键点和轨迹，用于自动驾驶仿真。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Generative Artificial Intelligence applications in vehicle control",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.05113v1",
+      "title": "Decoupling Task and Behavior: A Two-Stage Reward Curriculum in Reinforcement Learning for Robotics",
+      "abstract": "Deep Reinforcement Learning is a promising tool for robotic control, yet practical application is often hindered by the difficulty of designing effective reward functions. Real-world tasks typically require optimizing multiple objectives simultaneously, necessitating precise tuning of their weights to learn a policy with the desired characteristics. To address this, we propose a two-stage reward curriculum where we decouple task-specific objectives from behavioral terms. In our method, we first train the agent on a simplified task-only reward function to ensure effective exploration before introducing the full reward that includes auxiliary behavior-related terms such as energy efficiency. Further, we analyze various transition strategies and demonstrate that reusing samples between phases is critical for training stability. We validate our approach on the DeepMind Control Suite, ManiSkill3, and a mobile robot environment, modified to include auxiliary behavioral objectives. Our method proves to be simple yet effective, substantially outperforming baselines trained directly on the full reward while exhibiting higher robustness to specific reward weightings.",
+      "authors": [
+        "Kilian Freitag",
+        "Knut Åkesson",
+        "Morteza Haghir Chehreghani"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.RO"
+      ],
+      "published": "2026-03-05T12:34:27+00:00",
+      "link": "https://arxiv.org/pdf/2603.05113v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Reinforcement learning for energy efficiency in robotic control",
+      "llm_evidence_cn": "机器人控制中用于提高能量效率的强化学习",
+      "llm_evidence": "机器人控制中用于提高能量效率的强化学习",
+      "canonical_evidence": "机器人控制中用于提高能量效率的强化学习",
+      "llm_tldr_en": "A two-stage reward curriculum in RL that optimizes for task objectives and energy efficiency behavior.",
+      "llm_tldr_cn": "一种强化学习两阶段奖励课程，旨在优化任务目标和能量效率行为。",
+      "llm_tldr": "一种强化学习两阶段奖励课程，旨在优化任务目标和能量效率行为。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Reinforcement Learning for energy management systems",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07264v1",
+      "title": "Kinematics-Aware Latent World Models for Data-Efficient Autonomous Driving",
+      "abstract": "Data-efficient learning remains a central challenge in autonomous driving due to the high cost and safety risks of large-scale real-world interaction. Although world-model-based reinforcement learning enables policy optimization through latent imagination, existing approaches often lack explicit mechanisms to encode spatial and kinematic structure essential for driving tasks. In this work, we build upon the Recurrent State-Space Model (RSSM) and propose a kinematics-aware latent world model framework for autonomous driving. Vehicle kinematic information is incorporated into the observation encoder to ground latent transitions in physically meaningful motion dynamics, while geometry-aware supervision regularizes the RSSM latent state to capture task-relevant spatial structure beyond pixel reconstruction. The resulting structured latent dynamics improve long-horizon imagination fidelity and stabilize policy optimization. Experiments in a driving simulation benchmark demonstrate consistent gains over both model-free and pixel-based world-model baselines in terms of sample efficiency and driving performance. Ablation studies further verify that the proposed design enhances spatial representation quality within the latent space. These results suggest that integrating kinematic grounding into RSSM-based world models provides a scalable and physically grounded paradigm for autonomous driving policy learning.",
+      "authors": [
+        "Jiazhuo Li",
+        "Linjiang Cao",
+        "Qi Liu",
+        "Xi Xiong"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-03-07T15:47:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.07264v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "World-model-based reinforcement learning for autonomous driving kinematics",
+      "llm_evidence_cn": "基于世界模型的自动驾驶运动学强化学习",
+      "llm_evidence": "基于世界模型的自动驾驶运动学强化学习",
+      "canonical_evidence": "基于世界模型的自动驾驶运动学强化学习",
+      "llm_tldr_en": "Proposes a kinematics-aware latent world model for data-efficient autonomous driving policy optimization.",
+      "llm_tldr_cn": "提出一种运动学感知的潜界模型，用于高效数据的自动驾驶策略优化。",
+      "llm_tldr": "提出一种运动学感知的潜界模型，用于高效数据的自动驾驶策略优化。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Deep reinforcement learning for eco driving in connected and automated vehicles",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07568v1",
+      "title": "Constraints Matrix Diffusion based Generative Neural Solver for Vehicle Routing Problems",
+      "abstract": "Over the past decade, neural network solvers powered by generative artificial intelligence have garnered significant attention in the domain of vehicle routing problems (VRPs), owing to their exceptional computational efficiency and superior reasoning capabilities. In particular, autoregressive solvers integrated with reinforcement learning have emerged as a prominent trend. However, much of the existing work emphasizes large-scale generalization of neural approaches while neglecting the limited robustness of attention-based methods across heterogeneous distributions of problem parameters. Their improvements over heuristic search remain largely restricted to hand-curated, fixed-distribution benchmarks. Furthermore, these architectures tend to degrade significantly when node representations are highly similar or when tasks involve long decision horizons. To address the aforementioned limitations, we propose a novel fusion neural network framework that employs a discrete noise graph diffusion model to learn the underlying constraints of vehicle routing problems and generate a constraint assignment matrix. This matrix is subsequently integrated adaptively into the feature representation learning and decision process of the autoregressive solver, serving as a graph structure mask that facilitates the formation of solutions characterized by both global vision and local feature integration. To the best of our knowledge, this work represents the first comprehensive experimental investigation of neural network model solvers across a 378-combinatorial space spanning four distinct dimensions within the CVRPlib public dataset. Extensive experimental evaluations demonstrate that our proposed fusion model effectively captures and leverages problem constraints, achieving state-of-the-art performance across multiple benchmark datasets.",
+      "authors": [
+        "Zhenwei Wang",
+        "Tiehua Zhang",
+        "Ning Xue",
+        "Ender Ozcan",
+        "Ling Wang",
+        "Ruibin Bai"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-08T10:03:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.07568v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Generative AI and reinforcement learning for vehicle routing problems",
+      "llm_evidence_cn": "用于车辆路径规划的生成式人工智能与强化学习",
+      "llm_evidence": "用于车辆路径规划的生成式人工智能与强化学习",
+      "canonical_evidence": "用于车辆路径规划的生成式人工智能与强化学习",
+      "llm_tldr_en": "A generative neural solver using diffusion and RL to solve complex vehicle routing problems efficiently.",
+      "llm_tldr_cn": "一种利用扩散模型和强化学习高效解决复杂车辆路径问题的生成式神经求解器。",
+      "llm_tldr": "一种利用扩散模型和强化学习高效解决复杂车辆路径问题的生成式神经求解器。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Generative Artificial Intelligence applications in vehicle control",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07686v1",
+      "title": "UniUncer: Unified Dynamic Static Uncertainty for End to End Driving",
+      "abstract": "End-to-end (E2E) driving has become a cornerstone of both industry deployment and academic research, offering a single learnable pipeline that maps multi-sensor inputs to actions while avoiding hand-engineered modules. However, the reliability of such pipelines strongly depends on how well they handle uncertainty: sensors are noisy, semantics can be ambiguous, and interaction with other road users is inherently stochastic. Uncertainty also appears in multiple forms: classification vs. localization, and, crucially, in both static map elements and dynamic agents. Existing E2E approaches model only static-map uncertainty, leaving planning vulnerable to overconfident and unreliable inputs. We present UniUncer, the first lightweight, unified uncertainty framework that jointly estimates and uses uncertainty for both static and dynamic scene elements inside an E2E planner. Concretely: (1) we convert deterministic heads to probabilistic Laplace regressors that output per-vertex location and scale for vectorized static and dynamic entities; (2) we introduce an uncertainty-fusion module that encodes these parameters and injects them into object/map queries to form uncertainty-aware queries; and (3) we design an uncertainty-aware gate that adaptively modulates reliance on historical inputs (ego status or temporal perception queries) based on current uncertainty levels. The design adds minimal overhead and drops throughput by only $\\sim$0.5 FPS while remaining plug-and-play for common E2E backbones. On nuScenes (open-loop), UniUncer reduces average L2 trajectory error by 7\\%. On NavsimV2 (pseudo closed-loop), it improves overall EPDMS by 10.8\\% and notable stage two gains in challenging, interaction-heavy scenes. Ablations confirm that dynamic-agent uncertainty and the uncertainty-aware gate are both necessary.",
+      "authors": [
+        "Yu Gao",
+        "Jijun Wang",
+        "Zongzheng Zhang",
+        "Anqing Jiang",
+        "Yiru Wang",
+        "Yuwen Heng",
+        "Shuo Wang",
+        "Hao Sun",
+        "Zhangfeng Hu",
+        "Hao Zhao"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-03-08T15:43:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.07686v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "End-to-end driving pipeline mapping multi-sensor inputs to actions with uncertainty handling",
+      "llm_evidence_cn": "处理不确定性的多传感器输入到动作映射的端到端驾驶流水线",
+      "llm_evidence": "处理不确定性的多传感器输入到动作映射的端到端驾驶流水线",
+      "canonical_evidence": "处理不确定性的多传感器输入到动作映射的端到端驾驶流水线",
+      "llm_tldr_en": "Presents a unified uncertainty framework for end-to-end driving to improve planning reliability.",
+      "llm_tldr_cn": "提出了一种用于端到端驾驶的统一不确定性框架，以提高规划的可靠性。",
+      "llm_tldr": "提出了一种用于端到端驾驶的统一不确定性框架，以提高规划的可靠性。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Deep reinforcement learning for eco driving in connected and automated vehicles",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.07964v1",
+      "title": "Model-Free DRL Control for Power Inverters: From Policy Learning to Real-Time Implementation via Knowledge Distillation",
+      "abstract": "In response to the trade-off between control performance and computational burden hindering the deployment of Deep Reinforcement Learning (DRL) in power inverters, this paper presents a novel model-free control framework leveraging policy distillation. To handle the convergence instability and steady-state errors inherent in model-free agents, an error energy-guided hybrid reward mechanism is established to theoretically constrain the exploration space. More specifically, an adaptive importance weighting mechanism is integrated into the distillation architecture to amplify the significance of fluctuation regions, ensuring high-quality transfer of transient control logic by mitigating the observational bias dominated by steady-state data. This approach efficiently compresses the heavy DRL policy into a lightweight neural network, retaining the desired control performance while overcoming the computational bottleneck during deployment. The proposed method is validated through a hardware-based kilowatt-level experimental platform. Experimental comparison results with traditional methods demonstrate that the proposed technique reduces inference time to the microsecond level and achieves superior transient response speed and parameter robustness.",
+      "authors": [
+        "Yang Yang",
+        "Chenggang Cui",
+        "Xitong Niu",
+        "Jiaming Liu",
+        "Chuanlin Zhang"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-09T05:02:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.07964v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Model-free DRL control for power inverters with energy-guided rewards",
+      "llm_evidence_cn": "具有能量引导奖励的功率逆变器无模型深度强化学习控制",
+      "llm_evidence": "具有能量引导奖励的功率逆变器无模型深度强化学习控制",
+      "canonical_evidence": "具有能量引导奖励的功率逆变器无模型深度强化学习控制",
+      "llm_tldr_en": "Uses DRL and knowledge distillation for efficient real-time control of power electronics.",
+      "llm_tldr_cn": "利用深度强化学习和知识蒸馏实现电力电子设备的高效实时控制。",
+      "llm_tldr": "利用深度强化学习和知识蒸馏实现电力电子设备的高效实时控制。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Reinforcement Learning for energy management systems",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.02526v1",
+      "title": "Event-Driven Safe and Resilient Control of Automated and Human-Driven Vehicles under EU-FDI Attacks",
+      "abstract": "This paper studies the safe and resilient control of Connected and Automated Vehicles (CAVs) operating in mixed traffic environments where they must interact with Human-Driven Vehicles (HDVs) under uncertain dynamics and exponentially unbounded false data injection (EU-FDI) attacks. These attacks pose serious threats to safety-critical applications. While resilient control strategies can mitigate adversarial effects, they often overlook collision avoidance requirements. Conversely, safety-focused approaches tend to assume nominal operating conditions and lack resilience to adversarial inputs. To address these challenges, we propose a control framework that integrates event-driven Control Barrier Functions (CBFs) and Control Lyapunov Functions (CLFs) with adaptive attack-resilient control. The framework further incorporates data-driven estimation of HDV behaviors to ensure safety and resilience against EU-FDI attacks. Specifically, we focus on the lane-changing maneuver of CAVs in the presence of unpredictable HDVs and EU-FDI attacks on acceleration inputs. The event-driven approach reduces computational load while maintaining real-time safety guarantees. Simulation results, including comparisons with pure event-driven methods lacking resilience, validate the effectiveness and robustness of the proposed EDSR framework in achieving collision-free maneuvers, stable velocity regulation, and resilient operation under adversarial conditions.",
+      "authors": [
+        "Yi Zhang",
+        "Yichao Wang",
+        "Wei Xiao",
+        "Mohamadamin Rajabinezhad",
+        "Shan Zuo"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-03T02:22:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.02526v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Control of automated vehicles in mixed traffic environments",
+      "llm_evidence_cn": "混合交通环境下自动驾驶车辆的控制",
+      "llm_evidence": "混合交通环境下自动驾驶车辆的控制",
+      "canonical_evidence": "混合交通环境下自动驾驶车辆的控制",
+      "llm_tldr_en": "Proposes a resilient control framework for CAVs to ensure safety under cyber-attacks in mixed traffic.",
+      "llm_tldr_cn": "提出一种针对联网自动驾驶车辆的韧性控制框架，确保混合交通下的安全性。",
+      "llm_tldr": "提出一种针对联网自动驾驶车辆的韧性控制框架，确保混合交通下的安全性。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Deep reinforcement learning for eco driving in connected and automated vehicles",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.02654v1",
+      "title": "Generalized Per-Agent Advantage Estimation for Multi-Agent Policy Optimization",
+      "abstract": "In this paper, we propose a novel framework for multi-agent reinforcement learning that enhances sample efficiency and coordination through accurate per-agent advantage estimation. The core of our approach is Generalized Per-Agent Advantage Estimator (GPAE), which employs a per-agent value iteration operator to compute precise per-agent advantages. This operator enables stable off-policy learning by indirectly estimating values via action probabilities, eliminating the need for direct Q-function estimation. To further refine estimation, we introduce a double-truncated importance sampling ratio scheme. This scheme improves credit assignment for off-policy trajectories by balancing sensitivity to the agent's own policy changes with robustness to non-stationarity from other agents. Experiments on benchmarks demonstrate that our approach outperforms existing approaches, excelling in coordination and sample efficiency for complex scenarios.",
+      "authors": [
+        "Seongmin Kim",
+        "Giseung Park",
+        "Woojun Kim",
+        "Jiwon Jeon",
+        "Seungyeol Han",
+        "Youngchul Sung"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA"
+      ],
+      "published": "2026-03-03T06:37:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.02654v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Multi-agent reinforcement learning for coordination and efficiency",
+      "llm_evidence_cn": "用于提高协调性和效率的多智能体强化学习",
+      "llm_evidence": "用于提高协调性和效率的多智能体强化学习",
+      "canonical_evidence": "用于提高协调性和效率的多智能体强化学习",
+      "llm_tldr_en": "Introduces a per-agent advantage estimator to improve sample efficiency and coordination in multi-agent RL.",
+      "llm_tldr_cn": "引入单智能体优势估计器，以提高多智能体强化学习的样本效率和协调性。",
+      "llm_tldr": "引入单智能体优势估计器，以提高多智能体强化学习的样本效率和协调性。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Reinforcement Learning for energy management systems",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.02680v1",
+      "title": "LLMs for High-Frequency Decision-Making: Normalized Action Reward-Guided Consistency Policy Optimization",
+      "abstract": "While Large Language Models (LLMs) form the cornerstone of sequential decision-making agent development, they have inherent limitations in high-frequency decision tasks. Existing research mainly focuses on discrete embodied decision scenarios with low-frequency and significant semantic differences in state space (e.g., household planning). These methods suffer from limited performance in high-frequency decision-making tasks, since high-precision numerical state information in such tasks undergoes frequent updates with minimal fluctuations, and exhibiting policy misalignment between the learned sub-tasks and composite tasks. To address these issues, this paper proposes Normalized Action Reward guided Consistency Policy Optimization (NAR-CP). 1) Our method first acquires predefined dense rewards from environmental feedback of candidate actions via reward functions, then completes reward shaping through normalization, and theoretically verifies action reward normalization does not impair optimal policy. 2) To reduce policy misalignment in composite tasks, we use LLMs to infer sub-observation candidate actions and generate joint policies, with consistency loss ensuring precise alignment between global semantic policies and sub-semantic policies. Experiments on UAV pursuit, a typical high-frequency task, show our method delivers superior performance on independent and composite tasks with excellent generalization to unseen tasks.",
+      "authors": [
+        "Yang Zhao",
+        "Zihao Li",
+        "Zhiyu Jiang",
+        "Dandan Ma",
+        "Ganchao Liu",
+        "Wenzhe Zhao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-03T07:22:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.02680v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLMs for high-frequency decision-making in embodied tasks",
+      "llm_evidence_cn": "大语言模型在具身任务高频决策中的应用",
+      "llm_evidence": "大语言模型在具身任务高频决策中的应用",
+      "canonical_evidence": "大语言模型在具身任务高频决策中的应用",
+      "llm_tldr_en": "Proposes a consistency policy optimization for LLMs to handle high-frequency numerical decision-making tasks.",
+      "llm_tldr_cn": "提出一种一致性策略优化方法，使大语言模型能够处理高频数值决策任务。",
+      "llm_tldr": "提出一种一致性策略优化方法，使大语言模型能够处理高频数值决策任务。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Generative Artificial Intelligence applications in vehicle control",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.02862v1",
+      "title": "Learning in Markov Decision Processes with Exogenous Dynamics",
+      "abstract": "Reinforcement learning algorithms are typically designed for generic Markov Decision Processes (MDPs), where any state-action pair can lead to an arbitrary transition distribution. In many practical systems, however, only a subset of the state variables is directly influenced by the agent's actions, while the remaining components evolve according to exogenous dynamics and account for most of the stochasticity. In this work, we study a structured class of MDPs characterized by exogenous state components whose transitions are independent of the agent's actions. We show that exploiting this structure yields significantly improved learning guarantees, with only the size of the exogenous state space appearing in the leading terms of the regret bounds. We further establish a matching lower bound, showing that this dependence is information-theoretically optimal. Finally, we empirically validate our approach across classical toy settings and real-world-inspired environments, demonstrating substantial gains in sample efficiency compared to standard reinforcement learning methods.",
+      "authors": [
+        "Davide Maran",
+        "Davide Salaorni",
+        "Marcello Restelli"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-03T11:10:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.02862v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Exploiting exogenous dynamics in MDPs for improved RL guarantees",
+      "llm_evidence_cn": "利用MDP中的外生动力学改进强化学习保证",
+      "llm_evidence": "利用MDP中的外生动力学改进强化学习保证",
+      "canonical_evidence": "利用MDP中的外生动力学改进强化学习保证",
+      "llm_tldr_en": "Studies reinforcement learning in MDPs where actions only influence a subset of state variables.",
+      "llm_tldr_cn": "研究动作仅影响部分状态变量的马尔可夫决策过程中的强化学习。",
+      "llm_tldr": "研究动作仅影响部分状态变量的马尔可夫决策过程中的强化学习。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Reinforcement Learning for energy management systems",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.02976v1",
+      "title": "DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space",
+      "abstract": "Local navigation in cluttered environments often suffers from dense obstacles and frequent local minima. Conventional local planners rely on heuristics and are prone to failure, while deep reinforcement learning(DRL)based approaches provide adaptability but are constrained by limited onboard sensing. These limitations lead to navigation failures because the robot cannot perceive structures outside its field of view. In this paper, we propose DreamFlow, a DRL-based local navigation framework that extends the robot's perceptual horizon through conditional flow matching(CFM). The proposed CFM based prediction module learns probabilistic mapping between local height map latent representation and broader spatial representation conditioned on navigation context. This enables the navigation policy to predict unobserved environmental features and proactively avoid potential local minima. Experimental results demonstrate that DreamFlow outperforms existing methods in terms of latent prediction accuracy and navigation performance in simulation. The proposed method was further validated in cluttered real world environments with a quadrupedal robot. The project page is available at https://dreamflow-icra.github.io.",
+      "authors": [
+        "Jiwon Park",
+        "Dongkyu Lee",
+        "I Made Aswin Nahrendra",
+        "Jaeyoung Lim",
+        "Hyun Myung"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-03T13:31:22+00:00",
+      "link": "https://arxiv.org/pdf/2603.02976v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep reinforcement learning and conditional flow matching for local navigation",
+      "llm_evidence_cn": "深度强化学习与条件流匹配用于局部导航",
+      "llm_evidence": "深度强化学习与条件流匹配用于局部导航",
+      "canonical_evidence": "深度强化学习与条件流匹配用于局部导航",
+      "llm_tldr_en": "Combines DRL with generative flow matching to extend the perceptual horizon for robot and vehicle navigation.",
+      "llm_tldr_cn": "将深度强化学习与生成式流匹配结合，扩展了机器人和车辆导航的感知视野。",
+      "llm_tldr": "将深度强化学习与生成式流匹配结合，扩展了机器人和车辆导航的感知视野。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Deep reinforcement learning for eco driving in connected and automated vehicles",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.02862v2",
+      "title": "Learning in Markov Decision Processes with Exogenous Dynamics",
+      "abstract": "Reinforcement learning algorithms are typically designed for generic Markov Decision Processes (MDPs), where any state-action pair can lead to an arbitrary transition distribution. In many practical systems, however, only a subset of the state variables is directly influenced by the agent's actions, while the remaining components evolve according to exogenous dynamics and account for most of the stochasticity. In this work, we study a structured class of MDPs characterized by exogenous state components whose transitions are independent of the agent's actions. We show that exploiting this structure yields significantly improved learning guarantees, with only the size of the exogenous state space appearing in the leading terms of the regret bounds. We further establish a matching lower bound, showing that this dependence is information-theoretically optimal. Finally, we empirically validate our approach across classical toy settings and real-world-inspired environments, demonstrating substantial gains in sample efficiency compared to standard reinforcement learning methods.",
+      "authors": [
+        "Davide Maran",
+        "Davide Salaorni",
+        "Marcello Restelli"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-03T11:10:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.02862v2",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Reinforcement learning in MDPs with exogenous dynamics for practical systems",
+      "llm_evidence_cn": "具有外生动力学的MDP强化学习，适用于实际系统",
+      "llm_evidence": "具有外生动力学的MDP强化学习，适用于实际系统",
+      "canonical_evidence": "具有外生动力学的MDP强化学习，适用于实际系统",
+      "llm_tldr_en": "Improves RL efficiency by exploiting exogenous state structures in complex systems.",
+      "llm_tldr_cn": "通过利用复杂系统中的外生状态结构，显著提升强化学习的效率。",
+      "llm_tldr": "通过利用复杂系统中的外生状态结构，显著提升强化学习的效率。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Reinforcement Learning for energy management systems",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.03127v1",
+      "title": "Deep Q-Learning-Based Gain Scheduling for Nonlinear Quadcopter Dynamics",
+      "abstract": "This paper presents a deep Q-network (DQN)-based gain-scheduling framework for safety-critical quadcopter trajectory tracking. Instead of directly learning control inputs, the proposed approach selects from a finite set of pre-certified stabilizing gain vectors, enabling reinforcement learning to operate within a structured and stability-preserving control architecture. By exploiting the isotropic structure of the translational dynamics, feedback gains are shared across spatial axes to reduce dimensionality while preserving performance. The learned policy adapts feedback aggressiveness in real time, applying high authority during large transients and reducing gains near convergence to limit control effort. Simulation results using a high-fidelity nonlinear quadcopter model demonstrate accurate trajectory tracking, bounded attitude excursions, smooth transition to hover after the final time, and consistent reward improvement, validating the effectiveness and robustness of the proposed learning-based gain scheduling strategy.",
+      "authors": [
+        "Hossein Rastgoftar",
+        "Muhammad J. H. Zahed"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "math.DS"
+      ],
+      "published": "2026-03-03T16:00:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.03127v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep Q-Learning for trajectory tracking and control effort reduction",
+      "llm_evidence_cn": "用于轨迹跟踪和减少控制消耗的深度Q学习",
+      "llm_evidence": "用于轨迹跟踪和减少控制消耗的深度Q学习",
+      "canonical_evidence": "用于轨迹跟踪和减少控制消耗的深度Q学习",
+      "llm_tldr_en": "Applies DQN for gain-scheduling in vehicle control to optimize performance and limit control effort.",
+      "llm_tldr_cn": "将深度Q网络应用于车辆控制中的增益调度，以优化性能并限制控制消耗。",
+      "llm_tldr": "将深度Q网络应用于车辆控制中的增益调度，以优化性能并限制控制消耗。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Reinforcement Learning for energy management systems",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.03641v1",
+      "title": "The Evolution of Eco-routing under Population Growth: Evidence from Six U.S. Cities",
+      "abstract": "Rapid urban population growth drives car travel demand, increasing transport carbon emissions and posing a critical challenge to sustainable development. Although existing studies have demonstrated that eco-routing can reduce individual emissions, research gaps remain. On the one hand, such personal reductions have a negligible impact on overall emissions, and cannot be simply aggregated to capture the complex effects of large-scale eco-routing. On the other hand, under population growth, the long-term effectiveness of eco-routing, as well as the evolution of its efficiency and traveler route choice, remain underexplored. To address these limitations, this study proposes Time-Only and Time-Carbon user equilibrium (UE) models, integrates them with a demand forecasting method for simulating future network traffic, and designs multi-dimensional metrics to characterize urban dynamics. Using real-world road networks, commuting origin-destination (OD) demand, and population projections under various shared socioeconomic pathways (SSPs) for six representative U.S. cities as a case study, we conduct a comprehensive analysis of urban dynamics across different routing strategies and population sizes. The results reveal that while eco-routing mitigates total emissions, emissions in most cities scale superlinearly with population, a scaling order that remains invariant regardless of routing and construction strategies. Moreover, under population growth, travelers using eco-routing tend to increasingly select shorter routes, giving rise to carbon bottlenecks. A strategy of targeted capacity expansion on these critical bottlenecks (0.46% of links) significantly reduces both emissions (3%) and travel time (28%) without compromising eco-routing efficiency. This study provides a foundation for formulating low-carbon urban transport planning and emission reduction policies.",
+      "authors": [
+        "Zhiheng Shi",
+        "Xiaohan Xu",
+        "Wei Ma",
+        "Kairui Feng",
+        "Bin He"
+      ],
+      "primary_category": "physics.soc-ph",
+      "categories": [
+        "physics.soc-ph",
+        "eess.SY"
+      ],
+      "published": "2026-03-04T02:05:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.03641v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "eco-routing models to reduce transport carbon emissions",
+      "llm_evidence_cn": "旨在减少交通碳排放的生态路由模型",
+      "llm_evidence": "旨在减少交通碳排放的生态路由模型",
+      "canonical_evidence": "旨在减少交通碳排放的生态路由模型",
+      "llm_tldr_en": "Analyzes the long-term effectiveness of eco-routing on urban carbon emissions and traveler choice.",
+      "llm_tldr_cn": "分析了生态路由在城市人口增长背景下对碳减排和路径选择的长期演变影响。",
+      "llm_tldr": "分析了生态路由在城市人口增长背景下对碳减排和路径选择的长期演变影响。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Eco-driving optimization using machine learning",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.04325v1",
+      "title": "Scalable Evaluation of the Realism of Synthetic Environmental Augmentations in Images",
+      "abstract": "Evaluation of AI systems often requires synthetic test cases, particularly for rare or safety-critical conditions that are difficult to observe in operational data. Generative AI offers a promising approach for producing such data through controllable image editing, but its usefulness depends on whether the resulting images are sufficiently realistic to support meaningful evaluation.   We present a scalable framework for assessing the realism of synthetic image-editing methods and apply it to the task of adding environmental conditions-fog, rain, snow, and nighttime-to car-mounted camera images. Using 40 clear-day images, we compare rule-based augmentation libraries with generative AI image-editing models. Realism is evaluated using two complementary automated metrics: a vision-language model (VLM) jury for perceptual realism assessment, and embedding-based distributional analysis to measure similarity to genuine adverse-condition imagery.   Generative AI methods substantially outperform rule-based approaches, with the best generative method achieving approximately 3.6 times the acceptance rate of the best rule-based method. Performance varies across conditions: fog proves easiest to simulate, while nighttime transformations remain challenging. Notably, the VLM jury assigns imperfect acceptance even to real adverse-condition imagery, establishing practical ceilings against which synthetic methods can be judged. By this standard, leading generative methods match or exceed real-image performance for most conditions.   These results suggest that modern generative image-editing models can enable scalable generation of realistic adverse-condition imagery for evaluation pipelines. Our framework therefore provides a practical approach for scalable realism evaluation, though validation against human studies remains an important direction for future work.",
+      "authors": [
+        "Damian J. Ruck",
+        "Paul Vautravers",
+        "Oliver Chalkley",
+        "Jake Thomas"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-03-04T17:46:08+00:00",
+      "link": "https://arxiv.org/pdf/2603.04325v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Generative AI for producing synthetic environmental conditions in car-mounted camera images",
+      "llm_evidence_cn": "生成式AI用于在车载摄像头图像中生成合成环境条件",
+      "llm_evidence": "生成式AI用于在车载摄像头图像中生成合成环境条件",
+      "canonical_evidence": "生成式AI用于在车载摄像头图像中生成合成环境条件",
+      "llm_tldr_en": "Evaluates generative AI for creating realistic synthetic weather conditions to test autonomous vehicle systems.",
+      "llm_tldr_cn": "评估了生成式AI在创建逼真合成天气条件以测试自动驾驶系统方面的应用。",
+      "llm_tldr": "评估了生成式AI在创建逼真合成天气条件以测试自动驾驶系统方面的应用。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Generative Artificial Intelligence applications in vehicle control",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.04790v1",
+      "title": "Diffusion Policy through Conditional Proximal Policy Optimization",
+      "abstract": "Reinforcement learning (RL) has been extensively employed in a wide range of decision-making problems, such as games and robotics. Recently, diffusion policies have shown strong potential in modeling multi-modal behaviors, enabling more diverse and flexible action generation compared to the conventional Gaussian policy. Despite various attempts to combine RL with diffusion, a key challenge is the difficulty of computing action log-likelihood under the diffusion model. This greatly hinders the direct application of diffusion policies in on-policy reinforcement learning. Most existing methods calculate or approximate the log-likelihood through the entire denoising process in the diffusion model, which can be memory- and computationally inefficient. To overcome this challenge, we propose a novel and efficient method to train a diffusion policy in an on-policy setting that requires only evaluating a simple Gaussian probability. This is achieved by aligning the policy iteration with the diffusion process, which is a distinct paradigm compared to previous work. Moreover, our formulation can naturally handle entropy regularization, which is often difficult to incorporate into diffusion policies. Experiments demonstrate that the proposed method produces multimodal policy behaviors and achieves superior performance on a variety of benchmark tasks in both IsaacLab and MuJoCo Playground.",
+      "authors": [
+        "Ben Liu",
+        "Shunpeng Yang",
+        "Hua Chen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.RO"
+      ],
+      "published": "2026-03-05T04:12:13+00:00",
+      "link": "https://arxiv.org/pdf/2603.04790v1",
+      "tags": [
+        "keyword:ECO AI",
+        "query:ECO AI"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Diffusion policies for flexible action generation in reinforcement learning",
+      "llm_evidence_cn": "强化学习中用于灵活动作生成的扩散策略",
+      "llm_evidence": "强化学习中用于灵活动作生成的扩散策略",
+      "canonical_evidence": "强化学习中用于灵活动作生成的扩散策略",
+      "llm_tldr_en": "Combines diffusion models with PPO to enable efficient on-policy reinforcement learning for complex decision-making.",
+      "llm_tldr_cn": "将扩散模型与PPO结合，为复杂决策提供高效的同策略强化学习。",
+      "llm_tldr": "将扩散模型与PPO结合，为复杂决策提供高效的同策略强化学习。",
+      "llm_tags": [
+        "query:eco-ai"
+      ],
+      "matched_query_tag": "query:eco-ai",
+      "matched_query_text": "Generative Artificial Intelligence applications in vehicle control",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

@@ -1,0 +1,1982 @@
+Title: The Evolution of Eco-routing under Population Growth: Evidence from Six U.S. Cities
+
+URL Source: https://arxiv.org/pdf/2603.03641v1
+
+Published Time: Thu, 05 Mar 2026 01:30:23 GMT
+
+Number of Pages: 48
+
+Markdown Content:
+# The Evolution of Eco-routing under Population Growth: Evidence from Six U.S. Cities 
+
+Zhiheng Shi a,f , Xiaohan Xu b,c,d, ∗, Wei Ma e, Kairui Feng c,f, ∗, Bin He c,b,d, ∗
+
+> aSchool of Mathematics, Harbin Institute of Technology, Harbin 150001, China
+> bCollege of Electronics and Information Engineering, Tongji University, Shanghai 201804, China
+> cState Key Laboratory of Autonomous Intelligent Unmanned Systems, Shanghai 201210, China
+> dFrontiers Science Center for Intelligent Autonomous Systems, Shanghai 201210, China
+> eDepartment of Civil and Environmental Engineering, The Hong Kong Polytechnic University, Hong Kong 999077, China
+> fShanghai Innovation Institute, Shanghai 200030, China
+
+Abstract 
+
+Rapid urban population growth drives car travel demand, increasing transport carbon emissions and posing a critical challenge to sustainable development. Although existing studies have demonstrated that eco-routing can reduce individual emissions, research gaps remain. On the one hand, such personal reductions have a negligible impact on overall emissions, and cannot be simply aggregated to capture the complex effects of large-scale eco-routing. On the other hand, under population growth, the long-term effectiveness of eco-routing, as well as the evolution of its efficiency and traveler route choice, remain under-explored. To address these limitations, this study proposes Time-Only and Time-Carbon user equilibrium (UE) models, integrates them with a demand forecasting method for sim-ulating future network traffic, and designs multi-dimensional metrics to characterize urban dynamics. Using real-world road networks, commuting origin-destination (OD) demand, and population projections under various shared socioeconomic pathways (SSPs) for six repre-sentative U.S. cities as a case study, we conduct a comprehensive analysis of urban dynamics across different routing strategies and population sizes. The results reveal that while eco-routing mitigates total emissions, emissions in most cities scale superlinearly with popula-tion, a scaling order that remains invariant regardless of routing and construction strategies. Moreover, under population growth, travelers using eco-routing tend to increasingly select shorter routes, giving rise to carbon bottlenecks. A strategy of targeted capacity expan-sion on these critical bottlenecks (0.46% of links) significantly reduces both emissions (3%) and travel time (28%) without compromising eco-routing efficiency. This study provides a foundation for formulating low-carbon urban transport planning and emission reduction policies. 
+
+Keywords: Eco-routing, Transport carbon emissions, Population growth, Sustainable development  
+
+> ∗Corresponding author: xhxu@tongji.edu.cn; kelvinfkr@tongji.edu.cn; hebin@tongji.edu.cn
+> Preprint submitted to Elsevier March 5, 2026
+> arXiv:2603.03641v1 [physics.soc-ph] 4 Mar 2026
+
+1. Introduction 
+
+Cities have become centers of energy consumption, air pollution, and environmental degradation, with urban transport emissions (i.e., carbon emissions) contributing a sub-stantial fraction of national greenhouse gas (GHG) emissions, specifically accounting for 26.3% in the U.S., a share that continues to rise annually (UNFCCC, 2021). In addition, given projections estimating that approximately 68% of the global population will reside in urban areas by 2050 (UN DESA, 2019), such population growth and urban sprawl are accompanied by rising private car ownership, resulting in growing demand for car travel and increased vehicle miles traveled (VMT) (Glaeser and Kahn, 2004; Bento et al., 2005), which will inevitably translate into escalating emissions, posing a major challenge to sus-tainable development (Kazancoglu et al., 2021; Naganathan and Chong, 2017; Yao et al., 2020). Moreover, this challenge is particularly acute in the United States, where studies project that approximately 80% of urban cities in the Northeast and 75% in the Midwest will experience population growth by 2100 under the shared socioeconomic pathway 2 (SSP2) scenario (Sutradhar et al., 2024). Furthermore, with only 5% of the world’s population, the U.S. possesses 30% of the world’s automobiles and contributes 45% of global automotive emissions (U.S. Census Bureau, 2023; DeCicco et al., 2006). Given this high car dependency in the U.S., population growth will drive car travel demand even more significantly, leading to a substantial surge in emissions. To mitigate emissions, researchers have explored multiple approaches, such as alternative fuels (Fouladvand et al., 2024), more efficient engine technologies (Dong et al., 2022), and diverse traffic management strategies (Zong et al., 2024). Among these, eco-routing (also known as eco-friendly navigation) remains a research focus (Ortega-Cabezas et al., 2021; Zhuang et al., 2024; Liu et al., 2023). Specifically, eco-routing guides travelers to select routes that minimize their fuel consumption and emissions by incorporating these environmental costs into the generalized travel cost. In contrast, strategies prioritizing minimizing travel time are referred to as time-routing, while other routing approaches exist based on various optimization objectives (Ku et al., 2021; Wang et al., 2025a). The effectiveness of eco-routing has been validated by many studies, which demonstrate that a single traveler adopting eco-routing can significantly reduce fuel consumption and emissions (Fahmin et al., 2024; Zhou et al., 2016). In practice, Google Maps introduced eco-friendly navigation in the U.S. in 2021 to guide travelers along the “lowest carbon footprint” routes, a feature with the potential to reduce over 1 million tons of carbon emissions per year (Reinicke et al., 2021). Although eco-routing has proven effective, research gaps remain in existing literature. Prior studies have almost entirely focused on minimizing emissions at the individual level (Nie and Li, 2013; Ericsson et al., 2006). While a single driver utilizing eco-routing can achieve reductions in personal emissions, the impact of such individual emission savings on overall ur-ban transport emissions is negligible. However, with the widespread adoption of eco-routing, substantial shifts in travel route choice significantly affect network congestion, making the collective impact of this large-scale eco-routing complex. Moreover, most eco-routing studies formulate generalized travel costs based solely on environmental costs, neglecting the time-sensitivity of travelers. When both factors are considered, the trade-offs between travel time 2and emissions are expected to influence traveler route choice. Additionally, while limited studies have investigated the impact of large-scale eco-routing (Ahn and Rakha, 2013; An-túnez and Levin, 2023), they have overlooked its long-term effectiveness in the context of population growth, failing to assess whether eco-routing can fundamentally curb the upward trend of emissions. Meanwhile, the evolution of traveler route choice also remains underex-plored. As infrastructure development is inevitable, understanding this evolution is critical for guiding sustainable urban planning and road construction. Given that emission reduc-tions achieved via eco-routing typically come at the expense of increased travel time (Ahn and Rakha, 2008, 2013), it is necessary to investigate how the relative differences in travel time and emissions between time-routing and eco-routing vary under population growth, thereby evaluating the efficiency of eco-routing. Furthermore, available studies primarily fo-cus on idealized or small-to-medium-scale networks, lacking systematic quantitative analysis of real-world urban road networks and actual origin-destination (OD) demand. To address these gaps, this study formulates Time-Only and Time-Carbon UE models, integrates them with an OD demand forecasting method to simulate future urban network traffic under different routing strategies. Subsequently, several urban metrics are designed, including urban transport emissions, UE travel time (UETT), UE travel length (UETL), and volume over capacity (VOC). The evolution of these metrics and traveler route choice collectively constitutes the analyzed urban dynamics. Finally, through a case study of six representative U.S. cities under various SSPs, the results enable the analysis of urban dynamics across different routing strategies and population sizes, as well as eco-routing efficiency. The research findings can inform policy recommendations for low-carbon urban transport planning, road construction, and emission mitigation. The main contributions of this study are summarized as follows: (1) Time-Only and Time-Carbon UE models. We formulate Time-Only and Time-Carbon UE models, establish the existence and uniqueness of their solutions, and employ a bi-conjugate Frank-Wolfe algorithm for computation. By integrating these models with a demand forecasting method, we simulate future network traffic under different routing strategies. (2) Theoretical insights. We design a set of metrics and conduct theoretical deriva-tions based on the proposed UE models to explore urban dynamics and the impact of bounded link capacity expansion from both macroscopic and microscopic perspectives, thereby providing a rigorous foundation for the corresponding findings presented in the case study. (3) Empirical insights from six U.S. cities. Using real-world road networks and block-level commuting demand, we reveal that under population growth: (i) emissions in most cities scale superlinearly with population regardless of routing and construction strategies; (ii) eco-routing is either already inefficient in certain cities or projected to become inefficient in others; (iii) carbon bottlenecks (0.46% of links) emerge as travel-ers using eco-routing increasingly select shorter routes, and expanding their capacity significantly reduces both emissions (3%) and travel time (28%). The remainder of this paper is organized as follows: Section 2 reviews the relevant litera-3ture. Section 3 establishes the methodological framework, including UE models construction, indicator design, and theoretical derivations. Section 4 details the study area, data sources and processing procedures. Section 5 presents the case study analysis and discusses the key findings. Finally, Section 6 summarizes the conclusions of this study. 
+
+2. Literature Review 
+
+2.1. Population Growth and Urban Transport Emissions 
+
+Demographic projections indicate that the global population will continue to grow, with consensus estimates converging on a peak exceeding 9.7 billion in the latter half of this cen-tury (UN DESA, 2024; Vollset et al., 2020; Samir and Lutz, 2017). In developed economies, urban population dynamics are characterized by the simultaneous phenomena of reurban-ization and suburbanization, driving both densification and sprawl (Kabisch and Haase, 2011; OECD, 2018; Rérat, 2012). In the U.S. context, studies forecast widespread urban growth by 2100 (Gao, 2017; Hauer, 2019). Specifically, approximately 80% of urban cities in the Northeast, 75% of those in the Midwest, and nearly 100% in the West and South are projected to experience population increases under the SSP2 scenario (Sutradhar et al., 2024). Even cities currently experiencing population loss, such as Long Island and those around Chicago, may still achieve future growth driven by immigration. Moreover, cities with high vehicle ownership are more likely to grow in population. Consequently, demo-graphic expansion acts as a driver of total car travel demand, thereby placing stress on road networks and increasing urban transport emissions (Chapman, 2007). Additionally, urban sprawl remains ubiquitous and continues to expand, often accompanied by increased private car ownership (Glaeser and Kahn, 2004). These findings align with spatial analyses in the U.S. (Bento et al., 2005) indicating that urban sprawl results in increased car usage and higher annual VMT, thereby leading to higher emissions. Few studies have directly explored the relationship between population growth and urban transport emissions, as most related research primarily focuses on overall urban emissions. To quantify urban dynamics under population growth, Bettencourt et al. (2007) proposed the urban scaling theory, demonstrating that various urban indicators scale with popula-tion following a power-law function. Specifically, urban metrics like traffic congestion often exhibit superlinear scaling, whereas gasoline sales often exhibit sublinear scaling, implying that both traffic congestion and emissions increase as population grows (Bettencourt et al., 2010). Similarly, Mohsin et al. (2019) and Li (2023) showed that population growth leads to increased energy consumption, which directly intensifies emissions and accelerates en-vironmental degradation. Existing research has clearly shown the growth trend of future population and demonstrated the associated increase in urban transport emissions. How-ever, constrained by data availability, research gaps remain in exploring the effectiveness of traffic management strategies for mitigating emissions driven by population growth. In this study, we utilize urban commuting demand and integrate it with population projec-tions to predict future travel demand. By applying the forecasted travel demand to the real-world road network, we simulate future network traffic, thereby investigating emissions when implementing city-scale routing strategies in the context of population growth. 42.2. Application of Eco-routing in Large-Scale Networks 
+
+An eco-routing system comprises two fundamental components: (i) an energy consump-tion model to estimate the energy consumption for a single vehicle on a given road segment; (ii) a routing algorithm that identifies the most energy-efficient path from an origin to a destination. Existing studies often model energy consumption as a function of road gradi-ent, road type, vehicle operational characteristics, and vehicle speed (Yu et al., 2016; Wang and Rakha, 2016), with most research formulating fuel consumption solely based on vehicle speed (Yang et al., 2018; Antúnez and Levin, 2023; Wang et al., 2025b). Routing algo-rithms generally fall into two categories: search-based and optimization-based solutions. Search-based solutions treat eco-routing as a shortest path problem in graph theory, set-ting environmental costs (e.g., fuel consumption, emissions) as edge weights to identify the minimum cost path via algorithms like Dijkstra, A∗, and Bellman-Ford (Hart et al., 1968; Johnson, 1977). Optimization-based solutions formulate the routing task as a single or multi-objective optimization problem, solving for the optimal route using meta-heuristics such as Ant Colony Optimization (Jabir et al., 2017), Particle Swarm Optimization (Han-nan et al., 2018), and Genetic Algorithms (Wang et al., 2021). Many studies have validated the effectiveness of eco-routing, which demonstrate that individual travelers adopting eco-routing can reduce fuel consumption and emissions (Fahmin et al., 2024; Zhou et al., 2016). In practice, a key application of eco-routing lies in navigation systems that assist users in finding energy-efficient routes. For instance, Google Maps has introduced an eco-friendly navigation feature, with estimates suggesting that the adoption of this functionality could reduce carbon emissions by over one million tons annually (Reinicke et al., 2021). Prior research on eco-routing almost entirely focused on minimizing individual emissions. Only a limited number of studies have explored the complex impact of large-scale eco-routing, demonstrating that it can reduce urban transport emissions in most cities (Ahn and Rakha, 2008; Coloma et al., 2019). Specifically, Ahn and Rakha (2013) integrated eco-routing with incremental UE traffic assignment to develop an ECO-SFA routing mechanism, concluding that eco-routing can reduce network-wide fuel consumption and emissions in most cases, with emission reductions becoming more pronounced as market penetration increases. Subsequent research applied eco-routing to city backbone networks and found that as the level of market penetration rises, emissions may increase in some cities while decreasing in others, highlighting the complex impact of the large-scale eco-routing (Antúnez and Levin, 2023). However, existing studies on eco-routing strategies primarily rely on static travel demand, failing to explore the urban dynamics under population growth. To bridge this gap, we forecast future travel demand via population projections and historic demand data, utilizing them to simulate future network traffic, thereby investigating the long-term impact of large-scale eco-routing, as well as the evolution of travel route choice. Moreover, most available literature formulates generalized travel costs based solely on environmental costs. Given the time-sensitivity of travelers, we incorporate travel time into the optimization objective and vary its relative weight against carbon cost to explore how trade-offs between time and emissions influence traveler route choice. Furthermore, while eco-routing reduces emissions, it typically comes at the expense of increased travel time (Ahn and Rakha, 2008, 2013). Consequently, this study offers valuable insights into the efficiency of eco-routing 5by investigating the relative differences in time and emissions between time-routing and eco-routing. 
+
+2.3. UE Traffic Assignment 
+
+The UE traffic assignment is widely recognized as the most representative approach in static traffic assignment. The principle of UE originates from the seminal work of Wardrop (1952), stating that in a UE state, no traveler can reduce their own travel cost by changing their route alone. Beckmann et al. (1956) later gave this principle a strict mathematical formulation, which has since become the theoretical foundation for modern road network analysis. Solution methods for the UE problem can be traced back to the convex combi-nation algorithm proposed by Frank et al. (1956). Subsequently, based on this foundation, Florian and Nguyen (1976) made improvements and refinements to the algorithmic frame-work. These theories and algorithms form the cornerstone of traffic assignment research and are widely used to allocate travel demand under given traffic flow conditions (Van Zuylen and Willumsen, 1980). Many studies have demonstrated that the UE traffic assignment model is effective in reproducing real-world traffic flow patterns, and thus serves as an essential basis for evaluating the impact of infrastructure projects and traffic management policies (Sheffi, 1985; Nagurney, 2000). Specifically, in policy research, by modifying the generalized travel cost within the UE model, studies can simulate urban network traffic, capture traveler behavior, and investigate urban dynamics under traffic management strategies. Extensive literature on congestion pricing utilizes UE models by modifying generalized travel cost in specific areas during certain times, successfully capturing significant shifts in traveler behavior and traffic flow patterns that lead to reductions in congestion and pollution (Chen et al., 2020; Jia et al., 2023; Chen et al., 2022). For instance, by combining travel time, route length, and emissions as the travel cost, research in Changchun reported a 5% decrease in car usage and a 23% reduction in emissions (Zong et al., 2024). Similarly, numerous studies on routing strategies integrate UE models by formulating generalized travel cost based on specific objectives, also observing a fundamental reshaping of traffic flow patterns and travel route choice (Raith et al., 2014; Yin and Lawphongpanich, 2006). Specifically, existing literature applying UE models to explore the effectiveness of eco-routing in urban road networks has documented a reduction in VMT and an increase in average travel time (Antúnez and Levin, 2023; Ahn and Rakha, 2013). Moreover, Çolak et al. (2016) demonstrated that changing the selfish-routing strategy alone, through modifying the generalized travel cost to the social optimum, can significantly alter traveler route choice and reduce time losses by 15%–30%, where the resulting urban mean congestion exhibited a high correlation ( R2 = 0 .758 ) with empirical data from the TomTom Traffic Index. These studies have confirmed the efficacy, accuracy, and widespread applicability of the UE model in simulating real-world traffic patterns and evaluating traffic management strategies. Building on this foundation, we employ Time-Only and Time-Carbon UE models to analyze network traffic and urban dynamics under distinct routing strategies and different population sizes. 63. Methodology 
+
+3.1. ARIMA-based Prediction of OD Demand 
+
+We first normalize the OD demand ds,t y to obtain the OD demand distribution πs,t y ,formulated as: 
+
+πs,t y = ds,t y
+
+∑ 
+
+> s,t
+
+ds,t y
+
+(1) where ds,t y denotes the travel demand from origin s to destination t in year y, and πs,t y rep-resents the corresponding demand distribution. Through this normalization, the evolution of ds,t y is decoupled into the population-driven change in total demand and the variation in 
+
+πs,t y , where the latter solely reflects the intrinsic evolution of the OD demand distribution over time. To forecast the πs,t n for future year n, we employ the AutoRegressive Integrated Moving Average (ARIMA) algorithm, which involves a two-stage process: model calibration via historical data fitting and one-step-ahead forecasting, as detailed below: (1) Model calibration: The ARIMA model is calibrated on the historical OD demand distribution time series πs,t y where y ∈ { n − 18 , . . . , n − 1}. We determine the op-timal model orders based on the Akaike Information Criterion (AIC), including the autoregressive order o1, the degree of differencing o2, and the moving average order o3;and estimate the model coefficients using the Maximum Likelihood Estimation (MLE) method, a standard approach in time series analysis (Box et al., 2015). The general form of the ARIMA (o1, o 2, o 3) model is expressed as: 
+
+(
+
+1 −
+
+> o1
+
+∑
+
+> i=1
+
+ϕiBi
+
+)
+
+∇o2 πs,t y = c +
+
+(
+
+1 + 
+
+> o3
+
+∑
+
+> j=1
+
+θj Bj
+
+)
+
+εy (2) where o1 and o3 are determined within a search range of [0 , 3] ; and o2 is fixed at 1. Here, B is the backshift operator defined as Biπs,t y = πs,t y−i; ∇ is the differencing operator where ∇πs,t y = πs,t y −πs,t y−1; ϕi and θj are the autoregressive and moving average coefficients, respectively; c is the drift term; and εy represents the white noise error term. (2) One-step-ahead forecasting: Based on the calibrated parameters and historical data, the one-step-ahead forecast for target year n, denoted as ̂ πs,t n , is given by: ̂
+
+πs,t n = πs,t n−1 +
+
+> o1
+
+∑
+
+> i=1
+
+ϕi
+
+(πs,t n−i − πs,t n−i−1
+
+) +
+
+> o3
+
+∑
+
+> j=1
+
+θĵ εn−j + c (3) where ̂ εy = πs,t y −̂ πs,t y represents the observed residual at year y.Finally, the predicted OD distribution ̂ πs,t n is normalized to sum to unity over all OD pairs to satisfy the distributional constraint. By integrating the future population data with ̂
+
+πs,t n , the OD demand for the future year n is calculated as: 
+
+ds,t n =̂ πs,t n · Nn
+
+∑ 
+
+> s,t
+
+ds,t n−1
+
+Nn−1
+
+(4) 7where Nn denotes the population size in year n. Under this formulation, the total OD demand is directly proportional to the annual population size. 
+
+3.2. Time-Only and Time-Carbon UE models 
+
+Table 1 summarizes the nomenclature and parameter definitions used in this section. 
+
+> Table 1: Nomenclature
+
+Notation Definition 
+
+Ny The population size of a given city in year y;
+
+α, β Parameters of BPR function; 
+
+a Index for a link (road segment); 
+
+A Set of all links in the network; 
+
+W Set of all OD pairs in the network; 
+
+p Index for a route (path); 
+
+Ps,t Set of all feasible paths connecting the origin s and destination t in the network; 
+
+V Set of all nodes in the network; 
+
+Q Total OD demand in the network; 
+
+G The network G = ( V, A );
+
+la The travel length of link a, (km); 
+
+qa The capacity of link a, (veh/h); 
+
+t0 
+
+> a
+
+The free flow travel time of link a, (min); 
+
+xa The traffic vehicle flow on link a, (veh/h); 
+
+ta(xa) The travel time of link a for traffic flow xa, (min); 
+
+va(xa) The travel speed on link a for traffic flow xa, (km/h); 
+
+ca(xa) The travel fuel consumption of a single vehicle on link a for traffic flow xa, (L); 
+
+ea(xa) The travel carbon emissions of a single vehicle on link a for traffic flow xa, (g); 
+
+Ca(xa) The generalized travel cost of a single vehicle on link a for traffic flow xa, ($); 
+
+f s,t p The path flow between the origin s and destination t on route p;
+
+ds,t The demand volume between the origin s and destination t;
+
+δs,t (p, a ) δs,t (p, a ) = 1 when link a lies on route p, otherwise δs,t (p, a ) = 0 ;
+
+h(v) The fuel consumption factor at speed v, (L/km); 
+
+γ The emission factor, (g/L); 
+
+ψ1, ψ2 The weights for the time cost and carbon cost, respectively; 
+
+ω1, ω2 The monetary coefficients for time ($/min) and fuel ($/L), respectively. 
+
+Assumption 1 (Network Topology) . Let the road network be modeled as a strongly connected directed graph G = ( V, A ), where V is the set of nodes, and A is the set of links. Let W
+
+denote the finite set of OD pairs. For each OD pair (s, t ) ∈ W , let Ps,t denote the set of feasible paths connecting origin s and destination t, which is assumed to be non-empty and finite. Furthermore, the travel demand ds,t is positive and bounded, and the total demand in the network is denoted by Q = ∑ 
+
+> (s,t )∈W
+
+ds,t .
+
+83.2.1. Time-Only UE Model 
+
+The traffic assignment problem can be formalized by modeling route choice: every trav-eler i selects a route p connecting their origin and destination based on a personal utility 
+
+cost i = ∑ 
+
+> a∈p
+
+Ca(xa), where cost i is expressed as the sum of costs Ca(xa) of every link 
+
+a on the chosen route p. Under time-routing, the travel cost considers only travel time, 
+
+Ca(xa) = τ t a(xa), where ta(xa) represents the travel time on link a for traffic flow xa, and 
+
+τ denotes the average value of time (VOT) for all purposes, set to $0.30/min (U.S. Depart-ment of Transportation, 2023). The relationship between travel time ta(xa) and traffic flow 
+
+xa is commonly described by the bureau of public roads (BPR) function (Manual, 1964): 
+
+ta(xa) = t0
+
+> a
+
+(
+
+1 + α
+
+(xa
+
+qa
+
+)β )
+
+(5) where t0 
+
+> a
+
+is the free flow time of link a; α and β are the parameters of BPR function. The set of link flows that occur when every traveler adopts time-routing to minimize their own travel time is referred to as the UE flows. In this resulting equilibrium state, no traveler can benefit from deviating from their route. This concept is fundamentally a Nash equilibrium in road networks and is captured in Wardrop’s first principle (Wardrop, 1952): the journey times on all the used routes for an OD pair are equal and are less than those that would be experienced by a single vehicle on any unused route. To find this UE flows, we adopt the Time-Only UE model (i.e., the classic UE model), whose convex programming formulation is given by: 
+
+Minimize  
+
+> xa∀a∈A
+
+∑
+
+> a∈A
+
+∫ xa
+
+> 0
+
+τ t a(x)dx 
+
+subject to ∑
+
+> p
+
+f s,t p = ds,t 
+
+xa = ∑
+
+> s
+
+∑
+
+> t
+
+∑
+
+> p
+
+f s,t p δs,t (p, a ), ∀a ∈ Axa ≥ 0, f s,t p ≥ 0, ∀s, t, p 
+
+(6) where f s,t p is the path flow between the origin s and destination t on route p; and δs,t (p, a ) = 1 when link a lies on route p, otherwise δs,t (p, a ) = 0 . This optimization problem has been proven to be strictly convex, guaranteeing a unique solution for the UE flows (Sheffi, 1985). However, finding the optimal solution in city-scale road networks is challenging due to the prohibitive computational cost. To address this, we employ the bi-conjugate Frank-Wolfe algorithm (Mitradjieva and Lindberg, 2013; Zill et al., 2019). Additionally, in a UE model, although each traveler selects a route solely to minimize their own travel time, the total system cost also includes the marginal cost each traveler imposes on all other travelers sharing the links. Consequently, due to such selfish choices, the system settles into a suboptimal state (Çolak et al., 2016). 93.2.2. Time-Carbon UE Model 
+
+Car travel accounts for a dominant share of urban trips in the U.S. (McGuckin et al., 2018), a proportion projected to escalate due to ongoing urbanization and population growth. Moreover, research indicates that travelers exhibit strong behavioral inertia, maintaining their travel mode despite high travel costs (Li et al., 2023; Kim et al., 2023). Given these factors, this study focuses on modeling car traffic during the peak hour. (1) Fuel consumption factor : Consistent with existing studies (Wang et al., 2025b; Zong et al., 2024), we model fuel consumption per kilometer as a function of vehicle speed: 
+
+h(v) = φ1 (v − ve)2 + φ2 (7) where h(v) denotes the fuel consumption factor, representing the fuel consumption per kilometer (L/km); ve represents the optimal vehicle speed, at which the h(v)
+
+reaches its minimum value φ2. The parameter φ1 reflects the sensitivity of h(v) to speed deviations; specifically, a larger φ1 indicates a more rapid increase in h(v) as the current speed v deviates from optimal speed ve. Following Yang et al. (2018), we set φ1 = 3 .968 × 10 −5, ve = 73 .412 km/h, and φ2 = 4 .275 × 10 −2 L/km. Consequently, the fuel consumption of a single vehicle on link a, denoted as ca(xa), is formulated as: 
+
+ca(xa) = h(va)la (8) where ca(xa) is measured in liters (L); va represents the travel speed on link a; and la
+
+is the length of link a.(2) Carbon emissions : Carbon emissions ea(xa) of a single vehicle on link a are calcu-lated as the product of its fuel consumption ca(xa) and a carbon emission factor γ, as shown in Eq. (9). Since the factor γ depends on gasoline composition and is specific to the study region, we adopt the value from U.S. Environmental Protection Agency (2025), which states that the combustion of one gallon of gasoline produces 8,887 g of 
+
+CO 2, equivalent to approximately 2,350 g of CO 2 per liter. 
+
+ea(xa) = γc a(xa) (9) (3) Time-carbon cost : We formulate the generalized travel cost Ca(xa) for a single vehicle on link a based on the fuel consumption ca(xa), thereby ensuring the cost function with a clear physical interpretation. As shown in Eq. (10), Ca(xa) represents the time-carbon cost, which reduces to the time cost when ψ2 = 0 and to the carbon cost when ψ1 = 0 .
+
+Ca(xa) = τ (ψ1ta(xa) + ψ2ca(xa)) = ω1ta(xa) + ω2ca(xa) (10) where ψ1 and ψ2 represent the weights for the time and carbon costs; and ω1 and ω2
+
+correspond to the monetary coefficients for time ($/min) and fuel ($/L), respectively. 10 In this study, we trade off travel time and emissions by adjusting the unit prices of time 
+
+ω1 and fuel ω2, which are derived from varying cost weights ψ1 and ψ2. Specifically, ω2 is determined based on the VOT τ and the carbon cost weight ψ2, representing the generalized fuel price as the sum of the market fuel price per liter, ω12 , and the monetized cost of emissions generated by combusting one liter of fuel, ω22 , defined as ω22 = τ ψ 2 − ω12 . This is equivalent to imposing a carbon tax of ω3 = ω22 /γ per gram of emissions. When every traveler adopts eco-routing to minimize their individual generalized travel cost, the objective of the Time-Carbon UE model is to find the UE flows based on the time-carbon cost. The convex programming formulation for this problem is given by Eq. (11). To examine how trade-offs between time and emissions affect the UE flows, we vary the weight ratio of ψ1 : ψ2: adopting ψ2 = 0 (the Time-Only UE model) as the baseline; applying 
+
+ψ1 = 8 , ψ2 = 2 (i.e., ψ1 = 4 , ψ2 = 1 ) and ψ1 = 1 , ψ2 = 9 to explore the impact of increasing the relative weight of carbon cost; and setting ψ1 = 0 , ψ2 = 10 as the carbon-only boundary case. 
+
+Minimize  
+
+> xa∀a∈A
+
+∑
+
+> a∈A
+
+∫ xa
+
+> 0
+
+τ (ψ1ta(x) + ψ2ca(x)) dx 
+
+subject to ∑
+
+> p
+
+f s,t p = ds,t 
+
+xa = ∑
+
+> s
+
+∑
+
+> t
+
+∑
+
+> p
+
+f s,t p δs,t (p, a ), ∀a ∈ Axa ≥ 0, f s,t p ≥ 0, ∀s, t, p 
+
+(11) (1) Existence : Since the feasible region defined by Eq. (11) is compact (closed and bounded) and convex, and the objective function is continuous on this domain, the existence of an optimal solution is guaranteed by the Weierstrass Extreme Value The-orem. (2) Uniqueness : The objective function in Eq. (11) is strictly convex with respect to the link flow xa when ψ1 > 0 and ψ2 > 0, and the feasible region is convex because the constraints are linear. Therefore, the UE flows is unique, as guaranteed by the Strict Convexity Theorem. (3) Equivalence : The objective function in Eq. (11) represents a minimization prob-lem subject to linear conservation and non-negativity constraints. Consequently, the equilibrium conditions are satisfied at any minimum point if the first-order optimality conditions are equivalent to the equilibrium conditions (Sun and Szeto, 2021). First, the Lagrangian function of the objective function in Eq. (11) is constructed as: 
+
+L = ∑
+
+> a∈A
+
+∫ xa
+
+> 0
+
+τ (ψ1ta(x) + ψ2ca(x)) dx 
+
++ ∑
+
+> s,t
+
+σs,t 
+
+(
+
+ds,t − ∑
+
+> p
+
+f s,t p
+
+)
+
++ ∑
+
+> a
+
+μa
+
+(
+
+xa − ∑
+
+> s,t,p
+
+f s,t p δs,t (p, a )
+
+)
+
+,
+
+(12) where σs,t and μa are the Lagrange multipliers associated with the OD demand and link flow conservation constraints, respectively. 11 Taking the derivative of L with respect to the path flow f s,t p yields: 
+
+∂L
+
+∂f s,t p
+
+= ∑
+
+> a
+
+δs,t (p, a )τ (ψ1ta(xa) + ψ2ca(xa)) − σs,t . (13) According to the Kuhn-Tucker (KKT) conditions, we have: 
+
+∂L
+
+∂f s,t p
+
+{= 0 , if f s,t p > 0,
+
+≥ 0, if f s,t p = 0 . (14) Therefore, for each OD pair (s, t ), the following holds: 
+
+∑
+
+> a∈p
+
+Ca(xa) = ∑
+
+> a∈p
+
+τ (ψ1ta(xa) + ψ2ca(xa)) {= σs,t , if f s,t p > 0,
+
+≥ σs,t , if f s,t p = 0 . (15) This condition is exactly the Wardrop equilibrium condition for the Time-Carbon UE, and the first-order conditions of the optimization problem (Eq. (11)) are equivalent to the equilibrium conditions of the Time-Carbon UE model. Therefore, the equivalence between the first-order conditions and the Wardrop equilibrium conditions is ensured by the KKT conditions, which provide the necessary optimality conditions for this convex optimization problem. 
+
+3.3. Indicator Design 3.3.1. Urban Metrics 
+
+(1) Urban Transport Emissions 
+
+Urban transport emissions (i.e., carbon emissions), denoted as E and measured in grams (g), are quantified by aggregating the emissions across all links: 
+
+E = ∑
+
+> a∈A
+
+ea(xa)xa (16) (2) UETT 
+
+The UETT, denoted as T and measured in minutes (min), represents the average travel time in the urban road network, calculated as: 
+
+T =
+
+∑ 
+
+> a∈A
+
+ta(xa)xa
+
+Q (17) (3) UETL 
+
+Given that vehicle kilometers traveled (VKT) tends to rise as the population grows, we utilize the UETL, denoted as L and measured in kilometers (km), to represent the average travel distance in the urban road network. This metric is calculated by normalizing VKT 
+
+by the total demand Q:
+
+VKT = ∑
+
+> a∈A
+
+laxa (18) 12 L =
+
+∑ 
+
+> a∈A
+
+laxa
+
+Q (19) (4) VOC 
+
+We utilize the VOC to measure the congestion level of link a, denoted as VOC a and calculated as: 
+
+VOC a = xa
+
+qa
+
+(20) 
+
+3.3.2. Eco-routing Efficiency Metrics 
+
+(1) Trade-off Percentage and Optimization Percentage 
+
+The trade-off percentage Pt and optimization percentage Pc are used to quantify the relative changes in emissions and UETT between Time-Only and Time-Carbon UE models, as calculated in Eqs. (21) and (22). Within a city network, Pc is employed to evaluate the optimization performance of eco-routing, where a larger Pc indicates a better performance. 
+
+Pt = TTC − TTO 
+
+TTO 
+
+× 100% (21) 
+
+Pc = ETO − ETC 
+
+ETO 
+
+× 100% (22) where the subscripts TO and TC denote urban metrics under Time-Only and Time-Carbon UE models, respectively. (2) Optimization Potential and Cost Potential 
+
+Examining how Pt and Pc evolve with respect to population size helps to better un-derstand the variation in eco-routing performance. Specifically, Pt and Pc are plotted on the y-axis against population size on the x-axis, with the demand distribution implicitly re-flected in population. The slope of Pc curve at a given population is termed the optimization potential ( OP ), while the slope of Pt curve is termed the cost potential ( CP ), calculated as Eq. (23). A larger OP implies that the Pc increases more rapidly as population grows, equiv-alent to a larger improvement in the eco-routing performance, signifying that eco-routing possesses a greater emission reduction potential. 
+
+OP = ∂P c
+
+∂N , CP = ∂P t
+
+∂N (23) where N represents a given population size. (3) Optimization Level 
+
+Ideally, to ensure that eco-routing remains efficient under population growth, OP should increase to enhance future optimization performance, while CP should decrease to moderate the increase in travel time. Accordingly, the urban carbon optimization status under eco-routing can be classified into four distinct levels, as shown in Fig. 1, where eco-routing is considered efficient only if the city is at Level 1 or 2. In subsequent analyses, to facilitate a fair comparison of population sizes across cities, we transform the absolute population size into the relative population change with respect 13 Level 1 Level 2  
+
+> Level 4 Level 3
+> (0,0)
+> OP decreasing
+> CP decreasing
+> OP increasing
+> CP decreasing
+> OP increasing
+> CP increasing
+> OP decreasing
+> CP increasing
+
+Figure 1: The four optimization levels of eco-routing (with the positive x-axis extending to the left and the positive y-axis extending upwards). 
+
+to a given reference population (e.g., the population under a specific scenario in a specific year), defined as: 
+
+Gref (%) = Nu,y − Nref 
+
+Nref 
+
+× 100% (24) where Nu,y denotes the population size under scenario u in year y; Nref is the reference population; and Gref represents the percentage change in population relative to the reference 
+
+Nref across all scenarios and years. Here, the scenario u refers to the SSP scenario, as detailed in Section 4.3. This transformation constitutes a strictly monotonic affine mapping of the absolute population size. Consequently, by the chain rule, the sign and the trend of both 
+
+OP and CP remain invariant. Specifically, for any two reference populations N 1ref and N 2ref ,the corresponding OP values satisfy Eq. (25), where N 2ref /N 1ref is strictly positive. Therefore, changing the reference population preserves both the sign and the trend of OP and CP , as well as the optimization levels. Analogously, we can select reference urban metrics, where the transformations are also strictly monotonic affine mappings of the corresponding original urban metrics. 
+
+OP 2 = OP 1 ·N 2ref 
+
+N 1ref 
+
+, (25) The overall analytical framework of this study is illustrated in Fig. 2. Historic OD demand    
+
+> Historic demand distribution
+> Population data
+> Projected OD demand
+> for future year
+> Travel time Emissions
+> Time-Only UE model Time-Carbon UE model
+> Carbon cost
+> Weighted by
+> Future network traffic under time-routing
+> Future network traffic under eco-routing
+> Normalization
+> Future demand forecasting
+> UE models formulation
+> ARIMA algorithm
+> Cost conversion via
+> Time cost
+> Time-carbon cost
+> Urban transport emissions, UETT, UETL, VOC, and optimization level
+> To Characterize
+> Applied to
+
+Figure 2: The proposed analytical framework of this study. 
+
+14 3.4. Theoretical Derivations 
+
+This section derives general theorems based on the Time-Only and Time-Carbon UE models, offering theoretical insights that provide robust support for the case study findings. 
+
+3.4.1. Scaling Relationship between Emissions and Total Demand 
+
+Theorem 3.1 (Linear Scaling of Emissions with Total Demand) . Let d(1) = {ds,t (1) }(s,t )∈W
+
+denote the base demand. For a demand scaling factor λ > 0, the scaled demand d(λ) = 
+
+{ds,t (λ)}(s,t )∈W is defined by ds,t (λ) = λd s,t (1) ; x(λ) = {xa(λ)}a∈A represents the UE flows corresponding to the scaled demand d(λ); and the total carbon emission is given by: 
+
+E(λ) = ∑
+
+> a∈A
+
+ea(xa(λ)) xa(λ) = ∑
+
+> a∈A
+
+γl ah(va)xa(λ) (26) 
+
+Within typical road networks, there exist constants c1, c2 > 0, which are independent of 
+
+λ, such that: 
+
+c1λ ≤ E(λ) ≤ c2λ (27) 
+
+implying that E(λ) = Θ( λ) and emissions scale linearly with total demand. Proof. For a demand scaling factor λ > 0, the feasible region of the Beckmann convex program (Eq. (11)) is: 
+
+K(λ) = 
+
+{
+
+x ∈ R|A| 
+
+> +
+
+: ∃f ≥ 0, x a = ∑
+
+> s,t
+
+∑
+
+> p
+
+f s,t p δs,t (p, a ), ∑
+
+> p
+
+f s,t p = ds,t (λ)
+
+}
+
+(28) 
+
+Step 1: Linear scaling of link flows with demand. 
+
+Define the normalized link flows ξ(λ) = {ξa(λ)}a∈A by ξa(λ) = xa(λ)/λ . Since the UE flows x(λ) belong to the feasible set K(λ), it follows from the linearity of constraints that the normalized flows ξ(λ) must belong to the unit-demand feasible set K(1) . Given that 
+
+K(1) is a non-empty compact convex set, the feasible region for the normalized flows ξ(λ) is bounded; consequently, each ξa(λ) is uniformly bounded with respect to λ. The relationship 
+
+xa(λ) = λξ a(λ) thus implies that the link flows scale linearly with the demand scaling factor 
+
+λ, demonstrating a linear scaling property between link flows and demand. 
+
+Step 2: Boundedness of the fuel consumption factor. 
+
+Within typical road networks, the vehicle speed va is physically constrained to the range 
+
+[0 , v max ]. Consequently, there exist positive constants hmin and hmax such that the fuel consumption factor, h(va), satisfies: 
+
+hmin = φ2 ≤ h(va) ≤ hmax < ∞ (29) Notably, as the demand scaling factor λ → ∞ , severe congestion causes travel time 
+
+ta → ∞ and speed va → 0. Under these conditions, h(va) remains bounded, rather than diverging to infinity: 
+
+hmax = h(0) = φ1v2 
+
+> e
+
++ φ2 < ∞ (30) 15 Step 3: Upper and lower bounds of emissions. 
+
+Upper Bound: 
+
+E(λ) = ∑
+
+> a∈A
+
+γl ah(va)xa(λ) ≤ γh max 
+
+∑
+
+> a∈A
+
+laxa(λ) = γ · hmax · VKT( λ) (31) where VKT( λ) = ∑ 
+
+> a
+
+laxa(λ) = λ ∑ 
+
+> a
+
+laξa(λ) ≤ λ · Lmax · Q(1) . Here, Lmax denotes the maximum feasible path length between OD pairs in the network, and Q(1) represents the total base demand, both of which are bounded and independent of λ, allowing us to define the positive constant c2 = γ · hmax · Lmax · Q(1) .
+
+Lower Bound: 
+
+E(λ) ≥ γ · hmin · VKT( λ) ≥ γ · hmin · λ · Lmin · Q(1) = c1λ (32) where Lmin denotes the minimum feasible path length between OD pairs in the network, and we define the positive constant c1 = γ · hmin · Lmin · Q(1) .Combining these results, there exist positive constants c1 and c2 such that c1λ ≤ E(λ) ≤
+
+c2λ, which implies E(λ) = Θ( λ).
+
+Remark 1 (Local Scaling Characteristics) . Theorem 3.1 establishes the global linear rela-tionship between emissions and total demand. However, from a local perspective, particularly within the finite range of λ considered in this study, E(λ) may exhibit sublinear or superlinear growth trends. 
+
+Corollary 3.2 (Invariant Scaling Order under Routing Strategies) . For both Time-Only 
+
+(ψ2 = 0) and Time-Carbon (ψ2 > 0) UE models, the emissions satisfy: 
+
+ETO (λ) = Θ( λ), ETC (λ) = Θ( λ) (33) 
+
+where the superscripts TO and TC denote emissions under Time-Only and Time-Carbon UE models, indicating that their global scaling orders are identical. Furthermore, there exists a constant ρ ∈ (0 , 1) such that: 
+
+ETC (λ) ≈ ρ · ETO (λ) (34) 
+
+implying that eco-routing reduces emissions while retaining the local scaling order. Proof. The derivation of Theorem 3.1 demonstrates that the linear scaling relationship be-tween E(λ) and λ is determined by the boundedness of h(v), independent of the cost weights 
+
+ψ1 and ψ2; consequently, their scaling orders are identical. Furthermore, the empirical results in Table 7 indicate that as λ grows, the optimization percentage Pc consistently remains within the range (0 , 1) and exhibits only a small increase. This suggests the existence of a constant 0 < ρ < 1 such that ETC (λ) ≈ ρ · ETO (λ), thereby retaining the local scaling order observed under time-routing. 16 Remark 2 (Policy Implications) . Given that the total demand is directly proportional to the population size according to Eq. (4) , Theorem 3.1 and Corollary 3.2 reveal that the linear scaling relationship between emissions and population (total demand ) is an intrinsic property of urban road networks, thereby remaining invariant regardless of routing strategies. Consequently, the fundamental approach to mitigating emissions driven by future population growth lies in managing the associated rise in total demand, or following a sustainable development pathway characterized by slower population growth. 3.4.2. Critical Role of Travel Distance Reduction in Emission Mitigation 
+
+Theorem 3.3 (Critical Role of Travel Distance Reduction in Emission Mitigation) . Define the average fuel consumption factor as ¯h = E/ (γ · Q · L). Consequently, the emissions can be reformulated as E = γQL ¯h. Let ¯v denote the average travel speed, defined as ¯v = L/T .The elasticity of fuel consumption factor h(v) with respect to vehicle speed is defined as: 
+
+η(v) = vh ′(v)
+
+h(v) = 2φ1v(v − ve)
+
+φ1(v − ve)2 + φ2
+
+(35) 
+
+which quantifies the percentage change in fuel consumption factor resulting from a 1% change in vehicle speed. The variation in emissions corresponding to the transition from the initial state (Q1, L 1, ¯h1)
+
+to the final state (Q2, L 2, ¯h2) can be decomposed as: 
+
+∆E = E2 − E1 = γQ 1(¯h1∆L︸ ︷︷ ︸ 
+
+> ∆Edist
+
++ L2∆¯h︸ ︷︷ ︸ 
+
+> ∆Efuel
+
+) (36) 
+
+where ∆L = ( Q2/Q 1) · L2 − L1 and ∆¯h = ( Q2/Q 1) · (¯h2 − ¯h1); ∆Edist and ∆Efuel represent the distance effect and the fuel consumption factor effect, respectively. Within typical road networks, the elasticity of h(v) satisfies |η(v)| < 1, and the following relationship holds: 
+
+|∆Efuel ||∆Edist | ≤ | η(¯ v1)| · 
+
+∣∣∣ ¯v2−¯v1
+
+> ¯v1
+
+∣∣∣∣∣L2−L1
+
+> L2
+
+∣∣ (37) 
+
+We analyze the emission variations in the following two scenarios: (1) Transition from time-routing to eco-routing (∆ E < 0) : The system state shifts from 
+
+(Q, L TO , ¯hTO ) to (Q, L TC , ¯hTC ). To maximize emission reduction, ∆E should be as negative as possible. (2) Using eco-routing under population growth (∆ E > 0) : The system state shifts from 
+
+(Q(λ1), L λ1 , ¯hλ1 ) to (Q(λ2), L λ2 , ¯hλ2 ), where Q(λ1) < Q (λ2). For effective emission mitigation, ∆E should be minimized. The inequality in Eq. (37) implies that in both scenarios, to achieve effective emis-sion mitigation, reducing travel distance is significantly more critical than improving (or maintaining ) travel speed. 
+
+17 Proof. Step 1: Derivation of the formula. 
+
+Starting from the definition E = γQL ¯h:
+
+∆E = γQ 2L2¯h2 − γQ 1L1¯h1
+
+= γQ 1
+
+[Q2
+
+Q1
+
+(L2¯h2 − L2¯h1 + L2¯h1) − L1¯h1
+
+]
+
+= γQ 1
+
+[
+
+¯h1
+
+(Q2
+
+Q1 L2 − L1
+
+)
+
++ L2 Q2
+
+Q1
+
+(¯h2 − ¯h1)] (38) Within typical road networks, the average speed generally satisfies ¯v ≤ 30 km/h (TRB, 2016). Consequently, given the parameters φ1, φ2, and ve configured as in Section 3.2.2, this implies that |η(¯ v)| < 1. Considering the definition of elasticity, we obtain the Eq. (39), which holds trivially when Q1 = Q2; in cases where Q1̸ = Q2, it follows from the physical reality that the relative variation of L is significantly smaller than that of Q:
+
+|∆Efuel ||∆Edist | =
+
+∣∣∣∣∣ 
+
+> Q2
+> Q1(¯h2−¯h1)¯h1
+
+∣∣∣∣∣∣∣∣∣ 
+
+> Q2
+> Q1L2−L1
+> L2
+
+∣∣∣∣
+
+≈
+
+∣∣∣∣∣η(¯ v1) · 
+
+> Q2
+> Q1(¯ v2−¯v1)¯v1
+
+∣∣∣∣∣∣∣∣∣ 
+
+> Q2
+> Q1L2−L1
+> L2
+
+∣∣∣∣
+
+≤ | η(¯ v1)| · 
+
+∣∣∣ ¯v2−¯v1
+
+> ¯v1
+
+∣∣∣∣∣L2−L1
+
+> L2
+
+∣∣ (39) 
+
+Step 2: Critical Role of Travel Distance Reduction. 
+
+Assuming that variations in ¯v and L are independent, a change in ¯v affects solely ∆Efuel 
+
+and leaves ∆Edist unchanged. Eq. (39) implies that a 1% change in speed ¯v, yielding 
+
+|∆Efuel | > 0, only requires a change in L of at most |η(¯ v)|% < 1% to achieve |∆Edist | =
+
+|∆Efuel |. Therefore, ∆E is significantly more sensitive to changes in travel distance L than to changes in speed ¯v.
+
+From time-routing to eco-routing: 
+
+Consider the system transition from (Q, L TO , ¯hTO ) to (Q, L TC , ¯hTC ), where ∆E < 0.Ideally, a smaller LTC and a higher ¯vTC (closer to optimal speed ve) would contribute to maximizing the emission reduction (i.e., making ∆E more negative). However, within typical road networks, a trade-off exists: prioritizing a shorter distance (LTC < L TO ) implies a reduction in speed (¯ vTC < ¯vTO ), whereas prioritizing higher speed (¯ vTC > ¯vTO ) comes at the expense of longer travel distance LTC > L TO . Recalling that ∆E is significantly more sensitive to travel distance than to speed, we conclude that reducing travel distance is far more critical than improving travel speed for maximizing emission reduction. 
+
+Eco-routing under population growth: 
+
+Consider the system evolution driven by population growth from (Q(λ1), L λ1 , ¯hλ1 ) to 
+
+(Q(λ2), L λ2 , ¯hλ2 ), where ∆E > 0. Similarly, a smaller Lλ2 and a higher ¯vλ2 (closer to optimal speed) would contribute to minimizing the emission growth. However, within typical road networks, population growth leads to increased demand scaling factor λ, which raises link flows x(λ) and inevitably reduces travel speeds v(λ). Prioritizing maintaining speed 
+
+¯vλ2 inevitably results in a longer travel distance compared to prioritizing reducing Lλ2 .Analogously, given the higher sensitivity of ∆E to L, prioritizing reducing travel distance is significantly more important than maintaining travel speed for mitigating emissions. 18 Remark 3 (Policy Implications) . Theorem 3.3 establishes that to minimize emissions, re-ducing travel distance is significantly more critical than improving (or maintaining ) travel speed, whether shifting from time-routing to eco-routing or using eco-routing under popula-tion growth. Consequently, to reduce emissions and construct low-carbon road networks, on the one hand, it is crucial to enhance the jobs-housing balance and promote polycentric devel-opment to shorten travel distance. On the other hand, strategies should focus on improving the short routes between OD pairs. 3.4.3. Impact of Capacity Expansion on Emissions 
+
+Theorem 3.4 (Impact of Capacity Expansion on Emissions) . For specific link k, the sen-sitivity of emissions E with respect to capacity qk is given by: 
+
+∂E ∂q k
+
+= xk · dek
+
+dtk
+
+· ∂t k
+
+∂q k
+
+= −αβt 0 
+
+> k
+
+· dek
+
+dtk
+
+·
+
+(xk
+
+qk
+
+)β+1 
+
+(40) 
+
+where dek/dtk > 0 and ∂t k/∂q k < 0. Consequently, ∂E/∂q k < 0.Proof. 
+
+∂E ∂q k
+
+= ∂ ∑ 
+
+> a∈A
+
+xaea(xa)
+
+∂q k
+
+= xk ·
+
+d
+
+(
+
+γl kh( lk 
+
+> tk
+
+)
+
+)
+
+dtk
+
+· ∂t k
+
+∂q k
+
+= −αβt 0 
+
+> k
+
+· dek
+
+dtk
+
+·
+
+(xk
+
+qk
+
+)β+1 
+
+(41) Based on the physical interpretation of the fuel consumption factor h(vk), the link emis-sion ek increases monotonically with travel time tk, yielding dek/dtk > 0. Combining this with the fact that ∂t k/∂q k < 0, it follows immediately that ∂E/∂q k < 0.
+
+Remark 4 (Impact of Flow Redistribution) . The partial derivative of the generalized cost 
+
+Ck on link k is negative: 
+
+∂C k
+
+∂q k
+
+= τ
+
+(
+
+ψ1
+
+∂t k
+
+∂q k
+
++ ψ2
+
+∂c k
+
+∂q k
+
+)
+
+< 0 (42) 
+
+indicating that capacity expansion leads to a reduction in Ck. In this study, the expanded links are located on the short routes between OD pairs. Consequently, the reduced generalized cost on these links attracts more traffic flow under redistribution, thereby reducing both UETL and 
+
+VKT . Given the critical role of distance reduction in emission mitigation, coupled with the fact that capacity expansion enhances average travel speed, the emissions ultimately decrease following the redistribution, indicating that the total derivative of E satisfies dE/ dqk < 0.
+
+Proposition 3.5 (Properties of Carbon Influence) . The carbon influence of link k is defined as: 
+
+Ik =
+
+∣∣∣∣
+
+∂E ∂q k
+
+∣∣∣∣ (43) 
+
+which quantifies the change in emissions resulting from a unit capacity expansion on link k.Within a road network, the following properties hold: (1) Dependence on flow and capacity: Ik ∝ (xk/q k)β+1 = VOC β+1  
+
+> k
+
+.
+
+19 (2) Significant heterogeneity across links: The distribution of carbon influence is highly uneven, with the ratio between the maximum and minimum values spanning several orders of magnitude: Imax /Imin ≈ 10 3–10 5.Proof. Step 1: Expression for Carbon Influence. 
+
+According to Theorem 3.4, the carbon influence is given by: 
+
+Ik =
+
+∣∣∣∣
+
+∂E ∂q k
+
+∣∣∣∣ =
+
+∣∣∣∣∣
+
+de k
+
+dt k
+
+·
+
+(
+
+−αβt 0 
+
+> k
+
+· xβ+1 
+
+> k
+
+qβ+1 
+
+> k
+
+)∣ ∣∣∣∣ ∝
+
+(xk
+
+qk
+
+)β+1 
+
+= VOC β+1  
+
+> k
+
+(44) 
+
+Step 2: Significant Heterogeneity of Carbon Influence. 
+
+Based on typical urban road functional classification standards (FHWA, 2013; TRB, 2016), we adopt the parameters for a representative road network during the peak hour, where Principal Arterials exhibit VOC ranging from 0.6 to 0.85, and Local roads range from 0.1 to 0.3. Setting the standard BPR parameter β = 4 (Sheffi, 1985), we calculate the ratio of carbon influence between the Principal Arterial (I1) and the Local road (I2):
+
+I1
+
+I2
+
+≈
+
+(VOC 1
+
+VOC 2
+
+)5
+
+=
+
+(0.75 0.15 
+
+)5
+
+= 3125 = O(10 3) (45) Considering more extreme scenarios under population growth where severely congested links exhibit VOC > 1, the resulting ratio can reach the order of 10 4–10 5.
+
+Remark 5 (Policy Implications) . A larger carbon influence Ik indicates that a unit capacity expansion on link k yields a greater reduction in emissions. Consequently, given the sig-nificant heterogeneity of carbon influence revealed by Proposition 3.5, expansion strategies should prioritize bottleneck links with high VOC to maximize emission reduction efficiency. Furthermore, effective planning requires extending beyond static indicators to account for the dynamic evolution of network traffic under population growth. Specifically, expansion planning should target links projected to experience significant increases in VOC , thereby ensuring robust emission mitigation for future development. 
+
+Corollary 3.6 (Invariant Scaling Order under Bounded Capacity Expansion) . Consider a bounded capacity expansion scheme, defined as q′ = q + ∆ q subject to ∥∆q∥ ≤ B, where q
+
+and q′ denote the link capacity vectors before and after expansion, respectively; ∆q represents the expansion vector; and B is the budget constraint. Let E(λ; q) and E(λ; q′) denote the emissions before and after expansion. Then: (1) Invariant Scaling Order: E(λ; q) = Θ( λ) and E(λ; q′) = Θ( λ).(2) Proportional Reduction: There exists a constant ρq ∈ (0 , 1] such that E(λ; q′) ≈ ρq ·
+
+E(λ; q), indicating that bounded capacity expansion reduces emissions while retaining the local scaling order. Proof. According to Theorem 3.1, the scaling order of carbon emissions is fundamentally determined by the boundedness of the fuel consumption factor h(v). While the bounded 20 expansion strategy modifies link capacities, it does not alter this boundedness. Therefore, the scaling order remains invariant at Θ( λ).Proposition 3.5 establishes that capacity expansion leads to a reduction in carbon emis-sions. Analogous to Corollary 3.2, the results in Table 10 indicate the existence of a constant 
+
+ρq ∈ (0 , 1] , such that E(λ; q′) ≈ ρq · E(λ; q), thereby retaining the local scaling order. 
+
+Proposition 3.7 (Optimal Bounded Capacity Expansion Scheme and Shadow Price) . Con-sider the optimal capacity expansion problem subject to a budget constraint: 
+
+Minimize   
+
+> q′
+> a≥qa∀a∈A
+
+E(q′) s.t. ∑
+
+> a∈A
+
+κa(q′ 
+
+> a
+
+− qa) ≤ B (46) 
+
+where E(q′) denotes the emissions after expansion; and κa > 0 represents the unit expansion cost of link a. To minimize E(q′) within the budget constraint, for any expanded link a
+
+(q′ 
+
+> a
+
+> q a) and for any non-expanded link b (q′ 
+
+> b
+
+= qb), the following optimality condition must hold: Ia
+
+κa
+
+= ν, Ib
+
+κb
+
+≤ ν (47) 
+
+where ν ≥ 0 is the shadow price of the budget constraint. Consequently, the optimal scheme prioritizes allocating the budget to links with the highest carbon influence per unit cost. Upon budget exhaustion, the carbon influence per unit cost equalizes across all expanded links and corresponds to the shadow price. Proof. Construct the Lagrangian function for the constrained minimization problem: 
+
+L(q′, ν ) = E(q′) + ν
+
+(∑
+
+> a∈A
+
+κa(q′ 
+
+> a
+
+− qa) − B
+
+)
+
+(48) where ν is the Lagrange multiplier associated with the budget constraint. The KKT condi-tions with respect to q′ 
+
+> a
+
+require: 
+
+∂L
+
+∂q ′
+
+> a
+
+= ∂E (q′)
+
+∂q ′
+
+> a
+
++ νκ a ≥ 0, and (q′ 
+
+> a
+
+− qa) ∂L
+
+∂q ′
+
+> a
+
+= 0 (49) By definition, the carbon influence Ia = |∂E/∂q ′
+
+> a
+
+|. Since ∂E/∂q ′ 
+
+> a
+
+< 0, we have ∂E/∂q ′ 
+
+> a
+
+=
+
+−I a. Substituting this into the conditions yields: 
+
+−I a + νκ a
+
+{
+
+= 0 , if q′ 
+
+> a
+
+> q a,
+
+≥ 0, if q′ 
+
+> a
+
+= qa. ⇒ Ia
+
+κa
+
+{
+
+= ν, if q′ 
+
+> a
+
+> q a,
+
+≤ ν, if q′ 
+
+> a
+
+= qa. (50) where the multiplier ν ≥ 0 can be interpreted as the shadow price of the budget constraint. 21 3.5. Summary: Key Findings and Theoretical Support 
+
+The core findings of this section and their theoretical support are summarized in Table 2.        
+
+> Table 2: Key findings and theoretical support
+> Key Findings Theoretical Support Emissions scale linearly with population; neither eco-routing nor bounded capacity expansion fundamentally alters this scaling order. Theorem 3.1; Corollary 3.2 & Corollary 3.6 Emission mitigation is primarily driven by shortening travel distance rather than maintaining travel speed; Theorem 3.3 Expanding a few bottlenecks with high VOC yields significant emission reduction benefits; the optimal expansion scheme under budget constraints is governed by the shadow price. Theorem 3.4 →Proposition 3.5
+> →Proposition 3.7 Policies should extend beyond routing and construction strategies to manage the rising demand driven by population growth. Corollary 3.2 & Corollary 3.6
+
+Remark 6 (Theoretical Limitations) . This study is subject to the following theoretical lim-itations: (1) All theorems are derived assuming the BPR link performance function. (2) The fuel consumption factor h(v) is assumed to follow a quadratic form, whereas operational emission models in practice, such as the Motor Vehicle Emission Simulator 
+
+(MOVES) , exhibit greater complexity. 
+
+4. Study Area and Data 
+
+4.1. Study Area 
+
+To ensure the generalizability of the findings, we considered factors such as geographic location, urban scale, network topology, and demographic characteristics to select six repre-sentative U.S. cities: San Francisco, Dallas, Pittsburgh, Miami, Denver, and Philadelphia. Their geographical locations and basic information are presented in Fig. 3 and Table 3, with population and land area data derived from 2020 Census statistics (U.S. Census Bureau, 2024). Specifically, these cities are distributed across the United States, including larger cities such as San Francisco, Dallas, Miami, and Philadelphia, as well as smaller cities like Denver and Pittsburgh. Among these cities, Dallas has the largest land area and total popu-lation, while San Francisco exhibits the highest population density. The network topologies of these cities are also distinct. For example, San Francisco is divided by bay terrain, forcing traffic to rely on key bridges and tunnels. In contrast, Dallas features relatively flat and continuous terrain, forming grid-like transport systems dominated by surface roads. 22 city location                            
+
+> state boundary
+> Legend Figure 3: The geospatial distribution of the six representative U.S. cities. Table 3: Basic information for the six representative U.S. cities. City State Land Area (km 2)2020 Census Population Density San Francisco California 121.5 873,965 7,195 Dallas Texas 879.6 1,304,379 1,483 Pittsburgh Pennsylvania 143.5 302,971 2,112 Miami Florida 93.2 442,241 4,743 Denver Colorado 396.5 715,522 1,805 Philadelphia Pennsylvania 348.1 1,603,797 4,607
+
+4.2. OD Demand and Road Network Data 
+
+In this study, we constructed OD demand data using the LODES dataset, which has been widely adopted in existing studies (McKinney et al., 2021). This dataset is derived from administrative records where employers report employee work and home locations, thereby offering comprehensive block-level workforce commuting patterns across all U.S. states from 2002 to 2019. The U.S. Census Bureau collaborates with the state agencies to process this information into detailed OD pairs, making the LODES dataset an excellent basis for the initial OD demand matrix (U.S. Census Bureau, 2021a). The urban road network data required for traffic assignment are derived from the Open-StreetMap database (OpenStreetMap contributors, 2024), an open-source mapping platform providing comprehensive road network data. This allows us to extract the nodes, links, net-work topologies, and road attributes of the six selected U.S. cities. As shown in Table 4, 23 Dallas possesses the most complex road network, featuring 21,389 nodes and 77,818 links, while Pittsburgh has the smallest, with 3,532 nodes and 13,662 links. Notably, the origins and destinations within the initial OD demand matrix do not di-rectly correspond to the nodes in the road network. To address this spatial mismatch, we aggregate the OD demand data from the fine-grained block level to the coarser tract level, where a tract comprises multiple blocks (Smith and Blizard, 2021). Consistent with existing research (Abdel-Aty et al., 2013), we adopt tracts as traffic analysis zones (TAZs) to serve as the fundamental units for traffic assignment, which ensures computational feasibility while minimizing the loss of spatial resolution. The number of TAZs across the six U.S. cities is presented in Table 4, where cities with a greater number of nodes and links typically possess more TAZs. Regarding the UE model parameters, following the work of Xu et al. (2024), the BPR pa-rameters, road capacities, and free flow speeds for the six selected U.S. cities are summarized in Table 4.                                                                                 
+
+> Table 4: Parameters of the BPR function, road capacity, free flow speed, and road network data. City BPR function Capacity (veh/h) Free flow speed (km/h) Road network data
+> αβroad1 road2 road3 road1 road2 road3 TAZs nodes links San Francisco 0.5 1.8 2,200 2,000 1,400 90 60 40 194 4,986 18,002 Dallas 0.6 1.3 2,200 2,000 1,400 90 65 45 328 21,389 77,818 Pittsburgh 0.5 2.0 2,200 2,000 1,200 90 60 30 149 3,532 13,662 Miami 0.5 1.5 1,800 1,500 900 65 50 35 108 4,121 15,108 Denver 0.5 1.5 2,000 1,800 1,300 90 60 35 175 9,205 34,724 Philadelphia 0.5 1.2 2,000 1,800 1,200 90 60 30 389 10,410 38,641 where road 1, road 2, and road 3 correspond to Expressway, Highway, and Local roads, respectively.
+
+4.3. SSPs and Population Data 
+
+The population projection data used in this study are grounded in the SSPs framework presented by O’Neill et al. (2017). Unlike most global scenario exercises driven by inputs or elements, the SSPs were developed based on the challenges space, defined primarily by the nature of the outcomes. To span this space, the pathways were constructed using a backcasting scenario approach, where a particular outcome was first identified, and the key elements of society required to reach those states were subsequently determined. This process resulted in five distinct narratives (SSP1 to SSP5), with their core characteristics and impacts on future population outlined in Table 5. The future population data for U.S. cities were derived from the dataset developed by Sutradhar et al. (2024), providing population projections from 2020 to 2100 under five SSPs. The dataset integrates two primary sources: Hauer’s data (U.S. County-Level Population Projections, Total and by Sex, Race and Age, based on the SSPs, v1 (Hauer, 2019)) and NCAR data (Global 1-km Downscaled Population Base Year and Projection Grids Based on the SSPs, v1.01 (Gao, 2017)). Specifically, for Hauer’s data, the county-level projections were redistributed to the city level based on the intersected areas between cities and counties. For the NCAR data, city-level projections were derived using area weighted zonal statistics 24 Table 5: Core characteristics of SSPs and their impacts on future population.              
+
+> SSP Alias Core Characteristics Impacts on Population SSP1 Sustainable Development Green, inclusive, global cooperation Low growth: lowest population peak, fastest decline SSP2 Middle of the Road Continuation of historical trends Medium growth: medium peak population, slow decline SSP3 Regional Rivalry Nationalism, conflicts, fragmentation High growth: highest population peak, longest duration of growth SSP4 Inequality Unequal wealth, social division Medium growth but highly unequal: extreme internal disparities SSP5 Fossil-fueled Development High carbon, globalization, growth maximized Rapid growth with earlier transition: relatively early peak, faster decline
+
+from the overlapping areas of the 1-km gridded projected population and city administrative boundaries. The two city-level projection datasets were finally combined by weighting them based on their error contribution in predicting the 2020 Census population. To capture a broad range of future uncertainties, we selected SSP1 (Sustainable Devel-opment), SSP2 (Middle of the Road), and SSP5 (Fossil-fueled Development) as the research scenarios and extracted population data across the six selected cities for the period 2030 to 2050 under these SSPs, with a specific focus on the decadal milestones of 2030, 2040, and 2050, as shown in Table 6. The (baseline, 2025) population is forecasted using an ARIMA model calibrated on historical population statistics (U.S. Census Bureau, 2011, 2021b, 2024). In subsequent analysis, for each given city under each SSP scenario, we consistently apply the OD demand forecasting method and the UE models established in Section 3. 
+
+5. Case Study 
+
+5.1. Urban Metrics 
+
+In this section, we utilize urban metrics for the six U.S. cities across all years, SSPs, and UE models to analyze the urban dynamics under different routing strategies and population growth from a macroscopic city perspective. 
+
+5.1.1. Urban Transport Emissions 
+
+Carbon emissions under the Time-Carbon UE models exhibit a clear reduction compared to those under the Time-Only UE model across all cities, years, and SSPs, as illustrated in Fig. 4. Within a given year and SSP scenario, the magnitude of emission reduction is inversely related to weight ratio of ψ1 : ψ2. A smaller ψ1 : ψ2 (i.e., a higher relative weight 25 Table 6: Population data for the six representative U.S. cities under various SSPs (100,000). City baseline SSP1 SSP2 SSP5 2025 2030 2040 2050 2030 2040 2050 2030 2040 2050 San Francisco 8.27 9.78 10.72 11.59 9.71 10.56 11.34 10.28 11.68 13.20 0% 18.2% 29.5% 40.0% 17.3% 27.7% 37.0% 24.2% 41.2% 59.4% Dallas 13.35 15.38 17.64 19.82 15.29 17.41 19.41 16.25 19.38 22.80 0% 15.2% 32.1% 48.4% 14.5% 30.4% 45.3% 21.7% 45.2% 70.7% Pittsburgh 3.08 3.11 3.14 3.13 3.09 3.10 3.08 3.29 3.46 3.63 0% 1.2% 2.1% 1.8% 0.5% 0.8% 0.2% 6.8% 12.3% 17.9% Miami 4.93 4.96 5.44 5.88 4.92 5.36 5.74 5.21 5.93 6.68 0% 0.6% 10.3% 19.1% -0.2% 8.7% 16.4% 5.7% 20.2% 35.5% Denver 7.31 7.98 8.72 9.40 7.92 8.60 9.22 8.38 9.51 10.73 0% 9.0% 19.2% 28.5% 8.3% 17.6% 26.0% 14.6% 30.0% 46.6% Philadelphia 15.74 17.17 18.06 18.81 17.05 17.82 18.45 18.07 19.75 21.53 0% 9.1% 14.8% 19.5% 8.3% 13.2% 17.2% 14.8% 25.5% 36.8% 
+
+of carbon cost), yields a greater emission reduction, with the maximum occurring at ψ1 = 0 ,
+
+ψ2 = 10 .2025 2030 2040 2050             
+
+> Year
+> 321 339 352 400 480 560 640
+> Carbon emissions (t)
+> Time-Only Time-Carbon, 1= 0, 2= 10
+> Time-Carbon, 1= 1, 2= 9
+> Time-Carbon, 1= 8, 2= 2
+> ssp1 ssp2 ssp5
+
+(a) San Francisco 2025 2030 2040 2050  
+
+> Year
+> 852 880 1200 1400 1600 1800
+> Carbon emissions (t)
+
+(b) Dallas 2025 2030 2040 2050  
+
+> Year
+> 93
+> 97
+> 102
+> 108
+> 114
+> 120
+> Carbon emissions (t)
+
+(c) Pittsburgh 2025 2030 2040 2050 
+
+> Year
+> 50
+> 52
+> 60
+> 66
+> 72
+> 78
+> Carbon emissions (t)
+
+(d) Miami 2025 2030 2040 2050  
+
+> Year
+> 234 241 280 320 360 400
+> Carbon emissions (t)
+
+(e) Denver 2025 2030 2040 2050  
+
+> Year
+> 936 971 1100 1200 1300 1400 1500
+> Carbon emissions (t)
+
+(f) Philadelphia 
+
+Figure 4: Carbon emissions (t) for the six representative U.S. cities across all years, SSPs, and UE models. 
+
+For any city, (SSPs, years) with a larger population size invariably lead to higher emis-sions across all UE models; notably, in Pittsburgh (SSP1/SSP2, 2050) and Miami (SSP2, 2030), emissions decrease as their population declines. Consequently, although both OD 26 demand distribution πs,t y and population size influence carbon emissions, emissions consis-tently exhibit a positive scaling with annual population (Table 6) across all UE models, indicating that population growth is the dominant driver. This observation fully aligns with Theorem 3.1 and Corollary 3.2, which state that emissions scale linearly with population regardless of routing strategies. San Francisco exhibits the most significant emission reduction across all cities. As shown in Table 7, when ψ1 = 1 and ψ2 = 9 , its optimization percentage Pc ranges from a minimum of 8.4% in (baseline, 2025) to a maximum of 12.4% in (SSP5, 2050). Moreover, for this city in 2030, the Time-Carbon UE model ( ψ1 = 0 , ψ2 = 10 or ψ1 = 1 , ψ2 = 9 ) under the SSP5 scenario yields lower emissions than the Time-Only UE model under the SSP1 and SSP2 scenarios. However, in 2040 and 2050, this advantage diminishes and eventually reverses, as the emission reduction benefits from eco-routing are overwhelmed by the rapid population growth under SSP5 scenario. For all other cities in any given year, regardless of which weight ratio ψ1 : ψ2 is applied, the Time-Carbon UE model under SSP5 scenario consistently yields higher emissions than the Time-Only UE model under any other SSPs. These results suggest that the implementation of eco-routing cannot reduce the high emissions under SSP5 scenario to the lower levels under SSP1 or SSP2 scenarios with time-routing. Therefore, low-carbon urban development fundamentally requires following a sustainable SSP characterized by slower population growth.                                                                                                                                                                                                          
+
+> Table 7: Carbon emissions (t) for the six representative U.S. cities under the Time-Only and Time-Carbon (ψ1= 1 and ψ2= 9 ) UE models. City baseline SSP1 SSP2 SSP5 2025 2030 2040 2050 2030 2040 2050 2030 2040 2050 San Francisco TO 352 440 503 559 436 490 543 472 565 673 TC 323 398 450 495 394 439 482 425 501 589
+> Pc8.4% 9.6% 10.5% 11.4% 9.6% 10.3% 11.1% 10.1% 11.5% 12.4% Dallas TO 880 1076 1308 1574 1068 1286 1531 1174 1528 1908 TC 853 1039 1260 1511 1031 1239 1471 1132 1468 1824
+> Pc3.0% 3.4% 3.7% 4.0% 3.4% 3.7% 3.9% 3.6% 3.9% 4.4% Pittsburgh TO 96.7 98.5 99.3 98.5 97.6 97.7 96.3 106 114 122 TC 93.5 95.1 96.1 95.4 94.3 94.6 93.3 103 110 117
+> Pc3.2% 3.4% 3.3% 3.2% 3.3% 3.2% 3.1% 3.6% 3.7% 3.9% Miami TO 51.6 51.9 58.7 65.5 51.4 57.7 63.7 55.8 66.1 79.0 TC 50.1 50.4 56.8 62.9 50.0 55.8 61.3 54.0 63.4 75.0
+> Pc2.8% 2.9% 3.4% 4.0% 2.8% 3.3% 3.8% 3.1% 4.1% 5.1% Denver TO 241 272 309 342 269 301 333 291 346 414 TC 235 264 299 329 262 291 321 282 333 396
+> Pc2.5% 2.9% 3.3% 3.6% 2.9% 3.3% 3.5% 3.2% 3.7% 4.3% Philadelphia TO 971 1092 1174 1255 1083 1154 1227 1174 1334 1487 TC 937 1053 1130 1209 1044 1112 1181 1130 1282 1427
+> Pc3.4% 3.6% 3.7% 3.8% 3.6% 3.7% 3.7% 3.7% 3.9% 4.1% where the TO and TC denote metrics under Time-Only and Time-Carbon UE models, respectively.
+
+When ψ1 = 1 , ψ2 = 9 , as shown in Table 7, for a given year, SSPs with a larger population 27 size (i.e., higher emissions) exhibit a higher optimization percentage Pc; similarly, under a given SSP scenario, years with a larger population size also exhibit a higher Pc. Moreover, as shown in Fig. 4, these findings are robust across all Time-Carbon UE models, indicating that population growth also exerts a dominant influence on Pc. Therefore, it is essential to further investigate the impact of population growth on Pc, thereby evaluating the efficiency of eco-routing. 
+
+5.1.2. UETT 
+
+UETT under the Time-Carbon UE models is consistently higher than that under the Time-Only UE model, as shown in Fig. 5. This confirms that while eco-routing can reduce emissions, it generally comes at the expense of increased travel time. Moreover, for a given year and SSP scenario, as the weight ratio ψ1 : ψ2 decreases, the Time-Carbon UE model yields a greater emission reduction but incurs a corresponding increase in travel time. An exception is observed in Pittsburgh (SSP5), where the Time-Carbon UE model ( ψ1 = 8 ,
+
+ψ2 = 2 ) yields both lower UETT and emissions compared to the Time-Only UE model. This is possible because the relative weight of the carbon cost is small, and the equilibrium state of Time-Only UE model is suboptimal. Consequently, this rare case does not undermine the analysis above; rather, it demonstrates that cases where both UETT and emissions decrease under the Time-Carbon UE model are extremely limited. 2025 2030 2040 2050                                
+
+> Year
+> 23.3 27.4 30.0 36.0 42.0 48.0 54.0
+> UETT (min)
+> Time-Only Time-Carbon, 1= 0, 2= 10
+> Time-Carbon, 1= 1, 2= 9
+> Time-Carbon, 1= 8, 2= 2
+> ssp1 ssp2 ssp5
+> (a) San Francisco 2025 2030 2040 2050
+> Year
+> 34.9 35.6 39.0 42.0 45.0 48.0
+> UETT (min) (b) Dallas 2025 2030 2040 2050
+> Year
+> 18.2 19.0 19.2 20.0 20.8 21.6
+> UETT (min) (c) Pittsburgh 2025 2030 2040 2050
+> Year
+> 9.6 9.8 10.3 10.5 11.0 11.5 12.0
+> UETT (min)
+> (d) Miami 2025 2030 2040 2050
+> Year
+> 14.9 15.7 16.0 17.0 18.0 19.0
+> UETT (min) (e) Denver 2025 2030 2040 2050
+> Year
+> 36.1 36.8 38.0 40.0 42.0 44.0
+> UETT (min) (f) Philadelphia
+
+Figure 5: UETT (min) for the six representative U.S. cities across all years, SSPs, and UE models. 
+
+UETT exhibits a positive scaling with annual population, aligning with the proof of Theorem 3.3, where population growth leads to rising traffic flows, which in turn results 28 in increased travel time. Moreover, consistent with Section 5.1.1, San Francisco also shows the most significant changes in UETT. As shown in Table 8, when ψ1 = 1 and ψ2 = 9 , its trade-off percentage Pt ranges from a minimum of 13.6% in (baseline, 2025) to a maximum of 31.0% in (SSP5, 2050). Additionally, for all cities, the Pt increases as population grows, except for Miami, where it decreases. However, this does not mean that eco-routing in Miami is efficient in terms of UETT, as the CP may be increasing.                                                                                                                                                                                                     
+
+> Table 8: UETT (min) for the six representative U.S. cities under the Time-Only and Time-Carbon ( ψ1= 1
+> and ψ2= 9 ) UE models. City baseline SSP1 SSP2 SSP5 2025 2030 2040 2050 2030 2040 2050 2030 2040 2050 San Francisco TO 23.3 27.1 29.3 31.5 26.9 28.9 30.9 28.3 31.8 35.4 TC 26.5 32.2 35.9 39.4 32.0 35.3 38.4 34.2 39.8 46.4
+> Pt13.6% 19.1% 22.4% 25.0% 18.9% 22.0% 24.3% 21.2% 25.3% 31.0% Dallas TO 34.9 37.7 40.8 44.2 37.6 40.5 43.6 39.0 43.5 48.4 TC 35.5 38.4 41.7 45.2 38.3 41.3 44.6 39.8 44.5 49.6
+> Pt1.6% 1.8% 2.1% 2.4% 1.8% 2.1% 2.3% 1.9% 2.3% 2.6% Pittsburgh TO 18.2 18.5 18.5 18.3 18.3 18.3 18.1 19.3 20.1 20.7 TC 19.0 19.2 19.3 19.0 19.1 19.0 18.8 20.2 21.0 21.8
+> Pt4.1% 4.2% 4.2% 4.1% 4.2% 4.1% 4.1% 4.4% 4.8% 5.4% Miami TO 9.65 9.67 10.2 10.7 9.63 10.1 10.6 10.0 10.7 11.7 TC 10.2 10.2 10.8 11.3 10.2 10.7 11.2 10.5 11.3 12.3
+> Pt5.8% 5.8% 5.6% 5.6% 5.8% 5.7% 5.7% 5.7% 5.5% 4.8% Denver TO 14.9 15.5 16.3 17.0 15.5 16.1 16.8 15.9 17.0 18.4 TC 15.6 16.3 17.1 17.8 16.3 17.0 17.6 16.8 17.9 19.3
+> Pt5.0% 5.0% 5.0% 5.1% 5.0% 5.1% 5.1% 5.0% 5.2% 5.2% Philadelphia TO 36.1 38.0 39.3 40.5 37.9 39.0 40.0 39.2 41.6 43.8 TC 36.6 38.7 40.1 41.4 38.6 39.8 40.9 40.1 42.7 45.2
+> Pt1.6% 1.9% 2.1% 2.3% 1.8% 2.1% 2.2% 2.1% 2.6% 3.1%
+
+5.1.3. UETL 
+
+UETL is significantly different under various UE models, as shown in Fig. 6, indicating that traveler route choices are fundamentally distinct. Under the Time-Carbon UE models, UETL is lower than that under the Time-Only UE model, suggesting that travelers using eco-routing choose shorter routes to minimize the time-carbon cost. Moreover, for a given year and SSP scenario, UETL decreases as the weight ratio ψ1 : ψ2 declines. All of these findings align with Theorem 3.3, which states that reducing travel distance is critical for emission reduction when transitioning from time-routing to eco-routing. For Time-Carbon UE models, the trends of UETL over time are different across various weight ratios. We first analyze the results with ratios of ψ1 = 1 , ψ2 = 9 and ψ1 = 0 , ψ2 = 10 .Within a given city and SSP scenario, as population grows over time, UETL increases un-der the Time-Only UE model, whereas it decreases under the Time-Carbon UE models. This indicates that with population growth, travelers using time-routing increasingly choose 29 2025 2030 2040 2050                                
+
+> Year
+> 5.85 5.98 6.01 6.15 6.31 6.45 6.53 6.60
+> UETL (km)
+> Time-Only Time-Carbon, 1= 0, 2= 10
+> Time-Carbon, 1= 1, 2= 9
+> Time-Carbon, 1= 8, 2= 2
+> ssp1 ssp2 ssp5 (a) San Francisco 2025 2030 2040 2050
+> Year
+> 17.20 17.22 17.25 17.41 17.53 17.70
+> UETL (km) (b) Dallas 2025 2030 2040 2050
+> Year
+> 8.93
+> 8.94
+> 8.96
+> 9.00
+> 9.04
+> 9.06
+> 9.08
+> UETL (km) (c) Pittsburgh 2025 2030 2040 2050
+> Year
+> 4.13 4.14 4.20 4.23 4.26 4.32
+> UETL (km)
+> (d) Miami 2025 2030 2040 2050
+> Year
+> 7.32 7.41 7.42 7.50 7.56 7.60 7.62
+> UETL (km) (e) Denver 2025 2030 2040 2050
+> Year
+> 13.05 13.13 13.15 13.20 13.37 13.55
+> UETL (km) (f) Philadelphia
+
+Figure 6: UETL (km) for the six representative U.S. cities across all years, SSPs, and UE models. 
+
+longer routes; conversely, travelers using eco-routing increasingly select shorter routes, con-sistent with Theorem 3.3 that reducing travel distance is also critical for emission mitigation when employing eco-routing under population growth. Additionally, for the Time-Only UE model, minor deviations from the general UETL trend are observed, such as in Pittsburgh (2040) and (SSP5, 2050), Miami (SSP1, 2030), and Philadelphia (2030). These deviations typically occur in (SSPs, years) with small population growth, and are attributed to this slight growth and changes in the OD demand distribution πs,t y . With greater population growth, these exceptions are no longer observed; for example, Miami (SSP5, 2030), having a higher population size than (SSP1, 2030), follows the general UETL trend. Similarly, the few exceptions under the Time-Carbon UE model are attributed to the same factors, such as in Dallas (SSP1/2, 2050), where the exception is eliminated under (SSP5, 2050). These exceptions indicate that while changes in πs,t y do influence UETL, their impacts are typically masked by the effects of population growth. The influence of πs,t y becomes discernible only when population growth is minimal, implying that population acts as the dominant factor driving UETL and travel route choice. When ψ1 = 8 and ψ2 = 2 , it is difficult to identify a general UETL trend, as it is unstable across cities and years. This phenomenon arises because the relative weight of the carbon cost is too small, causing the dominance of time cost versus carbon cost in the generalized cost to vary by city and year. Within some cities and year intervals, the UETL increases as population grows, aligning with the Time-Only UE model (time cost dominates); within others, it decreases, consistent with the Time-Carbon UE model (carbon cost dominates). 30 Table 9: UETL (km) for the six representative U.S. cities under Time-Only and Time-Carbon ( ψ1 = 1                                                                                                                                            
+
+> and ψ2= 9 ) UE models. City baseline SSP1 SSP2 SSP5 2025 2030 2040 2050 2030 2040 2050 2030 2040 2050 San Francisco TO 6.53 6.55 6.57 6.59 6.56 6.57 6.58 6.57 6.59 6.61 TC 6.01 5.97 5.94 5.92 5.97 5.95 5.93 5.96 5.92 5.89 Dallas TO 17.53 17.57 17.61 17.68 17.57 17.60 17.67 17.59 17.66 17.73 TC 17.22 17.20 17.17 17.18 17.20 17.17 17.18 17.19 17.16 17.14 Pittsburgh TO 9.08 9.09 9.07 9.05 9.09 9.07 9.05 9.09 9.07 9.05 TC 8.94 8.95 8.93 8.91 8.94 8.92 8.90 8.95 8.93 8.90 Miami TO 4.262 4.258 4.276 4.300 4.258 4.273 4.298 4.269 4.291 4.326 TC 4.145 4.139 4.131 4.131 4.140 4.135 4.136 4.138 4.122 4.122 Denver TO 7.60 7.60 7.61 7.61 7.60 7.60 7.61 7.60 7.61 7.64 TC 7.42 7.39 7.38 7.36 7.40 7.37 7.36 7.38 7.35 7.33 Philadelphia TO 13.553 13.547 13.546 13.557 13.547 13.547 13.559 13.547 13.554 13.561 TC 13.150 13.109 13.089 13.080 13.114 13.095 13.091 13.089 13.055 13.027
+
+Consequently, given the behavioral inertia of travelers, the practical implementation of eco-routing necessitates appropriate ψ1 and ψ2 to ensure carbon cost dominance, thereby guaranteeing the stable evolution of the lowest carbon routes under population growth. 
+
+5.2. Impact of Population Growth 
+
+In this section, we aggregate population data for the six U.S. cities across all years and SSPs to analyze urban dynamics with respect to overall population change and evaluate the efficiency of eco-routing. To ensure the dominance of carbon cost while accounting for time cost, subsequent analysis primarily considers the cost weights ψ1 = 1 and ψ2 = 9 , unless otherwise noted. 
+
+5.2.1. Impact of Population Growth on Urban Metrics 
+
+By selecting the (baseline, 2025) population and urban metrics as the reference, we obtain Gbaseline ,2025 to represent the percentage population growth, and calculate the change ratios of urban metrics. As shown in Fig. 7, the change ratios of carbon emissions, UETL, and UETT all exhibit expected trends. Moreover, although the urban metrics are influenced by changes in population and OD demand distribution πs,t y , their respective trends remain consistent across most cities, indicating that population growth is the dominant driver of urban dynamics. These observations collectively corroborate the analysis in Section 5.1. Across most cities, under the Time-Only UE model, both UETL and UETT increase as the population grows. In contrast, under the Time-Carbon UE model, UETL decreases while UETT increases, with the percentage increase in UETT greater than that under the Time-Only UE model. Comparing these results demonstrates that under population growth, travelers using time-routing prioritize maintaining travel speed despite an increase in travel distance, whereas those using eco-routing prioritize reducing travel distance despite a sig-nificant decline in travel speed. These findings indicate that the carbon reduction benefits 31 8 16 24 32 40 48 56 020 40 60 80          
+
+> 1.34 1.34 1.37 1.40 1.43 1.44 1.51
+> Time-Carbon, 1= 1, 2= 9 , black
+> Time-Carbon, 1= 8, 2= 2
+> Time-Only
+
+-2.4 -1.6 -0.8 00.8 
+
+28 32 36 40 44 48 52 56 60 
+
+Gbaseline, 2025 (%) 
+
+15 30 45 60 75 Carbon emissions UETL UETT 
+
+> Change ratio (%)
+
+(a) San Francisco 8 16 24 32 40 48 56 64 025 50 75 100 
+
+> 1.51 1.52 1.60 1.68 1.69 1.72 1.72 1.56
+
+-0.8 -0.4 00.4 0.8 1.2 
+
+8 16 24 32 40 48 56 64 72 
+
+Gbaseline, 2025 (%) 
+
+010 20 30 40  
+
+> Change ratio (%)
+
+(b) Dallas 2 4 6 8 10 12 14 16 18 0510 15 20 25  
+
+> 1.40 1.40 1.41 1.41 1.42
+
+2 4 6 8 10 12 14 16 18 -0.6 -0.5 -0.3 -0.2 00.2 
+
+2 4 6 8 10 12 14 16 18 
+
+Gbaseline, 2025 (%) 
+
+036912 15  
+
+> Change ratio (%)
+
+(c) Pittsburgh 4 8 12 16 20 24 28 32 36 010 20 30 40 50  
+
+> 1.32 1.32 1.32 1.35 1.37 1.38 1.62
+
+-1 -0.5 00.5 11.5 
+
+4 8 12 16 20 24 28 32 36 
+
+Gbaseline, 2025 (%) 
+
+0510 15 20 
+
+> Change ratio (%)
+
+(d) Miami 5 10 15 20 25 30 35 40 45 015 30 45 60 75 
+
+> 1.41 1.43 1.45 1.48 1.60
+
+-1.2 -0.8 -0.4 00.4 
+
+5 10 15 20 25 30 35 40 45 
+
+Gbaseline, 2025 (%) 
+
+0510 15 20 25  
+
+> Change ratio (%)
+
+(e) Denver 4 8 12 16 20 24 28 32 36 010 20 30 40 50 
+
+> 1.45 1.46 1.51 1.52 1.52 1.46 1.16
+
+-1 -0.8 -0.5 -0.2 00.2 
+
+4 8 12 16 20 24 28 32 36 
+
+Gbaseline, 2025 (%) 
+
+0510 15 20 25  
+
+> Change ratio (%)
+
+(f) Philadelphia 
+
+Figure 7: Change ratios of carbon emissions (top), UETT (middle), and UETL (bottom) with respect to population growth percentage Gbaseline ,2025 for the six U.S. cities. 
+
+from reducing travel length outweigh the benefits from maintaining travel speed, aligning with Theorem 3.3 that reducing travel distance is significantly more critical than maintain-ing travel speed for mitigating emissions driven by population growth. However, this does not imply that travel speed is unimportant; rather, it reveals that under population growth, links along routes selected by eco-routing, especially those on short routes, will inevitably become increasingly congested, thereby constraining carbon reduction potential, as is visu-ally evident in Section 5.3.1. Therefore, to reduce emissions and construct low-carbon road networks, it is crucial to improve the jobs-housing balance, enhance spatial proximity, and promote polycentric development to counteract urban sprawl, thereby shortening travel dis-32 tance. Simultaneously, strategies should also focus on improving the short routes to relieve the increasing congestion (Remark 3). For all cities, the slopes of the emission change ratio curves are similar across all UE models, indicating that eco-routing cannot fundamentally slow down the upward trend of emissions driven by population growth. This finding corroborates Corollary 3.2 that the scaling order of emissions with population remains invariant regardless of routing strategies. Moreover, as established in Corollary 3.6, the implementation of bounded capacity expansion also fails to alter the scaling order. In addition, while emissions and population exhibit a global linear relationship (Theorem 3.1), from a local perspective within the examined population range, emissions in most cities scale superlinearly with population (Remark 1). Only a minority of cases, such as Dallas and Philadelphia within specific population intervals, display a sublinear relationship. Given the generality of these findings, the results hold true even for networks resulting from new road construction. Therefore, although routing and construction strategies can reduce absolute emissions, they cannot alter the superlinear scaling order of emissions with population. To fundamentally mitigate future emissions, policies should extend beyond them to manage the increase in total demand, and to follow a sustainable SSP characterized by slower population growth. 
+
+5.2.2. Impact of Population Growth on Eco-routing Efficiency 
+
+In this section, we evaluate the efficiency of eco-routing based on the optimization levels. As shown in Fig. 8, San Francisco transitions from Level 1 through 3 to 4; Dallas shifts from Level 4 to 1; Pittsburgh remains in Level 4; Miami moves from Level 2 to 1 and subsequently to 3; Denver transitions from Level 4 through 3 to 1; and Philadelphia shifts from Level 2 to 4. Furthermore, the variations in optimization level for the six U.S. cities under different SSPs are illustrated in Fig. 9. Some cities, such as Dallas, Pittsburgh, and Denver, are already in inefficient optimization levels across all SSPs in 2025. Other cities, including San Francisco, Miami, and Philadelphia, begin in an efficient Level 1 or 2 but drop to Level 3 or 4 as population grows; notably, Miami and Philadelphia are projected to sustain Level 1 or 2 through 2050 under the SSP1 or SSP2 scenarios. These observations show that the eco-routing efficiency exhibits three distinct patterns: in some cities, eco-routing is already inefficient if the city resides in Level 3 or 4; in others, eco-routing is currently efficient but is projected to become inefficient under population growth, as its efficiency declines once the optimization level deviates from Level 1 or 2; and in a few cities, eco-routing maintains long-term high efficiency, provided that future development follows the sustainable SSP1 or SSP2 scenarios. Therefore, given that most cities either already operate at or tend to shift toward inefficient optimization levels, sole reliance on eco-routing for emission mitigation is insufficient under population growth. Complementary strategies should be adopted to directly reduce emissions and travel time, as well as to maintain efficient optimization levels. 33 8.8 9.6 10.4 11.2 12.0   
+
+> Pc (%)
+> 0.0569 0.0785 0.0790 0.0808 0.0806 0.0801 0.0754 0.0724 0.0710 0.0360
+
+8 16 24 32 40 48 56 
+
+G (%) 
+
+16 20 24 28   
+
+> Pt (%)
+> 0.3673 0.2827 0.2802 0.2670 0.2629 0.2618 0.2647 0.2692 0.2715 0.3452
+> baseline, 2025
+
+(a) San Francisco 3.0 3.3 3.6 3.9 4.2   
+
+> Pc (%)
+> 0.0296 0.0204 0.0201 0.0174 0.0153 0.0150 0.0151 0.0151 0.0156 0.0253
+
+8 16 24 32 40 48 56 64 72 
+
+G (%) 
+
+1.6 1.8 2.0 2.2 2.4 2.6   
+
+> Pt (%)
+> 0.0094 0.0149 0.0151 0.0165 0.0174 0.0174 0.0164 0.0163 0.0157 0.0070
+> baseline, 2025
+
+(b) Dallas 3.2 3.3 3.5 3.6 3.8  
+
+> Pc (%)
+> 0.0425 0.0297 0.0127
+
+2 4 6 8 10 12 14 16 18 
+
+G (%) 
+
+4.0 4.2 4.5 4.8 5.0 5.2  
+
+> Pt (%)
+> 0.0500 0.0830 0.1489
+> baseline, 2025
+
+(c) Pittsburgh 3.0 3.5 4.0 4.5 5.0  
+
+> Pc (%)
+> 0.0474 0.0570 0.0614 0.0634 0.0684 0.0694 0.0696 0.0593
+
+4 8 12 16 20 24 28 32 36 
+
+G (%) 
+
+4.8 5.0 5.2 5.4 5.6 5.8 
+
+> Pt (%)
+> -0.0248 -0.0119 -0.0079 -0.0068 -0.0096 -0.0144 -0.0168 -0.0886
+> baseline, 2025
+
+(d) Miami 2.4 2.8 3.2 3.6 4.0 4.4    
+
+> Pc (%)
+> 0.0536 0.0440 0.0433 0.0389 0.0371 0.0364 0.0345 0.0344 0.0344 0.0425
+
+5 10 15 20 25 30 35 40 45 
+
+G (%) 
+
+4.90 4.95 5.00 5.05 5.10 5.15   
+
+> Pt (%)
+> 0.0011 0.0033 0.0034 0.0043 0.0045 0.0046 0.0046 0.0044 0.0042 0.0001
+> baseline, 2025
+
+(e) Denver 3.5 3.6 3.8 3.9 4.1    
+
+> Pc (%)
+> 0.0144 0.0167 0.0169 0.0176 0.0177 0.0177 0.0179 0.0180 0.0177 0.0154
+
+4 8 12 16 20 24 28 32 36 
+
+G (%) 
+
+1.5 1.8 2.1 2.4 2.7 3.0    
+
+> Pt (%)
+> 0.0326 0.0373 0.0377 0.0398 0.0406 0.0406 0.0417 0.0428 0.0453 0.0492
+> baseline, 2025
+
+(f) Philadelphia 
+
+Figure 8: Optimization levels for the six U.S. cities (vertical dashed lines indicate the boundaries between optimization levels). Level 4  Level 3 
+
+Sf 
+
+Da 
+
+Pi 
+
+De 
+
+: 2050 
+
+: 2030, 2040 
+
+: 2030, 2040, 2050 
+
+: 2030, 2040 
+
+Mi 
+
+Ph 
+
+: 2030, 2040 
+
+: 2030, 2040, 2050 
+
+Sf 
+
+Da 
+
+Mi 
+
+: 2030 
+
+: 2050 
+
+: 2050 
+
+Sf 
+
+De 
+
+: 2040 
+
+: 2050 
+
+Level 1 Level 2 
+
+(a) SSP1 scenario Level 4  Level 3 
+
+Sf 
+
+Da 
+
+Pi 
+
+De 
+
+: 2050 
+
+: 2030, 2040 
+
+: 2030, 2040, 2050 
+
+: 2030, 2040, 2050 
+
+Mi 
+
+Ph 
+
+: 2030, 2040 
+
+: 2030, 2040, 2050 
+
+Sf 
+
+Da 
+
+Mi 
+
+: 2030 
+
+: 2050 
+
+: 2050 
+
+Sf  : 2040 
+
+Level 1 Level 2  (b) SSP2 scenario Level 4  Level 3 
+
+Sf 
+
+Da 
+
+Pi 
+
+De 
+
+Ph 
+
+: 2040, 2050 
+
+: 2030 
+
+: 2030, 2040, 2050 
+
+: 2030 
+
+: 2040, 2050 
+
+Sf 
+
+Da 
+
+Mi 
+
+De 
+
+Mi 
+
+De 
+
+: 2050 
+
+: 2040 
+
+Level 1 Level 2 
+
+: 2030 
+
+: 2040, 2050 
+
+: 2040 
+
+: 2050 
+
+Mi 
+
+Ph 
+
+: 2030 
+
+: 2030  (c) SSP5 scenario 
+
+Figure 9: Variations in optimization level for the six U.S. cities under different SSPs. (The classification of optimization levels is based on Fig. 1. Sf: San Francisco; Da: Dallas; Pi: Pittsburgh; Mi: Miami; De: Denver; and Ph: Philadelphia.) 
+
+5.3. Carbon Bottlenecks 5.3.1. VOC 
+
+In this section, we utilize VOC to analyze the urban dynamics from a microscopic road network perspective. When travelers shift from time-routing to eco-routing, as illustrated in Fig. 10a, links along shorter routes experience an increase in VOC; conversely, links on longer routes experience a decrease. For other cities, similar patterns are observed in Fig. 11, all of 34 which corroborate Theorem 3.3 and the findings in Section 5.1.3. Furthermore, there are a set of specific links that exhibit a significant increase in VOC, and their spatial distribution remains nearly invariant across the three analysis years. When using eco-routing under population growth, as shown in Fig. 10b, in addition to a general increase in VOC observed across almost all road segments, there are also specific links on short paths exhibiting a significant increase while their spatial distribution remains highly consistent across years. Moreover, as illustrated in Fig. A.1, although these specific links are already characterized by high VOC and low speed, their traffic flow continues to surge as the population grows. These observations corroborate our analysis in Section 5.2.1, confirming that under population growth, links along routes selected by eco-routing, especially those on short paths, will inevitably become increasingly congested. <-1.5 -1.5 - -0.75 -0.75 - -0.3 -0.3 - 0 0 - 0.3 0.3 - 0.75 0.75 - 1 1 - 1.25 1.25< OD node           
+
+> (a) 2030 (left), 2040 (middle), and 2050 (right) <-0.20 -0.2 - -0.15 -0.15-00 - 0.15 0.15 - 0.3 0.3 - 0.35 0.35 - 0.4 0.4< OD node
+> (b) 2030 (left), 2040 (middle), and 2050 (right)
+
+Figure 10: Maps of VOC difference in San Francisco under the SSP2 scenario. (a) The VOC difference between different UE models, calculated as the VOC under the Time-Carbon UE model ( ψ1 = 1 , ψ2 = 9 )minus that under the Time-Only UE model. (b) The VOC difference between different years under the Time-Carbon UE model ( ψ1 = 1 , ψ2 = 9 ), calculated as the VOC in specific year minus that in corresponding previous analysis years. (OD nodes represent the top 15 origins and destinations ranked by demand volume.) 
+
+The spatial distribution of the two sets of specific links observed in Fig. 10 exhibit high similarity. In the first set (Fig. 10a), under the Time-Carbon UE model, the VOC on these links increases significantly relative to the Time-Only UE model, driving a reduction in car-bon emissions. In the second set (Fig. 10b), the VOC increases annually, contributing to the mitigation of emissions driven by population growth. Both results indicate that these links are key for reducing emissions. However, under eco-routing, they already exhibit high VOC and will become increasingly congested as population grows. On the one hand, severe congestion results in longer travel time and lower speed, which increases the fuel consump-35 (a) San Francisco (b) Dallas (c) Pittsburgh                 
+
+> (d) Miami (e) Denver (f) Philadelphia <-1.5 -1.5 - -0.75 -0.75 - -0.3 -0.3-00 - 0.3 0.3 - 0.75 0.75 - 1 1 - 1.25 1.25< OD node
+> Figure 11: Maps of VOC difference between Time-Only and Time-Carbon UE ( ψ1= 1 ,ψ2= 9 ) models for the six U.S. cities under the SSP2 scenario in 2050.
+
+tion factor h(v), thereby offsetting part of the emission savings derived from reducing route length. On the other hand, such congestion limits further reduction in travel distance, di-rectly constraining the potential for emission mitigation. Consequently, we refer to the links from the second set as carbon bottlenecks, and future strategies should focus on improving these bottlenecks. Identifying carbon bottlenecks requires setting a significance threshold to distinguish links exhibiting a significant increase in VOC, as well as specifying the year and SSP sce-nario. Specifically, for (SSP2, 2050) with a threshold of 0.35, we first calculate the difference in VOC between 2040 and 2050 under the Time-Carbon UE model and SSP2 scenario, and then select links where the difference exceeds 0.35 as the bottleneck links. Carbon bottle-necks are characterized by high VOC that will inevitably increase with future population growth, implying that they exert a high and rising carbon influence within the road network. Therefore, as suggested by Proposition 3.5, strategies to expand the capacity of these links can yield substantial and long-term emission reduction benefits (Remark 5). 
+
+5.3.2. Efficient Strategy: Improving Carbon Bottlenecks 
+
+In this section, we explore the effectiveness of expanding the capacity of carbon bottle-necks. Specifically, for all cities, we identify carbon bottlenecks using a significance threshold of 0.35, based on (SSP2, 2050) and Time-Carbon UE model with ψ1 = 1 and ψ2 = 9 . How-36 ever, no bottlenecks are found in Pittsburgh under the defined parameters, even when the threshold is moderately lowered. In the San Francisco network, as shown in Table 10, carbon bottleneck links constitute only 0.46% of the total links, yet expanding this small number of links yields significant dual benefits for travel time and emissions, verifying Proposition 3.5. On the one hand, adding capacity reduces travel time and the fuel consumption factor h(v),mitigating the issue where congestion offsets the emission benefits gained from the reduced route length. On the other hand, the expanded bottlenecks attract more vehicles to the shorter routes, thereby reducing their travel distance and emissions (Remark 4). Specifi-cally, with a 50% expansion, the reduction in emissions ranges from 1.2% to 1.9%, while the reduction in UETT spans from 16.5% to 21.9%. With a 100% expansion, emission reduc-tions range from 2.2% to 3.6%, and UETT reductions range from 23.8% to 31.6%. In stark contrast, the other links account for 99.54% of the network segments. Although expanding this vast number of links by 20% achieves a slightly larger emission reduction than expanding bottleneck links, it falls significantly behind in reducing UETT. These results collectively confirm that expanding carbon bottlenecks is a long-term efficient strategy (Remark 5).                                                                                                                                                            
+
+> Table 10: Carbon emissions (t) and UETT (min) under the Time-Carbon UE model ( ψ1= 1 ,ψ2= 9 ) in San Francisco with different expansion strategies. Expansion baseline SSP1 SSP2 SSP5 2025 2030 2040 2050 2030 2040 2050 2030 2040 2050 Emissions 0% 323 398 450 495 394 439 482 425 501 589 20% 305 377 428 472 374 418 459 404 477 563 (99.54%) 5.4% 5.1% 4.9% 4.7% 5.1% 4.9% 4.7% 5.0% 4.7% 4.5% 50% 316 391 443 489 388 432 475 418 494 582 (0.46%) 1.9% 1.6% 1.5% 1.4% 1.6% 1.5% 1.4% 1.6% 1.4% 1.2% 100% 311 385 437 482 382 426 469 412 487 576 (0.46%) 3.6% 3.1% 2.9% 2.6% 3.1% 2.9% 2.7% 3.0% 2.6% 2.2% UETT 0% 26.5 32.2 35.9 39.4 32.0 35.3 38.4 34.2 39.8 46.4 20% 23.7 28.8 32.3 35.6 28.5 31.6 34.6 30.7 35.9 41.9 (99.54%) 10.7% 10.6% 10.2% 9.8% 10.8% 10.2% 9.9% 10.4% 9.8% 9.7% 50% 22.1 26.3 29.0 31.5 26.1 28.5 30.8 27.7 31.7 36.3 (0.46%) 16.5% 18.4% 19.3% 20.2% 18.4% 19.3% 19.9% 19.0% 20.4% 21.9% 100% 20.2 23.6 25.8 27.8 23.5 25.4 27.3 24.8 28.0 31.7 (0.46%) 23.8% 26.8% 28.2% 29.4% 26.7% 28.0% 29.1% 27.7% 29.5% 31.6% where (0.46%) refers to expanding carbon bottlenecks; (99.54%) refers to expanding links in the road network excluding carbon bottlenecks.
+
+In Fig. 12a, the slopes of carbon emissions curves are virtually identical across all ex-pansion percentages, indicating that bounded capacity expansion fails to alter the scaling order of emissions with population, aligning with Corollary 3.6. Additionally, as shown in Figs. 12b and 13, for all cities, both OP and CP trends remain nearly unchanged after expansion. Consequently, the strategy of expanding carbon bottlenecks does not alter the optimization level. Managers can implement this strategy by converting on-street parking into traffic lanes, as these bottlenecks typically feature such parking. Moreover, given the 37 lower traffic demand during off-peak periods, a dynamic curbside management approach can be adopted to flexibly reallocate curb space for either parking or traffic lanes based on temporal traffic needs. Regarding road capacity expansion subject to a budget constraint, Proposition 3.7 implies that the optimal scheme prioritizes allocating the budget to bottle-necks with the highest carbon influence per unit cost. Upon budget exhaustion, the carbon influence per unit cost equalizes across all expanded links and corresponds to the shadow price. In summary, the strategy of expanding carbon bottlenecks is practically feasible, effectively reducing both emissions and travel time without compromising the efficiency of eco-routing. 20 25 30 35 40 45                     
+
+> UETT (min)
+> 816 24 32 40 48 56
+> G(%)
+> 300 350 400 450 500 550
+> Carbon emissions (t)
+> 0% expansion 50% expansion 100% expansion
+> baseline, 2025
+> (a) 7.2 8.0 8.8 9.6 10.4
+> Pc (%)
+> 0.0319 0.0757 0.0769 0.0822 0.0830 0.0829 0.0775 0.0734 0.0714 0.0175 50% expansion
+> 816 24 32 40 48 56
+> G(%)
+> 6.0 7.5 9.0 10.5 12.0
+> Pt (%)
+> 0.1651 0.0950 0.0930 0.0831 0.0806 0.0801 0.0851 0.0901 0.0925 0.1643
+> 50% expansion
+> baseline, 2025 (b)
+
+Figure 12: Impact of expanding carbon bottlenecks in San Francisco. (a) Carbon emissions (t) and UETT (min) with 0%, 50%, and 100% expansion. (b) Optimization levels with 50% expansion. 
+
+5.3.3. Induced Demand 
+
+Although the strategy of expanding carbon bottlenecks is proven to be efficient, it in-evitably leads to the issue of induced demand, which may compromise the optimization level. This induced demand primarily manifests as increased demand on existing OD pairs, which can be decomposed into variations in πs,t y and population growth. As established in Sections 5.1 and 5.2.1, population growth acts as the dominant driver of changes in urban metrics. Therefore, it is reasonable to infer that the impact of induced demand on the opti-mization level is functionally equivalent to an additional increase in population, preserving the trend of optimization level. To validate this inference, we first calculate the changes in travel cost for each OD pair before and after expansion under both Time-Only and Time-Carbon UE models. Subse-quently, we identify the top 10% of OD pairs exhibiting the largest decrease in travel cost and increase their demand volume by 10% and 20% to simulate the induced demand. As shown in Fig. 14, the shapes of all corresponding curves remain similar before and after in-troducing the induced demand; specifically, the curves with 10% and 20% increase manifest as leftward shifts relative to the curve with 0% increase. Regarding the trend of optimization level, this result implies that the impact of induced demand is indeed functionally equivalent to additional population growth, thereby corroborating the inference. Moreover, given that the dominance of population growth is consistent across cities, this finding is generalizable 38 7.2 7.8 8.4 9.0 9.6 
+
+> Pc (%)
+
+0.0462 0.0597 0.0600 0.0610 0.0608 0.0604 0.0572 0.0552 0.0543 0.0313 100% expansion 
+
+8 16 24 32 40 48 56 
+
+G (%) 
+
+3.0 3.5 4.0 4.5 5.0 5.5 
+
+> Pt (%)
+
+0.0663 0.0384 0.0376 0.0336 0.0324 0.0322 0.0338 0.0356 0.0365 0.0635 
+
+100% expansion 
+
+baseline, 2025 (a) San Francisco 3.0 3.2 3.5 3.8 4.0 
+
+> Pc (%)
+
+0.0295 0.0204 0.0201 0.0171 0.0140 0.0136 0.0115 0.0115 0.0114 0.0148 
+
+100% expansion 
+
+8 16 24 32 40 48 56 64 72 
+
+G (%) 
+
+1.1 1.2 1.4 1.5 
+
+> Pt (%)
+
+-0.0126 -0.0004 0.0001 0.0042 0.0083 0.0089 0.0119 0.0119 0.0121 0.0079 100% expansion 
+
+baseline, 2025 (b) Dallas 2.5 3.0 3.5 4.0 4.5 
+
+> Pc (%)
+
+0.0594 0.0678 0.0708 0.0718 0.0717 0.0697 0.0686 0.0324 100% expansion 
+
+4 8 12 16 20 24 28 32 36 
+
+G (%) 
+
+3.8 4.0 4.2 4.5 4.8 5.0 
+
+> Pt (%)
+
+-0.0182 -0.0105 -0.0093 -0.0097 -0.0175 -0.0243 -0.0274 -0.1077 100% expansion 
+
+baseline, 2025 
+
+(c) Miami 5 10 15 20 25 30 35 40 45 2.4 2.8 3.2 3.6 4.0 
+
+> Pc (%)
+
+0.0587 0.0458 0.0448 0.0388 0.0363 0.0353 0.0324 0.0320 0.0320 0.0411 100% expansion 
+
+5 10 15 20 25 30 35 40 45 
+
+G (%) 
+
+4.12 4.16 4.20 4.24 4.28 
+
+> Pt (%)
+
+-0.0069 -0.0022 -0.0019 0.0001 0.0009 0.0013 0.0020 0.0020 0.0019 -0.0027 
+
+100% expansion 
+
+baseline, 2025 (d) Denver 4 8 12 16 20 24 28 32 36 3.2 3.3 3.5 3.6 3.8 
+
+> Pc (%)
+
+0.0170 0.0193 0.0194 0.0199 0.0199 0.0199 0.0199 0.0198 0.0187 0.0145 100% expansion 
+
+4 8 12 16 20 24 28 32 36 
+
+G (%) 
+
+1.0 1.1 1.2 1.3 1.4 1.5 
+
+> Pt (%)
+
+0.0046 0.0054 0.0056 0.0072 0.0080 0.0080 0.0094 0.0110 0.0161 0.0297 
+
+100% expansion 
+
+baseline, 2025 (e) Philadelphia 
+
+Figure 13: Optimization levels for five cities with 100% expansion. 
+
+to diverse road networks. Consequently, the strategy of expanding carbon bottlenecks does not alter the trend of cities’ optimization level, even when accounting for potential induced demand. 7.5 9.0 10.5 12.0 
+
+> Pc (%)
+> 10% increase 20% increase 0% increase
+
+8 16 24 32 40 48 56 
+
+G (%) 
+
+6810 12 14 16 
+
+> Pt (%)
+
+10% increase 20% increase 0% increase 
+
+baseline, 2025 
+
+(a) 50% expansion 78910 11 12 
+
+> Pc (%)
+> 10% increase 20% increase 0% increase
+
+8 16 24 32 40 48 56 
+
+G (%) 
+
+2.4 3.2 4.0 4.8 5.6 
+
+> Pt (%)
+
+10% increase 20% increase 0% increase 
+
+baseline, 2025 (b) 100% expansion 
+
+Figure 14: Optimization levels for San Francisco with 50% and 100% expansion, specifically accounting for the induced demand. 
+
+39 6. Conclusion 
+
+This study develops an analytical framework that integrates the demand forecasting method with the Time-Only and Time-Carbon UE models to simulate future network traf-fic under different routing strategies. We apply the bi-conjugate Frank-Wolfe algorithm to these models and establish the existence, uniqueness, and equivalence of their optimal solu-tions. Using real-world road networks, commuting OD demand, and population projections under various SSPs for the six representative U.S. cities, we reveal that population growth is the dominant driver of urban dynamics and eco-routing efficiency: (i) While eco-routing mit-igates urban transport emissions, emissions in most cities scale superlinearly with population regardless of routing and construction strategies, as the scaling order is an intrinsic property of road networks. (ii) The efficiency of eco-routing exhibits distinct patterns: in some cities, eco-routing is already inefficient; in others, while currently efficient, it is projected to be-come inefficient under population growth; and in only a few cities, it retains long-term high efficiency, exclusively under SSP1 or SSP2 scenarios. (iii) Under population growth, travel-ers using eco-routing increasingly select shorter routes despite significant decreases in travel speed, thereby giving rise to carbon bottlenecks. This indicates that the carbon reduction benefits from reducing travel distance outweigh those from maintaining travel speed. Fur-thermore, the strategy of expanding the small number of bottlenecks (0.46%) is efficient and practically feasible, reducing emissions (3%) and travel time (28%) without compromising the efficiency of eco-routing, even when accounting for potential induced demand. Based on the findings, this study offers policy recommendations for emission mitigation, infrastructure development, and low-carbon urban transport planning. Specifically: (i) Im-plement eco-routing and improve carbon bottlenecks. Both strategies have proven effective in emissions mitigation. Imposing a carbon tax on fuel serves as a practical implementation of city-scale eco-routing, necessitating an appropriate tax rate to ensure the stable evolution of the lowest carbon routes under population growth. Concurrently, a dynamic curbside management approach can be applied to the carbon bottlenecks to reallocate curb space for either parking or lanes based on temporal traffic needs. (ii) Optimize urban spatial func-tionality. Given the critical role of reducing travel distance in emission mitigation, policies should prioritize improving the jobs-housing balance and promoting polycentric develop-ment to counteract urban sprawl and shorten the average trip length. (iii) Manage gasoline car travel demand. As the scaling order of emissions with population remains invariant to routing and construction strategies, the fundamental approach to mitigate emissions lies in managing the growing demand for gasoline car travel, including expanding public transit, incentivizing carpooling, and following a sustainable SSP characterized by slower population growth. Furthermore, introducing electric vehicles is expected to significantly reduce emis-sions. They displace gasoline vehicles, generating zero direct emissions, and tend to bypass road segments heavily utilized by gasoline vehicles, thereby yielding synergistic emission reduction benefits. A limitation of this study is that the travel model only refers to cars, and future re-search needs to conduct a more comprehensive analysis by incorporating carpooling, public transit, and other factors. Besides, the UE traffic assignment faces challenges under sub-40 stantial population growth, as it may underestimate the severity of congestion. Moreover, the strategy of expanding carbon bottlenecks leads to induced demand; although we simu-lated this impact, unforeseen effects may arise in the long run due to complex demographic dynamics such as residential relocation and the emergence of new OD pairs; nevertheless, in the short run, this strategy remains efficient. In addition, the OD demand data utilized in this study reflects the peak-hour traffic conditions, which accounts for the majority of daily urban transport emissions. However, conclusions may vary slightly during off-peak periods; for instance, the spatial distribution of carbon bottlenecks may shift during other temporal segments. With the availability of data for additional time periods, further research could extend to different intervals. 
+
+Declaration of Interest 
+
+The authors declare no conflict of interest. 
+
+Data Availability 
+
+The processed data and implementation code will be made available upon publication. The Frank-Wolfe algorithm converges to a unique equilibrium state due to strict convexity (Section 3.2.2), ensuring reproducibility regardless of initialization. 
+
+Author Contributions 
+
+Zhiheng Shi: Conceptualization, Data Curation, Formal Analysis, Methodology, Vali-dation, Visualization, Writing - Original Draft, Writing - review & editing; Xiaohan Xu: Data Curation, Formal Analysis, Resources, Supervision, Writing - Original Draft, Writing - review & editing; Wei Ma: Methodology, Resources, Supervision, Writing - Original Draft, Writing - review & editing; Kairui Feng: Methodology, Resources, Supervision, Writing -Original Draft, Writing - review & editing; Bin He: Supervision, Writing - Original Draft. 
+
+Acknowledgement 
+
+Kairui Feng is supported by Shanghai Municipal Science and Technology Commission Explorers Program (24TS1401600) and Xiaomi Foundation. Kairui Feng and Bin He are supported by the National Natural Science Foundation of China (Grant No. 62088101). This support is gratefully acknowledged. 
+
+Appendix A. Additional Maps 
+
+Additional maps under the Time-Carbon UE model ( ψ1 = 1 and ψ2 = 9 ) are shown in Fig. A.1. 41 0 - 0.2 
+
+0.2 - 0.4 
+
+0.4 - 0.6 
+
+0.6 - 0.8 
+
+0.8 - 1 
+
+1 - 1.2 
+
+1.2 - 1.4 
+
+1.4 - 1.6 
+
+1.6 - 1.8 
+
+1.8 - 2 
+
+2 - 2.2 
+
+2.2 - 3.2 
+
+3.2 - 4.2 
+
+4.2< 
+
+Legend 2025 
+
+baseline 
+
+2030 
+
+SSP1 
+
+2040 
+
+SSP1 
+
+2050 
+
+SSP1 
+
+2030 
+
+SSP2 
+
+2040 
+
+SSP2 
+
+2050 
+
+SSP2 
+
+2030 
+
+SSP5 
+
+2040 
+
+SSP5 
+
+2050 
+
+SSP5 (a) San Francisco 
+
+(b) Philadelphia 
+
+Figure A.1: Maps of VOC across cities, years and SSPs under the Time-Carbon UE model ( ψ1 = 1 , ψ 2 = 9 ). 
+
+42 (c) Pittsburgh 
+
+> (c) Pittsburgh
+> (d) Miami
+
+Figure A.1: (continued). 
+
+43 (e) Denver 
+
+> (f) Dallas
+
+Figure A.1: (continued). 
+
+44 References 
+
+UNFCCC, Greenhouse gas inventory data-detailed data by party, https://di.unfccc.int/detailed_dat a_by_party , accessed: Oct. 10, 2025, 2021. UN DESA, World Urbanization Prospects: The 2018 Revision, United Nations, New York, NY, 2019. E. L. Glaeser, M. E. Kahn, Sprawl and urban growth, in: Handbook of regional and urban economics, vol. 4, Elsevier, 2481–2527, 2004. A. M. Bento, M. L. Cropper, A. M. Mobarak, K. Vinha, The effects of urban spatial structure on travel demand in the United States, Review of Economics and Statistics 87 (3) (2005) 466–478. Y. Kazancoglu, M. Ozbiltekin-Pala, Y. D. Ozkan-Ozen, Prediction and evaluation of greenhouse gas emis-sions for sustainable road transport within Europe, Sustainable Cities and Society 70 (2021) 102924. H. Naganathan, W. K. Chong, Evaluation of state sustainable transportation performances (SSTP) using sustainable indicators, Sustainable Cities and Society 35 (2017) 799–815. E. Yao, T. Liu, T. Lu, Y. Yang, Optimization of electric vehicle scheduling with multiple vehicle types in public transport, Sustainable Cities and Society 52 (2020) 101862. U. Sutradhar, L. Spearing, S. Derrible, Depopulation and associated challenges for US cities by 2100, Nature Cities 1 (1) (2024) 51–61. U.S. Census Bureau, Household Size by Vehicles Available (Table B08201), 2022 American Community Survey (ACS) 5-Year Estimates, https://data.census.gov/table/ACSDT5Y2022.B08201?q=B08201: +Household+Size+by+Vehicles+Available , accessed: Sep. 16, 2025, 2023. J. DeCicco, F. Fung, F. An, Global warming on the road: the climate impact of America’s automobiles, Environmental Defense, 2006. J. Fouladvand, E. Ateş, Y. Sarı, Ö. Okur, Does the availability of alternative energy choices lead to more en-vironmentally friendly outcomes? The case of thermal energy communities and natural gas consumption, Applied Energy 374 (2024) 123932. H. Dong, W. Zhuang, B. Chen, Y. Wang, Y. Lu, Y. Liu, L. Xu, G. Yin, A comparative study of energy-efficient driving strategy for connected internal combustion engine and electric vehicles at signalized intersections, Applied Energy 310 (2022) 118524. F. Zong, M. Zeng, Y.-X. Li, Congestion pricing for sustainable urban transportation systems considering carbon emissions and travel habits, Sustainable Cities and Society 101 (2024) 105198. P.-M. Ortega-Cabezas, A. Colmenar-Santos, D. Borge-Diez, J.-J. Blanes-Peiró, Can eco-routing, eco-driving and eco-charging contribute to the European Green Deal? Case Study: The City of Alcalá de Henares (Madrid, Spain), Energy 228 (2021) 120532. W. Zhuang, J. Li, F. Ju, B. Li, H. Liu, G. Yin, Dual-objective eco-routing strategy for vehicles with different powertrain types, Energy 293 (2024) 130583. Y. Liu, Q. Chen, J. Li, Y. Zhang, Z. Chen, Z. Lei, Collaborated eco-routing optimization for continuous traffic flow based on energy consumption difference of multiple vehicles, Energy 274 (2023) 127277. D. Ku, M. Choi, N. Yoo, S. Shin, S. Lee, A new algorithm for eco-friendly path guidance focused on electric vehicles, Energy 233 (2021) 121198. Y. Wang, W. Liu, B. Li, N. Lei, H. Zhang, W. Zhuang, G. Yin, B. Chen, TErouting: Traffic-aware energy routing for electric vehicle logistics fleets, Energy (2025a) 139807. A. Fahmin, M. A. Cheema, M. Eunus Ali, A. Nadjaran Toosi, H. Lu, H. Li, D. Taniar, H. A. Rakha, B. Shen, Eco-Friendly Route Planning Algorithms: Taxonomies, Literature Review and Future Directions, ACM Computing Surveys 57 (1) (2024) 1–42. M. Zhou, H. Jin, W. Wang, A review of vehicle fuel consumption models to evaluate eco-driving and eco-routing, Transportation Research Part D: Transport and Environment 49 (2016) 203–218. N. Reinicke, J. Cappellucci, J. Holden, RouteE: A Vehicle Energy Consumption Prediction Engine, Tech. Rep., National Renewable Energy Lab.(NREL), Golden, CO (United States), 2021. Y. M. Nie, Q. Li, An eco-routing model considering microscopic vehicle operating conditions, Transportation Research Part B: Methodological 55 (2013) 154–170. E. Ericsson, H. Larsson, K. Brundell-Freij, Optimizing route choice for lowest fuel consumption–potential 
+
+45 effects of a new driver support tool, Transportation Research Part C: Emerging Technologies 14 (6) (2006) 369–383. K. Ahn, H. A. Rakha, Network-wide impacts of eco-routing strategies: A large-scale case study, Transporta-tion Research Part D: Transport and Environment 25 (2013) 119–130. R. C. Antúnez, M. W. Levin, How does Eco-routing affect total system emissions? City network predictions from user equilibrium models, IEEE Transactions on Intelligent Transportation Systems 25 (2) (2023) 1408–1417. K. Ahn, H. Rakha, The effects of route choice decisions on vehicle energy consumption and emissions, Transportation Research Part D: Transport and Environment 13 (3) (2008) 151–167. UN DESA, World Population Prospects 2024: Summary of Results, Stylus Publishing, LLC, 2024. S. E. Vollset, E. Goren, C.-W. Yuan, J. Cao, A. E. Smith, T. Hsiao, C. Bisignano, G. S. Azhar, E. Castro, J. Chalek, et al., Fertility, mortality, migration, and population scenarios for 195 countries and territories from 2017 to 2100: a forecasting analysis for the Global Burden of Disease Study, The Lancet 396 (10258) (2020) 1285–1306. K. Samir, W. Lutz, The human core of the shared socioeconomic pathways: Population scenarios by age, sex and level of education for all countries to 2100, Global Environmental Change 42 (2017) 181–192. N. Kabisch, D. Haase, Diversifying European agglomerations: Evidence of urban population trends for the 21st century, Population, Space and Place 17 (3) (2011) 236–253. OECD, Rethinking urban sprawl: Moving towards sustainable cities, 2018. P. Rérat, The new demographic growth of cities: The case of reurbanisation in Switzerland, Urban Studies 49 (5) (2012) 1107–1125. J. Gao, Downscaling global spatial population projections from 1/8-degree to 1-km grid cells, National Center for Atmospheric Research, Boulder, CO, USA 1105. M. E. Hauer, Population projections for US counties by age, sex, and race controlled to shared socioeconomic pathway, Scientific Data 6 (1) (2019) 1–15. L. Chapman, Transport and climate change: a review, Journal of Transport Geography 15 (5) (2007) 354– 367. L. M. Bettencourt, J. Lobo, D. Helbing, C. Kühnert, G. B. West, Growth, innovation, scaling, and the pace of life in cities, Proceedings of the National Academy of Sciences 104 (17) (2007) 7301–7306. L. M. Bettencourt, J. Lobo, D. Strumsky, G. B. West, Urban scaling and its deviations: Revealing the structure of wealth, innovation and crime across cities, PloS one 5 (11) (2010) e13541. M. Mohsin, Q. Abbas, J. Zhang, M. Ikram, N. Iqbal, Integrated effect of energy consumption, economic development, and population growth on CO2 based environmental degradation: a case of transport sector, Environmental Science and Pollution Research 26 (32) (2019) 32824–32835. H. Li, The Research on Urban Population Size, Spatial Distribution and Traffic Carbon Emission, Ph.D. thesis, Hunan University, Changsha, China, (in Chinese), 2023. Q. Yu, T. Li, H. Li, Improving urban bus emission and fuel consumption modeling by incorporating passenger load factor for real world driving, Applied Energy 161 (2016) 101–111. J. Wang, H. A. Rakha, Fuel consumption model for conventional diesel buses, Applied Energy 170 (2016) 394–402. L. Yang, X. Hu, L. Fang, Carbon emissions tax policy of urban road traffic and its application in Panjin, China, PloS one 13 (5) (2018) e0196762. J. Wang, H. Dai, H. Feng, M. Guo, V. Zylianov, Z. Feng, J. Cui, Carbon emission of urban vehicles based on carbon emission factor correlation analysis, Scientific Reports 15 (1) (2025b) 2037. P. E. Hart, N. J. Nilsson, B. Raphael, A formal basis for the heuristic determination of minimum cost paths, IEEE Transactions on Systems Science and Cybernetics 4 (2) (1968) 100–107. D. B. Johnson, Efficient algorithms for shortest paths in sparse networks, Journal of the ACM (JACM) 24 (1) (1977) 1–13. E. Jabir, V. V. Panicker, R. Sridharan, Design and development of a hybrid ant colony-variable neighbour-hood search algorithm for a multi-depot green vehicle routing problem, Transportation Research Part D: Transport and Environment 57 (2017) 422–457. 
+
+46 M. Hannan, M. Akhtar, R. Begum, H. Basri, A. Hussain, E. Scavino, Capacitated vehicle-routing problem model for scheduled solid waste collection and route optimization using PSO algorithm, Waste Manage-ment 71 (2018) 31–41. H. Wang, X. Lang, W. Mao, Voyage optimization combining genetic algorithm and dynamic programming for fuel/emissions reduction, Transportation Research Part D: Transport and Environment 90 (2021) 102670. J. F. Coloma, M. García, Y. Wang, A. Monzón, Environmental strategies for selecting eco-routing in a small city, Atmosphere 10 (8) (2019) 448. J. G. Wardrop, Road paper. some theoretical aspects of road traffic research., Proceedings of the Institution of Civil Engineers 1 (3) (1952) 325–362. M. Beckmann, C. B. McGuire, C. B. Winsten, Studies in the Economics of Transportation, Yale University Press, New Haven, CT, 1956. M. Frank, P. Wolfe, et al., An algorithm for quadratic programming, Naval Research Logistics Quarterly 3 (1-2) (1956) 95–110. M. Florian, S. Nguyen, An application and validation of equilibrium trip assignment methods, Transporta-tion Science 10 (4) (1976) 374–390. H. J. Van Zuylen, L. G. Willumsen, The most likely trip matrix estimated from traffic counts, Transportation Research Part B: Methodological 14 (3) (1980) 281–293. Y. Sheffi, Urban transportation networks, vol. 6, Prentice-Hall, Englewood Cliffs, NJ, 1985. A. Nagurney, A multiclass, multicriteria traffic network equilibrium model, Mathematical and Computer Modelling 32 (3-4) (2000) 393–411. S. Chen, X. Zheng, H. Yin, Y. Liu, Did Chinese cities that implemented driving restrictions see reductions in PM10?, Transportation Research Part D: Transport and Environment 79 (2020) 102208. S. Jia, L. Bi, W. Zhu, T. Fang, System dynamics modeling for improving the policy effect of traffic energy consumption and CO2 emissions, Sustainable Cities and Society 90 (2023) 104398. Z. Chen, B. Li, S. Jia, Dynamic evaluation of environmental-economic performance of vehicle emission reduction policy from the perspective of the loss-aversion effect, Sustainable Cities and Society 85 (2022) 104080. A. Raith, J. Y. Wang, M. Ehrgott, S. A. Mitchell, Solving multi-objective traffic assignment, Annals of Operations Research 222 (1) (2014) 483–516. Y. Yin, S. Lawphongpanich, Internalizing emission externality on road networks, Transportation Research Part D: Transport and Environment 11 (4) (2006) 292–301. S. Çolak, A. Lima, M. C. González, Understanding congested travel in urban areas, Nature Communications 7 (1) (2016) 10793. G. E. Box, G. M. Jenkins, G. C. Reinsel, G. M. Ljung, Time series analysis: forecasting and control, John Wiley & Sons, 2015. U.S. Department of Transportation, Benefit-cost analysis guidance for discretionary grant programs, https: //www.transportation.gov/office-policy/transportation-policy/benefit-cost-analysis-gui dance , accessed: Sep. 21, 2025, 2023. T. A. Manual, Bureau of public roads, us dept, Commerce, Urban Planning Division, Washington, DC, USA .M. Mitradjieva, P. O. Lindberg, The stiff is moving—Conjugate direction Frank-Wolfe methods with appli-cations to traffic assignment, Transportation Science 47 (2) (2013) 280–293. J. C. Zill, P. Camargo, N. S. Daisy, T. Veitch, Toll choice and stochastic user equilibrium: ticking all the boxes, Transportation Research Record 2673 (4) (2019) 930–940. N. McGuckin, A. Fucci, et al., Summary of travel trends: 2017 national household travel survey, Tech. Rep., United States. Department of Transportation. Federal Highway Administration, 2018. Y. Li, Z. Liu, S. Zhang, Joint Impacts of Pricing Strategies and Persuasive Information on Habitual Auto-mobile Commuters’ Travel Mode Shift Responses, Sustainability 15 (2) (2023) 1058. S. Kim, K. Jang, J. Yeo, Non-linear impacts of COVID-19 pandemic on human mobility: Lessons from its variations across three pandemic waves, Sustainable Cities and Society 97 (2023) 104769. 
+
+47 U.S. Environmental Protection Agency, Greenhouse Gas Emissions from a Typical Passenger Vehicle, https: //www.epa.gov/greenvehicles/greenhouse- gas- emissions- typical- passenger- vehicle ,accessed: Sep. 20, 2025, 2025. S. Sun, W. Szeto, Multi-class stochastic user equilibrium assignment model with ridesharing: Formulation and policy implications, Transportation Research Part A: Policy and Practice 145 (2021) 203–227. TRB, Highway Capacity Manual, Transportation Research Board, Washington, DC, 6th edn., 2016. FHWA, Highway Functional Classification Concepts, Criteria and Procedures, Tech. Rep., U.S. Department of Transportation, 2013. U.S. Census Bureau, Annual Estimates of the Resident Population for Incorporated Places of 20,000 or More, Ranked by July 1, 2024 Population: April 1, 2020 to July 1, 2024 (SUB-IP-EST2024-ANNRNK), 
+
+https://www.census.gov/data/tables/time-series/demo/popest/2020s-total-cities-and-tow ns.html , accessed: Sep. 21, 2025, 2024. K. L. McKinney, A. S. Green, L. Vilhuber, J. M. Abowd, Total error and variability measures for the quarterly workforce indicators and LEHD origin-destination employment statistics in OnTheMap, Journal of Survey Statistics and Methodology 9 (5) (2021) 1146–1182. U.S. Census Bureau, LEHD Origin-Destination Employment Statistics (LODES) Data, Version 7, https: //lehd.ces.census.gov/data/lodes , accessed: Sep. 15, 2025, 2021a. OpenStreetMap contributors, OpenStreetMap, https://www.openstreetmap.org , accessed: Sep. 22, 2025, 2024. R. M. Smith, Z. D. Blizard, A census tract level analysis of urban sprawl’s effects on economic mobility in the United States, Cities 115 (2021) 103232. M. Abdel-Aty, J. Lee, C. Siddiqui, K. Choi, Geographical unit based analysis in the context of transportation safety planning, Transportation Research Part A: Policy and Practice 49 (2013) 62–75. X. Xu, Z. Zheng, Z. Hu, K. Feng, W. Ma, A unified dataset for the city-scale traffic assignment model in 20 U.S. cities, Scientific Data 11 (1) (2024) 325. B. C. O’Neill, E. Kriegler, K. L. Ebi, E. Kemp-Benedict, K. Riahi, D. S. Rothman, B. J. Van Ruijven, D. P. Van Vuuren, J. Birkmann, K. Kok, et al., The roads ahead: Narratives for shared socioeconomic pathways describing world futures in the 21st century, Global Environmental Change 42 (2017) 169–180. U.S. Census Bureau, Intercensal Estimates of the Resident Population for Incorporated Places and Minor Civil Divisions: April 1, 2000 to July 1, 2010, https://www.census.gov/data/tables/time-series/ demo/popest/intercensal-2000-2010-cities-and-towns.html , accessed: Sep. 21, 2025, 2011. U.S. Census Bureau, Intercensal Subcounty Resident Population Estimates: April 1, 2010 to April 1, 2020 (SUB-EST2020INT), https://www.census.gov/data/tables/time-series/demo/popest/intercen sal-2010-2020-cities.html , accessed: Sep. 21, 2025, 2021b. 
+
+48

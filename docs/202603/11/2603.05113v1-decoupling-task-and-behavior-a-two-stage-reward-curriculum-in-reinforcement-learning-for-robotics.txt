@@ -1,0 +1,538 @@
+Title: Decoupling Task and Behavior: A Two-Stage Reward Curriculum in Reinforcement Learning for Robotics
+
+URL Source: https://arxiv.org/pdf/2603.05113v1
+
+Published Time: Fri, 06 Mar 2026 02:03:41 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# Decoupling Task and Behavior: A Two-Stage Reward Curriculum in Reinforcement Learning for Robotics 
+
+# Kilian Freitag 1 , Knut ˚ Akesson 1 , Morteza Haghir Chehreghani 1,21Chalmers University of Technology 
+
+> 2
+
+# Gothenburg University 
+
+# {kilian.freitag, knut.akesson, morteza.chehreghani }@chalmers.se 
+
+# Abstract 
+
+Deep Reinforcement Learning is a promising tool for robotic control, yet practical application is of-ten hindered by the difficulty of designing effec-tive reward functions. Real-world tasks typically require optimizing multiple objectives simultane-ously, necessitating precise tuning of their weights to learn a policy with the desired characteristics. To address this, we propose a two-stage reward cur-riculum where we decouple task-specific objectives from behavioral terms. In our method, we first train the agent on a simplified task-only reward func-tion to ensure effective exploration before introduc-ing the full reward that includes auxiliary behavior-related terms such as energy efficiency. Further, we analyze various transition strategies and demon-strate that reusing samples between phases is criti-cal for training stability. We validate our approach on the DeepMind Control Suite, ManiSkill3, and a mobile robot environment, modified to include aux-iliary behavioral objectives. Our method proves to be simple yet effective, substantially outperform-ing baselines trained directly on the full reward while exhibiting higher robustness to specific re-ward weightings. 
+
+# 1 Introduction 
+
+Reinforcement Learning (RL) has emerged as a powerful paradigm in the field of robotic control, offering the promise of adaptable and efficient solutions to complex problems. RL has demonstrated its potential to learn optimal policies in a wide range of applications, such as manipulation [Gu et al. ,2016; Kalashnikov et al. , 2018; Leyendecker et al. , 2022; Han et al. , 2023] or mobile robotics [Lillicrap, 2015; Zhu 
+
+et al. , 2017; Rodriguez-Ramos et al. , 2018; Zhu and Zhang, 2021; Sang and Wang, 2022]. However, as we transition from carefully curated benchmarks to realistic scenarios, a signifi-cant gap emerges, highlighting the challenges of applying RL in practical settings. One of the primary challenges in realistic applications lies in the complexity of the environment and the multiplicity of objectives. While classical RL problems often focus on a sin-gle, well-defined goal, real-world scenarios typically involve multiple, sometimes conflicting objectives. For instance, a mobile robot might need to navigate to a goal location while simultaneously avoiding obstacles, maintaining a specific ve-locity, and ensuring a smooth trajectory [Zhang et al. , 2023; Ceder et al. , 2024]. This multi-objective nature of real-world problems poses a significant challenge to traditional RL ap-proaches. Formulating an effective reward function for complex tasks is non-trivial and can often result in undesired behav-iors [Booth et al. , 2023; Knox et al. , 2023; Knox and Mac-Glashan, 2024]. Moreover, optimizing such complex rewards can be challenging due to the presence of local optima, where policies might satisfy only a subset of objectives (e.g., min-imizing energy consumption by remaining stationary) with-out learning the intended task, which is referred to as re-ward hacking. We call such potentially conflicting objectives complex reward functions, where the complexity lies in the presence of strong local optima for undesired behaviors. No-tably, our setting focuses on combining multiple objectives into a single reward function to learn one policy, distinct from multi-objective reinforcement learning (MORL), which typi-cally considers a set of Pareto-optimal solutions for multiple objectives [Hayes et al. , 2022]. A line of work that has emerged to tackle challenging RL problems is curriculum learning [Bengio et al. , 2009; Narvekar et al. , 2020; Pathare et al. , 2025]. Inspired by how animals can be trained to learn new skills [Skinner, 1958], learning proceeds from simple problems to gradually more challenging ones. In the realm of RL, such curricula are often hand-designed and have been successfully employed in several applications in robotic control [Sanger, 1994; Hwangbo et al. , 2019; Leyendecker et al. , 2022]. More re-cently, several methods for automatic curriculum design have emerged that are able to learn curriculum policies [Narvekar and Stone, 2019] or that break down problems into smaller ones [Andrychowicz et al. , 2017; Fang et al. , 2019] for more effective learning. Further, automatic curricula are used in sparse or no reward settings as intrinsically motivated exploration that encourages reaching diverse states [Belle-mare et al. , 2016; Pathak et al. , 2017; Burda et al. , 2018; Shyam et al. , 2019]. Nevertheless, such methods have been explored less for reward functions and often focus on task difficulty or goal location. To address the challenge of learning with complex reward           
+
+> arXiv:2603.05113v1 [cs.LG] 5 Mar 2026 Figure 1: Comparison of the baseline TD3 and SAC algorithms with reward curriculum versions (RC-TD3 and RC-SAC). The first row shows the achieved base reward (DM Control) or success rate (MobileRobot and ManiSkill3) and the second row shows the average reward. Both are computed as the average over the last 50k training steps and 3 random seed using target weight wtarget = 0 .5for DM Control, wtarget = 0 .25
+> for ManiSkill3 and wtarget ∈ { 0.25 ,0.5,0.75 }for MobileRobot (MR).
+
+functions, we propose leveraging curriculum learning. We introduce a novel two-stage reward curriculum that distin-guishes between task and behavior-related reward terms. In the first phase, only a subset of task-related rewards is used for training to simplify the discovery of successful trajecto-ries. When the policy has converged sufficiently, the second phase is initiated by transitioning towards optimizing the full reward, including behavior-related rewards. Additionally, our method allows for sample-efficient reuse of collected trajec-tories by incorporating two rewards in the replay buffer such that samples from the first phase can be reused for training with an updated reward in the second phase. To analyze the efficacy of our method, we test it on sev-eral robotics benchmarks that we modify to include be-havioral terms that are often desired for robotics (for in-stance minimizing jerk), such as the DeepMind (DM) Con-trol Suite [Tassa et al. , 2018], ManiSkill3 [Tao et al. , 2025], and a mobile robot environment [Ceder et al. , 2024]. Over-all, it substantially outperforms a baseline trained on the full reward from the beginning (see Fig. 1) and shows a much greater robustness to varying weights of auxiliary behavioral terms, thus simplifying design choices for the experimenter. Notably, it works best in cases where the task is learnable, but the auxiliary terms are in conflict with the exploration needed to master it. Our contributions can be summarized as follows: 1. We introduce a novel two-stage reward curriculum to ef-fectively learn complex rewards by first learning the task and then adding behavioral rewards. The curriculum is integrated into two RL methods, one based on SAC and the other based on TD3. 2. In ablation studies, we compare different strategies of when to switch between curriculum phases, how to tran-sition towards optimizing the full reward, and the impor-tance of reusing samples between phases. 3. We extensively evaluate our method on several realistic robotics environments where it consistently outperforms a baseline trained on the full reward, and we show its ro-bustness to different reward weights, alleviating the need for precise tuning. 
+
+# 2 Problem Formulation 
+
+We formulate the problem as a Markov Decision Process (MDP) defined by the tuple ⟨S , A, P, r, p 0, γ ⟩. A represents the action space, S the state space, P : S × A × S → [0 , 1] 
+
+is the state transition function, p0 : S → [0 , 1] the initial state distribution and γ ∈ [0 , 1) a discount factor. The reward is denoted by r; we omit its explicit dependence on state and action r(s, a ) for a less clustered notation. The objective of RL is to maximize the expected return, 
+
+E[Gn], where Gn = PNk=n γk−nrk is the cumulative dis-counted reward, with n being the current step and N the max-imum steps per episode. A key concept for achieving this goal is the action-value function, commonly referred to as the 
+
+Q-function, which represents the expected return when tak-ing action a in state s. The Q-function is parameterized by weights ϕ, and denoted as Qϕ(s, a ).Figure 2: Exemplary environments from DM control (walker-run), MobileRobot, and ManiSkill3 (PullCubeTool-v1). 
+
+In our case, we consider any control problem with several reward terms, where each can be categorized either as a base reward rbase if it helps learning the task (for instance reward shaping terms), and auxiliary rewards raux , which specify the desired behavior. The reward is then given by 
+
+rw = (1 − w) · rbase + w · raux (1) with w ∈ [0 , 1] . Thus, increasing w will decrease rbase and increase raux in order to keep the overall reward magnitude stable. Further, we assume there is a target reward function defined by wtarget ∈ [0 , 1) which remains smaller than 1, such that rbase is never ignored. While we require having access to individual reward terms, the framework works for any num-ber of terms. They simply need to be assigned to either the base or auxiliary reward. The goal is to learn a policy πθ (a|s) parametrized by θ that learns to complete the primary task (encoded by rbase ) while optimizing the auxiliary objectives raux . A key requirement is robustness to the target weight wtarget , eliminating the need for precise tuning. This challenge is common in robotics, for instance when training an energy-efficient policy for a robotics manipulator. If the weight on the efficiency term is too high, the penalties effectively discourage exploration, pre-venting the agent from ever learning the manipulation task. Conversely, if the weight is too low, the auxiliary objective is ignored. Our method aims to resolve this conflict by decou-pling task acquisition from auxiliary optimization, avoiding the local optima often caused by conflicting reward signals. 
+
+# 3 Reward Curriculum Framework 
+
+We propose a novel two-stage reward curriculum to effec-tively learn complex reward functions in a sample-efficient manner. While this framework is compatible with any off-policy RL algorithm, we demonstrate its effectiveness on RC-SAC (based on Soft-Actor Critic [Haarnoja et al. , 2018]) and 
+
+RC-TD3 (based on Twin-Delayed DDPG [Fujimoto et al. ,2018]). The core principle is to dynamically adjust the weighting 
+
+w in Eq. 2 to shift focus from fundamental task learning to the combined objective. In the first phase ( k = 0 ), the agent trains exclusively on the base reward ( w = 0 ) to acquire essential task behaviors without interference from auxiliary terms. The second phase ( k = 1 ) is initiated automatically when a transition criterion triggers (see Section 3.1). Upon switching to the second phase, we introduce the aux-iliary reward by annealing w from 0 towards the target weight 
+
+Algorithm 1 Two-Stage Reward Curriculum  
+
+> 1:
+
+Input: Policy πθ , Critic Qϕ, Buffer D 
+
+> 2:
+
+Input: Anneal duration Tann , Target weight wtarget  
+
+> 3:
+
+Init: Global step t ← 0, Switch step tswitch ← ∞  
+
+> 4:
+
+Init: Phase k ← 0, Metric history M ← ∅  
+
+> 5:
+
+while t < T max do  
+
+> 6:
+
+Sample action at ∼ πθ (·| st) 
+
+> 7:
+
+Step env: st+1 , r base , r aux  
+
+> 8:
+
+D ← D ∪ { (st, a t, r base , r aux , s t+1 )} 
+
+> 9:
+
+t ← t + 1  
+
+> 10:
+
+/* Metric Tracking */  
+
+> 11:
+
+Update M with current rbase and loss metrics  
+
+> 12:
+
+if k = 0 and CheckTransition (M) then  
+
+> 13:
+
+k ← 1; tswitch ← t 
+
+> 14:
+
+end if  
+
+> 15:
+
+w ← 0 
+
+> 16:
+
+if k = 1 then  
+
+> 17:
+
+∆t ← t − tswitch  
+
+> 18:
+
+α ← AnnealFactor (∆ t, T ann ) ▷ 0 → 1 
+
+> 19:
+
+w ← α · wtarget  
+
+> 20:
+
+end if  
+
+> 21:
+
+for G gradient steps do  
+
+> 22:
+
+Sample batch B ∼ D  
+
+> 23:
+
+/* Reward Construction */  
+
+> 24:
+
+rw ← (1 − w) · rbase + w · raux  
+
+> 25:
+
+B ← { (s, a, r w, s ′)} 
+
+> 26:
+
+Update ϕ ← ϕ − αQ∇ϕLQ(ϕ, B ) 
+
+> 27:
+
+Update θ ← θ − απ ∇θ Lπ (θ, B ) 
+
+> 28:
+
+Update target parameters  
+
+> 29:
+
+end for  
+
+> 30:
+
+end while 
+
+wtarget . The curriculum weight wt at any global step t is de-fined as: 
+
+wt =
+
+0 if k = 0 ,α(∆ t) · wtarget if k = 1 , (2) where ∆t = t − tswitch is the number of steps elapsed since the phase transition. The annealing factor α(∆ t) ∈ [0 , 1] in-creases from 0 to 1 over a fixed duration Tann (e.g., via a lin-ear or cosine schedule) and remains at 1 thereafter (see Sec-tion 3.2). This smooth transition prevents sudden shocks to the value function estimates, allowing the policy to adapt to the auxiliary objectives while maintaining task performance. The complete procedure is summarized in Algorithm 1. The function CheckTransition monitors performance metrics M (such as returns per reward term or actor losses) to trigger the phase switch. Parameters denoted with a bar (e.g., ¯θ) indicate target networks updated via Polyak averag-ing. Specific implementation details for RC-TD3 and RC-SAC are provided in Appendix A. 
+
+3.1 Phase Switch Mechanisms 
+
+A critical component of the reward curriculum is determining the optimal timestep tswitch to transition from the initial phase (k = 0 ) to the combined reward phase ( k = 1 ). We evaluate several strategies for the function CheckCriterion (M)
+
+(line 12 in Alg. 1): Actor fit threshold: One hypothesis is that the actor must sufficiently learn the base objective before tackling auxiliary tasks. We quantify this by monitoring the actor’s ability to minimize the critic’s value estimate. For TD3, this metric is the standard actor loss in Eq. 3 and for SAC we utilize the policy loss in Eq. 4 without the entropy term to isolate the exploitation capability. We define a “good fit” threshold Γfit 
+
+that triggers if the actor loss Lπ remains below this threshold for a window of m consecutive steps: 
+
+CheckCriterion (M) ≜
+
+
+
+∀i ∈ [t−m, t ] : Lπ (i) < Γfit 
+
+
+
+This ensures the policy has stably converged to a local opti-mum with respect to the base reward critic. In experiments including this switch we set Γfit = −50 and m = 20 .
+
+Base reward threshold: Alternatively, we can use the ex-trinsic performance directly as a proxy for learning progress. This strategy triggers the phase switch once the agent achieves a target reward Γrbase on the base task. Let ¯rbase ,t 
+
+be the average of the the base reward at step t for the last 1000 steps. The condition is formally defined as: 
+
+CheckCriterion (M) ≜
+
+
+
+¯rbase ,t ≥ Γrbase 
+
+
+
+For the experiments including this switch method we set 
+
+Γrbase = 0 .5 (with 1.0 being the highest possible base reward for DM control environments). 
+
+Base reward convergence: While the two options above are intuitive, their hyperparameters Γfit and Γrbase vary across environments and algorithms, thus often require manual tun-ing. To address this we propose another mechanism that is based on convergence of rbase . The intuition is to initiate the second phase only once the agent’s performance on the base task has plateaued, regardless of the absolute return value. We again use the average base reward ¯rbase ,t over the last 1000 steps followed by a 20-point rolling average to further smooth the curve to obtain ˜rbase ,t . We estimate the slope βt
+
+of the performance trend by fitting a Huber Regressor [Owen, 2007] to ˜rbase ,t over the recent history (75 timesteps). Un-like Ordinary Least Squares (OLS), which penalizes outliers quadratically, the Huber Regressor minimizes a hybrid loss function: it applies a squared loss to small errors (inliers) and a linear loss to errors exceeding a threshold ϵHuber (outliers) which we set to the default of 1.35 . This linear tail ensures that the high variance and sporadic reward spikes inherent in stochastic RL training do not disproportionately skew the estimated trend. The switch is triggered when the slope in-dicates a plateau (i.e., falls below a small value ϵslope ) for m
+
+steps, provided the agent has improved upon the random pol-icy baseline ¯Rinit :
+
+CheckCriterion (M) ≜
+
+
+
+(βt < ϵ slope )
+
+∧ (¯ rbase ,t > 1.5 · ¯rbase ,init )
+
+
+
+The second condition ( ¯rbase ,t > 1.5 · ¯rbase ,init ), where 
+
+¯rbase ,init is collected with a random policy for the first 10k steps, prevents premature transitions during the initial explo-ration phase where the slope might be flat simply because learning has not yet begun. Further, we prevent any transition before recent history is filled. In all of our experiments we set 
+
+ϵslope = 0 .001 and m = 10 .
+
+3.2 Transition Dynamics and Annealing 
+
+Upon triggering the second phase of the curriculum, the ob-jective function transitions from the base reward to the full task reward. We investigate the impact of the transition dynamics on agent stability by comparing three annealing schedules for the weight vector w: instantaneous switching (step function), linear interpolation, and cosine annealing. These schedules dictate the AnnealFactor in line 18 of Alg 1. We further ablate the duration of this transition (measured in environment steps). We hypothesize a trade-off: abrupt changes in the reward function (instant switching) can induce large shifts in the Q-values, potentially destabilizing the pol-icy. Conversely, overly extended annealing may waste com-putational resources. However, given that the base reward is a subset of the full reward ( rbase ⊂ rwtarget ), we posit that the gradients are partially aligned, potentially allowing for more sudden transition schedules than would be required for dis-joint tasks. 
+
+3.3 Reuse of past experience 
+
+Another key aspect of our framework is leveraging past ex-periences after a phase switch. Specifically, we store tuples of the form {(st, a t, r base , r aux , s t+1 )} in the replay buffer. When transitioning to the second phase, we reuse experiences from the first phase by calculating the reward rw with the cur-rent w for gradient updates. This mechanism aims to stabilize training by populating the replay buffer with a diverse set of samples, thereby facilitating sample-efficient learning. No-tably, this approach is only compatible with off-policy RL algorithms. 
+
+# 4 Experiments 
+
+To evaluate the efficacy of our method we test RC-SAC and RC-TD3 on i) 12 DM control suite environments [Tassa et al. ,2018] modified to include an acceleration penalty to encour-age smoothness, ii) a MobileRobot environment [Ceder et al. ,2024] with several task-related and behavior-related reward terms, and iii) 4 robot manipulation environments from Man-iSkill3 (PickCube-v1, LiftPegUpright-v1, PullCubeTool-v1, PullCube-v1) [Tao et al. , 2025] with additional behavior re-lated reward terms to reduce jerk, effort and action smooth-ness (see Fig. 2 for some exemplary environments). Introduc-ing those terms makes the benchmarks relevant for real-life robotics, as, for instance, reducing jerk is vital when deploy-ing a policy to hardware to avoid damage. The details about the environments are described in Appendix C, and the exper-imental setup, such as specific hyperparameters, can be found in Appendix B. Note that we exclude the sparse outcome re-ward for MobileRobot from the curriculum (see Appendix C.4 for details). 
+
+4.1 How effective is the Two-Stage Curriculum? 
+
+The overall results of our reward curriculum framework are presented in Fig. 1. We observe that the curriculum vari-Figure 3: Comparison of the mean success rate and average reward for ManiSkill3 (4 environments aggregated) and MobileRobot with different wtarget of RC-TD3 and RC-SAC to their baselines. The average reward is computed using a wtarget = 0 .5 to make results comparable. 
+
+ants (with RC) consistently outperform the baseline trained using a fixed wtarget from the beginning. Specifically, the av-erage rwtarget in DM improved from 0.637 to 0.690 and rbase 
+
+from 0.419 to 0.594. Similarly, in MobileRobot the success rate substantially increased from 52.4% to 65.8% on aver-age. While the average reward in RC-SAC increased simi-larly, RC-TD3 shows slightly lower values while keeping a competitive success rate and rbase . In ManiSkill3 the success rate substantially increased for wtarget = 0 .25 from 62.1% to 97.6 % and rwtarget changed from 0.282 to 0.349. Importantly, our method is consistently equal or better in terms of rbase and success rate (except for finger-turn-easy), thus indicating that it successfully increases task focus and avoids reward hack-ing. Notably, this is without environment-specific tuning of curriculum hyperparameters, as we are using the same set-tings in all experiments. This demonstrates the vast applica-bility of our method and underlines the effectiveness of our curriculum approach. While there are cases where the av-erage reward becomes worse using the curriculum, this hap-pens mostly for environments where the task reward rbase is low, and the agent exploits auxiliary terms without learning the task. Especially in environments such as finger spin, our method becomes effective where the baseline does not learn the task at all, while the curriculum version obtains near-perfect performance, thus vastly outperforming the baseline. We assume that the behavioral terms particularly hinder ex-ploration here. For detailed results per environment, we refer to Table 1 in the Appendix. 
+
+4.2 How robust is the method to different wtarget ?
+
+One important aspect of the reward curriculum method is its robustness to different wtarget . In order to test this, we run experiments for the ManiSkill3 environments with wtarget ∈
+
+[0 .0, 0.25 , 0.5, 0.75] with 3 random seeds. The results are dis-played in Fig. 3. Both in terms of Task success and average reward, the curriculum method clearly outperforms baseline SAC and TD3. Interestingly, already a small target weight of 0.25 substantially lowers the performance of both SAC and TD3 while RC-SAC and RC-TD3 manage to remain 100% success. For higher weights also the curriculum versions ob-tain reduced success rates, while still being clearly better to the baselines until both end up with near 0% success rates for 
+
+wtarget = 0 .75 .We repeat the same experiment for the Mobile Robot en-Figure 4: Comparison of the mean episode reward of RC-SAC with different switches as described in Section 3.1. The values are aver-age over the last 50 [k] training steps. 
+
+vironment with wtarget ∈ [0 .0, 0.25 , 0.5, 0.75] for 3 random seeds. The results are shown in the bottom half of Fig. 3. Also in this case the success rate of the curriculum versions is higher or better compared to their baselines. Interestingly RC-TD3 consistently obtains a slightly lower average reward compared to TD3 while being equal or better in terms of suc-cess. This is largely due to TD3 taking smaller actions and preferring slightly longer episodes compared to RC-TD3. 
+
+4.3 Ablation Studies 
+
+To better understand the impact of our method’s components, we perform the following ablation studies. They are con-ducted on a subset of the environments that should capture the main trends, namely on finger spin, walker run, reacher easy, fish swim, and on PullCubeTool-v1. 
+
+When should the second phase be initiated? 
+
+Firstly, we want to analyze how sensitive our method is to the precise choice of when to change curriculum phases. For that, we compare the different methods presented in Section 3.1 with fixed switches at 250 [k], 500 [k], and 1000 [k] steps. During this comparison, we will fix the transition to linear an-nealing w towards wtarget = 0 .5 over 100 [k] steps and choose RC-SAC only. We expect similar results for RC-TD3. Re-sults averaged over the last 50 [k] steps of training are shown in Fig. 4. As it can be seen, all switches reach similar per-formance except the fixed switch at 250 [k] steps. However, even that switch clearly outperforms the baseline trained us-ing the full reward from the beginning, especially in terms of 
+
+rbase . Therefore, we conclude that the first phase has to be sufficiently long to learn rbase , but the precise time to switch after that does not have a significant influence. Note that “Ac-tor Fit” and “Base Reward” obtain the highest base rewards, which is due to the reason that they never switch phases in fish-swim as the rewards and losses remain under their thresh-
+
+> Figure 5: Comparison of the mean episode reward for different tran-sitions as described in Section 3.2. The values are average over the last 50 [k] training steps.
+
+olds. In continuation, we will be using the “Convergence” switch given that its hyperparameters neither depend on the specific algorithm nor environment, making it more generally applicable. 
+
+How critical are the transition dynamics between phases? 
+
+Next, we compare different methods to anneal w from 0 to 
+
+wtarget = 0 .5. As introduced in Section 3.2, we compare in-stant annealing (0 steps) with linear or cosine annealing over 50 [k], 100 [k], and 200 [k] steps. The aggregated results for RC-SAC and RC-TD3 are shown in Fig. 5. As it can be seen, the performance for all strategies is largely similar, with a tendency that longer annealing leads to better results. Again, the method seems to be robust to the precise choice, confirming the hypothesis that given that rbase ⊂ rwtarget , the transition should be relatively stable in all cases. Given the slightly better results for linear annealing over 200 [k] steps, we used this to obtain the overall results presented in Fig. 1. 
+
+What is the importance of a flexible replay buffer? 
+
+Further, we compare resetting the network weights or re-setting the replay buffer (i.e. deleting all samples collected so far) after switching curriculum phases to our method, which reuses past experience via the flexible replay buffer for RC-SAC. For that, we use linear annealing over 200 [k] steps and pick two environments where the method had a substantial impact: DM control finger-spin and ManiSkill3 PullCubeTool-v1. The results are shown in Fig. 6. As can be seen, resetting the network weights seems to destabilize training right after switching phases. However, after a short while, training becomes stable again and reaches a similar fi-nal performance. Similarly, resetting the replay buffer leads to elevated training instabilities, indicated by the increased average reward variance. However, even when resetting the buffer upon switching phases, a substantial amount of sam-ples will be collected with a policy for small w given the slow Figure 6: Comparison of RC-SAC with SAC and resetting the buffer or networks when switching between curriculum phases. Results are computed using 2 random seeds. Results are smoothed using a Savitzky-Golay filter with a window length 100 and polyorder 2. 
+
+annealing. This explains the similar performance compared to not resetting. Further, completely removing the flexible re-play buffer would require resetting the buffer at every step, thus making the method fully on-policy for the annealing du-ration. We conclude that both the pretrained networks and the flexible replay buffer increase training stability and are thus a vital part of the method. 
+
+# 5 Related Work 
+
+Reward shaping is a well-established technique to facil-itate sample-efficient learning, with a history spanning decades [Dorigo and Colombetti, 1994; Randløv and Al-strøm, 1998]. The most prevalent approach is potential-based reward shaping, which preserves the policy ordering [Ng et al. , 1999]. Building on this foundation, recent work has explored the concept of automatic reward shaping, where the shaping process is learned and adapted during train-ing. For instance, [Hu et al. , 2020] formulate reward shap-ing as a bi-level optimization problem, where the high-level policy optimizes the true reward and adaptively selects re-ward shaping weights for the lower-level policy. This ap-proach has been successfully applied to various tasks with sparse rewards, effectively creating an automatic reward-shaping curriculum. Another line of research focuses on building automatic reward curricula through intrinsic moti-vation, encouraging exploration of unexpected states [Belle-mare et al. , 2016; Pathak et al. , 2017; Burda et al. , 2018; Shyam et al. , 2019]. However, these methods primarily mod-ify the shaping terms while keeping the ground-truth rewards fixed. A parallel line of work that has been studied extensively addresses auxiliary terms via Safe Reinforcement Learn-ing [Berkenkamp et al. , 2017; Turchetta et al. , 2020; Varga et al. , 2021; As et al. , 2024; Gu et al. , 2024]. These methods typically formulate auxiliary objectives as hard constraints (e.g., safety budgets) that must be satisfied below a specific threshold. However, many behavioral objectives, such as en-ergy efficiency or motion smoothness, do not have natural binary thresholds. Rather, they are soft objectives that should be minimized continuously. Unlike constrained approaches which target a feasible set, our method treats these terms as a continuous trade-off against task performance, allow-ing the agent to find the optimal balance without requiring pre-defined constraint thresholds or complex Lagrangian op-timization. Although less prevalent, several works have employed re-ward curricula in reinforcement learning (RL) using subsets of the true reward. For instance, [Hwangbo et al. , 2019] uti-lize an exponential reward curriculum, initially focusing on locomotion and gradually increasing the weight of other cost terms to refine the behavior. Similarly, [Leyendecker et al. ,2022] observe that RL agents optimized on complex reward functions with multiple constraints are highly sensitive to in-dividual reward weights, leading to local optima when di-rectly optimizing the full reward. They successfully learn a policy by gradually increasing constraint weights based on task success. Furthermore, [Pathare et al. , 2025] em-ploy a three-stage reward curriculum, incrementally increas-ing complexity and realism by incorporating additional terms. However, they find reward curriculum learning largely inef-fective. To the best of our knowledge, we are the first to sys-tematically investigate a two-stage reward curriculum, lever-aging sample-efficient experience transfer between phases to mitigate reward exploitation. 
+
+# 6 Conclusion 
+
+In this work, we present a two-stage reward curriculum, where we first train an RL agent on an easier task-related sub-set of rewards and then switch to training using the full reward by also including behavior-related terms. We investigate dif-ferent methods to switch from the first two second phase, how to transition between phases, and investigate the importance of a flexible replay buffer that adaptively calculates the cur-rent rewards to reuse samples between phases. In extensive experiments, we show that our method outperforms the base-line only trained on the full reward in almost all cases. It is especially successful for high auxiliary target weights and en-vironments where the behavioral objectives substantially hin-der learning the task. We believe that this work contributes towards developing more stable RL methods to effectively learn challenging objectives, which are especially relevant for robotics, where multiple conflicting objectives are often in-evitable. References 
+
+[Andrychowicz et al. , 2017] Marcin Andrychowicz, Filip Wolski, Alex Ray, Jonas Schneider, Rachel Fong, Peter Welinder, Bob McGrew, Josh Tobin, OpenAI Pieter Abbeel, and Wojciech Zaremba. Hindsight expe-rience replay. Advances in neural information processing systems , 30, 2017. [As et al. , 2024] Yarden As, Bhavya Sukhija, Lenart Treven, Carmelo Sferrazza, Stelian Coros, and Andreas Krause. Actsafe: Active exploration with safety constraints for re-inforcement learning. arXiv preprint arXiv:2410.09486 ,2024. [Bellemare et al. , 2016] Marc Bellemare, Sriram Srinivasan, Georg Ostrovski, Tom Schaul, David Saxton, and Remi Munos. Unifying count-based exploration and intrinsic motivation. Advances in neural information processing systems , 29, 2016. [Bengio et al. , 2009] Yoshua Bengio, J´ erˆ ome Louradour, Ronan Collobert, and Jason Weston. Curriculum learn-ing. In Proceedings of the 26th annual international con-ference on machine learning , pages 41–48, 2009. [Berkenkamp et al. , 2017] Felix Berkenkamp, Matteo Turchetta, Angela Schoellig, and Andreas Krause. Safe model-based reinforcement learning with stability guaran-tees. Advances in neural information processing systems ,30, 2017. [Booth et al. , 2023] Serena Booth, W Bradley Knox, Julie Shah, Scott Niekum, Peter Stone, and Alessandro Al-lievi. The perils of trial-and-error reward design: misde-sign through overfitting and invalid task specifications. In 
+
+Proceedings of the AAAI Conference on Artificial Intelli-gence , volume 37, pages 5920–5929, 2023. [Burda et al. , 2018] Yuri Burda, Harrison Edwards, Amos Storkey, and Oleg Klimov. Exploration by random net-work distillation. arXiv preprint arXiv:1810.12894 , 2018. [Ceder et al. , 2024] Kristian Ceder, Ze Zhang, Adam Bur-man, Ilya Kuangaliyev, Krister Mattsson, Gabriel Nyman, Arvid Peters´ en, Lukas Wisell, and Knut Akesson. Bird’s-eye-view trajectory planning of multiple robots using con-tinuous deep reinforcement learning and model predictive control. In 2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) . IEEE, 2024. [Dorigo and Colombetti, 1994] Marco Dorigo and Marco Colombetti. Robot shaping: Developing autonomous agents through learning. Artificial intelligence , 71(2):321– 370, 1994. [Fang et al. , 2019] Meng Fang, Tianyi Zhou, Yali Du, Lei Han, and Zhengyou Zhang. Curriculum-guided hindsight experience replay. Advances in neural information pro-cessing systems , 32, 2019. [Fujimoto et al. , 2018] Scott Fujimoto, Herke Hoof, and David Meger. Addressing function approximation error in actor-critic methods. In International conference on ma-chine learning , pages 1587–1596. PMLR, 2018. [Girshick, 2015] Ross Girshick. Fast r-cnn. In Proceedings of the IEEE international conference on computer vision ,pages 1440–1448, 2015. [Gu et al. , 2016] Shixiang Gu, Ethan Holly, Timothy P Lilli-crap, and Sergey Levine. Deep reinforcement learning for robotic manipulation. arXiv preprint arXiv:1610.00633 ,1:1, 2016. [Gu et al. , 2024] Shangding Gu, Long Yang, Yali Du, Guang Chen, Florian Walter, Jun Wang, and Alois Knoll. A re-view of safe reinforcement learning: Methods, theories and applications. IEEE Transactions on Pattern Analysis and Machine Intelligence , 2024. [Haarnoja et al. , 2018] Tuomas Haarnoja, Aurick Zhou, Kristian Hartikainen, George Tucker, Sehoon Ha, Jie Tan, Vikash Kumar, Henry Zhu, Abhishek Gupta, Pieter Abbeel, et al. Soft actor-critic algorithms and applications. 
+
+arXiv preprint arXiv:1812.05905 , 2018. [Han et al. , 2023] Dong Han, Beni Mulyana, Vladimir Stankovic, and Samuel Cheng. A survey on deep rein-forcement learning algorithms for robotic manipulation. 
+
+Sensors , 23(7):3762, 2023. [Hart et al. , 1968] Peter Hart, Nils Nilsson, and Bertram Raphael. A formal basis for the heuristic determination of minimum cost paths. IEEE Transactions on Systems Science and Cybernetics , 4(2):100–107, 1968. [Hayes et al. , 2022] Conor F Hayes, Roxana R˘ adulescu, Eu-genio Bargiacchi, Johan K¨ allstr¨ om, Matthew Macfarlane, Mathieu Reymond, Timothy Verstraeten, Luisa M Zint-graf, Richard Dazeley, Fredrik Heintz, et al. A practi-cal guide to multi-objective reinforcement learning and planning. Autonomous Agents and Multi-Agent Systems ,36(1):26, 2022. [Hu et al. , 2020] Yujing Hu, Weixun Wang, Hangtian Jia, Yixiang Wang, Yingfeng Chen, Jianye Hao, Feng Wu, and Changjie Fan. Learning to utilize shaping rewards: A new approach of reward shaping. Advances in Neural Informa-tion Processing Systems , 33:15931–15941, 2020. [Hwangbo et al. , 2019] Jemin Hwangbo, Joonho Lee, Alexey Dosovitskiy, Dario Bellicoso, Vassilios Tsounis, Vladlen Koltun, and Marco Hutter. Learning agile and dynamic motor skills for legged robots. Science Robotics ,4(26), 2019. [Kalashnikov et al. , 2018] Dmitry Kalashnikov, Alex Irpan, Peter Pastor, Julian Ibarz, Alexander Herzog, Eric Jang, Deirdre Quillen, Ethan Holly, Mrinal Kalakrishnan, Vin-cent Vanhoucke, et al. Scalable deep reinforcement learn-ing for vision-based robotic manipulation. In Conference on robot learning , pages 651–673. PMLR, 2018. [Knox and MacGlashan, 2024] W Bradley Knox and James MacGlashan. How to specify reinforcement learning ob-jectives. In Finding the Frame: An RLC Workshop for Examining Conceptual Frameworks , 2024. [Knox et al. , 2023] W Bradley Knox, Alessandro Allievi, Holger Banzhaf, Felix Schmitt, and Peter Stone. Reward (mis) design for autonomous driving. Artificial Intelli-gence , 316:103829, 2023. [Leyendecker et al. , 2022] Lars Leyendecker, Markus Schmitz, Hans Aoyang Zhou, Vladimir Samsonov, Marius Rittstieg, and Daniel L¨ utticke. Deep reinforcement learning for robotic control in high-dexterity assembly tasks—a reward curriculum approach. International Journal of Semantic Computing , 16(03):381–402, 2022. [Lillicrap, 2015] TP Lillicrap. Continuous control with deep reinforcement learning. arXiv preprint arXiv:1509.02971 ,2015. [Narvekar and Stone, 2019] Sanmit Narvekar and Peter Stone. Learning curriculum policies for reinforcement learning. In Proceedings of the 18th International Con-ference on Autonomous Agents and MultiAgent Systems ,AAMAS ’19, page 25–33, Richland, SC, 2019. Interna-tional Foundation for Autonomous Agents and Multiagent Systems. [Narvekar et al. , 2020] Sanmit Narvekar, Bei Peng, Matteo Leonetti, Jivko Sinapov, Matthew E Taylor, and Peter Stone. Curriculum learning for reinforcement learning domains: A framework and survey. Journal of Machine Learning Research , 21(181):1–50, 2020. [Ng et al. , 1999] Andrew Y Ng, Daishi Harada, and Stuart Russell. Policy invariance under reward transformations: Theory and application to reward shaping. In Icml , vol-ume 99, pages 278–287, 1999. [Owen, 2007] Art B Owen. A robust hybrid of lasso and ridge regression. Contemporary Mathematics , 443(7):59– 72, 2007. [Pathak et al. , 2017] Deepak Pathak, Pulkit Agrawal, Alexei A Efros, and Trevor Darrell. Curiosity-driven exploration by self-supervised prediction. In International conference on machine learning , pages 2778–2787. PMLR, 2017. [Pathare et al. , 2025] Deepthi Pathare, Leo Laine, and Morteza Haghir Chehreghani. Tactical decision making for autonomous trucks by deep reinforcement learning with total cost of operation based reward. Artificial In-telligence Review , 59(1):27, 2025. [Randløv and Alstrøm, 1998] Jette Randløv and Preben Al-strøm. Learning to drive a bicycle using reinforcement learning and shaping. In ICML , volume 98, pages 463– 471, 1998. [Rodriguez-Ramos et al. , 2018] Alejandro Rodriguez-Ramos, Carlos Sampedro, Hriday Bavle, Ignacio Gil Moreno, and Pascual Campoy. A deep reinforcement learning technique for vision-based autonomous multi-rotor landing on a moving platform. In 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , pages 1010–1017. IEEE, 2018. [Ruiz et al. , 2016] Francisco R Ruiz, Michalis K Titsias, and David M Blei. The generalized reparameterization gradi-ent. Advances in neural information processing systems ,29, 2016. [Sang and Wang, 2022] Hanying Sang and Shuquan Wang. Motion planning of space robot obstacle avoidance based on DDPG algorithm. In 2022 International Conference on Service Robotics (ICoSR) , pages 175–181. IEEE, 2022. [Sanger, 1994] Terence D Sanger. Neural network learning control of robot manipulators using gradually increasing task difficulty. IEEE transactions on Robotics and Au-tomation , 10(3):323–333, 1994. [Shyam et al. , 2019] Pranav Shyam, Wojciech Ja´ skowski, and Faustino Gomez. Model-based active exploration. In International conference on machine learning , pages 5779–5788. PMLR, 2019. [Skinner, 1958] Burrhus F Skinner. Reinforcement today. 
+
+American Psychologist , 13(3):94, 1958. [Tao et al. , 2025] Stone Tao, Fanbo Xiang, Arth Shukla, Yuzhe Qin, Xander Hinrichsen, Xiaodi Yuan, Chen Bao, Xinsong Lin, Yulin Liu, Tse kai Chan, Yuan Gao, Xuanlin Li, Tongzhou Mu, Nan Xiao, Arnav Gurha, Viswesh Na-gaswamy Rajesh, Yong Woo Choi, Yen-Ru Chen, Zhiao Huang, Roberto Calandra, Rui Chen, Shan Luo, and Hao Su. Maniskill3: Gpu parallelized robotics simulation and rendering for generalizable embodied ai. Robotics: Sci-ence and Systems , 2025. [Tassa et al. , 2018] Yuval Tassa, Yotam Doron, Alistair Muldal, Tom Erez, Yazhe Li, Diego de Las Casas, David Budden, Abbas Abdolmaleki, Josh Merel, Andrew Lefrancq, et al. Deepmind control suite. arXiv preprint arXiv:1801.00690 , 2018. [Turchetta et al. , 2020] Matteo Turchetta, Andrey Kolobov, Shital Shah, Andreas Krause, and Alekh Agarwal. Safe re-inforcement learning via curriculum induction. Advances in Neural Information Processing Systems , 33:12151– 12162, 2020. [Varga et al. , 2021] Bal´ azs Varga, Bal´ azs Kulcs´ ar, and Morteza Haghir Chehreghani. Constrained policy gra-dient method for safe and fast reinforcement learning: a neural tangent kernel based approach. arXiv preprint arXiv:2107.09139 , 2021. [Zhang et al. , 2023] Ze Zhang, Yao Cai, Kristian Ceder, Arvid Enliden, Ossian Eriksson, Soleil Kylander, Rajath Sridhara, and Knut ˚Akesson. Collision-free trajectory planning of mobile robots by integrating deep reinforce-ment learning and model predictive control. In 2023 IEEE 19th International Conference on Automation Science and Engineering (CASE) , pages 1–7. IEEE, 2023. [Zhu and Zhang, 2021] Kai Zhu and Tao Zhang. Deep rein-forcement learning based mobile robot navigation: A re-view. Tsinghua Science and Technology , 26(5):674–691, 2021. [Zhu et al. , 2017] Yuke Zhu, Roozbeh Mottaghi, Eric Kolve, Joseph J Lim, Abhinav Gupta, Li Fei-Fei, and Ali Farhadi. Target-driven visual navigation in indoor scenes using deep reinforcement learning. In 2017 IEEE international conference on robotics and automation (ICRA) , pages 3357–3364. IEEE, 2017. [Ziebart, 2010] Brian D Ziebart. Modeling purposeful adap-tive behavior with the principle of maximum causal en-tropy . Carnegie Mellon University, 2010. A RL Algorithms 
+
+A.1 RC-TD3 
+
+In the following, we show how the reward curriculum in-tegrates with Twin-Delayed DDPG (TD3) [Fujimoto et al. ,2018]. It extends the Deep Deterministic Policy Gradient (DDPG) [Lillicrap, 2015] algorithm to enhance its stability by making use of two Q-functions, delay the policy updates, and add noise to target actions to avoid exploitation of Q-function errors. The algorithm uses a deterministic policy, though Gaussian noise is added during data collection for exploration: 
+
+at = πθ (st) + ϵ ϵ ∼ N (0 , σ )
+
+A similar procedure using clipped noise is applied to the tar-get action ˜a′ to smooth the target value estimates: 
+
+˜a′ = π¯θ (s′) + ϵ ϵ ∼ clip (N (0 , ˜σ), −c, c )
+
+where π¯θ is a target policy. The curriculum-aware Q-targets are computed as 
+
+y(rw, s ′) = rw + γ min  
+
+> i=1 ,2
+
+Q ¯ϕi (s′, ˜a′)
+
+The critic networks are updated by minimizing the Smooth L1 loss [Girshick, 2015] with respect to these targets in order to stabilize training 
+
+LQ(ϕi) = SmoothL1 (Qϕi (s, a ) − y(rw, s ′)) 
+
+The policy is updated by minimizing the negative Q-value estimated by the first critic 
+
+Lπ (θ) = −Qϕ1 (s, π θ (s)) (3) Importantly, the policy is not updated in every iteration. In-stead it is delayed and is only updated in every second itera-tion. In all experiments we set ˜σ = 0 .2, c = 0 .5 while we use 
+
+σ = 0 .1 for DM Control and ManiSkill3, and in MobileR-obot we anneal σ from 9.0 to 1.0 over the first 250k steps for enhanced exploration. 
+
+A.2 RC-SAC 
+
+Furthermore, we show how our method integrates with SAC. Instead of solely optimizing the expected return, SAC makes use of the maximum entropy objective [Ziebart, 2010] such that a policy additionally tries to maximize its entropy H at each state which is defined as 
+
+π∗ 
+
+> θ
+
+= arg max 
+
+> πθ
+
+X
+
+> t
+
+E(st,a t)∼ρπθ [rw(st, a t) + αH(πθ (·| st)] 
+
+where α is a parameter to control the policy temperature, i.e. the relative importance of the entropy term. SAC makes use of two Q-functions parameterized by ϕ1 and ϕ2 which are updated using the Smooth L1 loss [Girshick, 2015] as 
+
+LQ(ϕi) = SmoothL1 (Qϕi (s, a ) − y(rcr , s ′)) 
+
+where i is the Q-function index and the targets are computed as 
+
+y(rcr , s ′) = rw + γ
+
+
+
+min  
+
+> i=1 ,2
+
+Q ¯ϕi (s′, ˜a′) − α log πθ (˜ a′|s′)
+
+
+
+Importantly, ˜a′ ∼ πθ (·| s′) is newly sampled during training and Q ¯ϕi is the ith target Q-function. Note that instead of op-timizing for a general reward r, we use rw in this step which changes depending on the phase. The policy update is given by 
+
+Lπ (θ) = − min  
+
+> i=1 ,2
+
+Qϕi (s, ˜aθ (s)) − α log πθ (˜ aθ (s)|s) (4) where ˜aθ (s) is sampled from πθ (·| s) via the reparameteriza-tion trick [Ruiz et al. , 2016]. We make use of the entropy-constraint variant of SAC as described in [Haarnoja et al. ,2018], where α is updated as 
+
+L(α) = Ea∼πθ
+
+h
+
+−α log πθ (a|s) − α ˜H
+
+i
+
+where ˜H is the target entropy set to −dim (A). An impor-tant parameter in SAC is the initial value for α, which we denote as αinit . It determines the importance of the entropy term and, thus how much the agent explores different states. When α converges to low values, the agent focuses mainly on the objective instead and becomes more deterministic. For our experiments, we set αinit = 1 .0.
+
+# B Experimental Setup 
+
+As neural network architecture, we use two fully connected layers, each with 256 hidden units and ReLU activation. We train for 2000 [k] environments steps in the DM control and ManiSkill3 environments and for 1000 [k] for MobileRobot. In the DM control and the mobile robot environments we use a replay ratio of 1, where we first sample 1000 environment steps and then train for the same number of gradient steps while we use a ratio of 0.5 for ManiSkill3. Our replay buffer has a capacity of 1000 000 samples and we set all learning rates ( λQ, λπ , λα) to 3.0 × 10 −4. For DM Control and MobileRobot we set τtarg = 0 .995 with a batch size of 128 and for ManiSkill3 τtarg = 0 .99 with a batch size of 1024. In the DM control suite experiments, we set ΓCR = −50 
+
+with m = 20 (in [k]) for both RC-TD3 and RC-SAC with 
+
+γ = 0 .99 . The maximum episodes steps are set to their de-faults at 1000 for DM control, 300 for MobileRobot and 50 
+
+for ManiSkill3. We utilized Nvidia T4 and A40 GPUs as computational resources. All results are computed for 3 dif-ferent random seeds. 
+
+# C Environments 
+
+C.1 DM Control Suite 
+
+The DM Control Suite [Tassa et al. , 2018] is a well-known collection of control environments in RL. In our experi-ments we include the following ones: walker-run, fish-swim, reacher-easy, finger-spin, walker-walk, pendulum-swingup, fish-upright, reacher-hard, finger-turn-hard, finger-turn-easy, ball-in-cup-catch, and cheetah-run. We use the state-space observations and the environments have an action space A ∈ 
+
+[−1, 1] 2. The original rewards are in the range [0 , 1] , which we take as base reward rbase . Furthermore, we introduce the following reward term to minimize action magnitudes, to find Figure 7: Exemplary environment maps used for training. Obstacle positions, paths, initial states, and goal positions are randomized. While maps 0 and 2 contain dynamic obstacles, maps 1 and 3 only contain static ones. 
+
+efficient solutions to the control problems 
+
+raux = −
+
+> d
+
+X
+
+> i=1
+
+|ai| (5) where d is the number of actions of each environment. This is used as an auxiliary term in the curriculum reward (see Equation 2). 
+
+C.2 ManiSkill3 
+
+To encourage safe and smooth robot behavior suitable for real-world deployment, we extended the reward function in ManiSkill3 [Tao et al. , 2025]. Additional to the task-specific terms we introduce behavioral regularization terms. The be-havioral terms penalize undesirable motion characteristics and are defined as follows: 
+
+Smoothness: Penalizes abrupt changes in action com-mands to encourage smooth control signals: 
+
+rsmooth = −∥ at − at−1∥2 (6) where at is the action at timestep t.
+
+Jerk: Penalizes changes in joint velocity to reduce mechan-ical stress and vibration: 
+
+rjerk = −∥ ˙qt − ˙qt−1∥2 (7) where ˙qt denotes the joint velocities at timestep t, excluding gripper joints. 
+
+Effort: Penalizes large action magnitudes to encourage energy-efficient motions: 
+
+reffort = −∥ at∥2 (8) The base reward is the original reward and the auxiliary reward is defined as the sum of the behavioral terms as 
+
+raux = rsmooth + rjerk + reffort (9)          
+
+> Figure 8: Functions for dense reward terms with κ= 0 .942 ,vref =1.2and dtrack,max = 5 .The range for each term is normalized to
+> [−1,1] . Green shows the reward shaping term that enables finding the goal faster. The other penalizing terms are colored in red.
+
+C.3 Mobile Robot 
+
+To evaluate our method in a more realistic and complex set-ting (in terms of rewards), we consider a mobile robot navi-gation problem where the robot is tasked to reach a goal po-sition while avoiding obstacles and satisfying various other objectives. The environment maps are randomized and con-tain both permanent (e.g., walls and corridors) and temporary (e.g., dynamic or static) obstacles. A subset of exemplary en-vironment maps can be found in Fig. 7. Furthermore, a ref-erence path that considers only permanent obstacles is com-puted using A* [Hart et al. , 1968]. This reference path should simulate a setting where an optimal path is pre-computed but the robot might not be able to naively follow it due to tempo-rary obstacles. The state space S ∈ R178 consists of the latest two lidar observations, the robot’s position, the current speed, the ref-erence path, and the goal position. The action space A ∈ 
+
+[−1, 1] 2 represents the translational and angular acceleration. For the reward design, we will focus on easily interpretable formulations. The objectives include reaching a goal position while driving at a reference velocity, staying close to the ref-erence path, and creating smooth trajectories. Thus, there are three possible outcomes of an episode: (1) reach the goal, (2) timeout, i.e. reach maximum steps, or (3) collide with an ob-stacle. Empirical tests have shown that penalizing collisions mainly hinders exploration and does not lead to better final policies. Therefore, the only outcome-based reward included is: 
+
+rg =
+
+10 if reached goal 
+
+0 otherwise The other objectives can be expressed as dense terms evalu-ated at each step. To enable intuitive weighting, we normalize each term between [−1, 1] . We chose this range over [−1, 0] 
+
+to discourage the policy from learning to crash immediately. To achieve smooth trajectories we encourage minimizing accelerations. As this corresponds to our action space, we penalize high action values, similar to the DM control exper-iments, as 
+
+ra = 1 −
+
+> 2
+
+X
+
+> i=1
+
+|ai|, ra ∈ [−1, 1] 
+
+Further, to drive at a desired reference velocity vref we model a velocity reward as a piece-wise quadratic function centered on vref , and scaled to our desired range. This choice is motivated by the intuition that slowing down is less severe than going too fast. 
+
+rv = 1 − lκ 
+
+> 2
+
+(vt − vref ) · 2
+
+max (lκ 
+
+> 2
+
+(−vref ), l κ 
+
+> 2
+
+(vmax − vref )) , rv ∈ [−1, 1] 
+
+with the piece-wise quadratic function lκ 
+
+> 2
+
+being defined as: 
+
+lκ 
+
+> 2
+
+(x) = 
+
+κx 2 if x > 0(1 − κ)x2 otherwise where κ ∈ [0 , 1] controls the slope of the negative and posi-tive regions and vmax = 1 .5 is the maximum velocity. Further, we linearly penalize deviating from the reference trajectory with the following reward term 
+
+rx = clip 
+
+ |dtrack |
+
+dtrack ,max 
+
+, −1, 1
+
+
+
+, rx ∈ [−1, 1] 
+
+where dtrack is the distance between the agent and the refer-ence trajectory and dtrack ,max is a tuning parameter that sets the maximum distance. This is done to make the robot’s be-havior predictable, such that it only deviates from a planned path if necessary. To enable effective learning we additionally make use of potential-based reward shaping [Ng et al. , 1999], by encour-aging progress along the reference path, through 
+
+rp = ppath (s′) − ppath (s)
+
+vmax · dt , rp ∈ [−1, 1] 
+
+where ppath (s) is the position on a path in state s and the de-nominator is the maximum distance traversed in one step. As it is potential-based, it does not alter the ordering over poli-cies [Ng et al. , 1999]. Fig. 8 gives an overview of the dense reward terms used. 
+
+C.4 Reward formulation 
+
+As the outcome reward is very sparse and keeps important in-formation we exclude it from the curriculum. Thus the overall reward is given by 
+
+rw = rg + (1 − w) · rbase + w · raux (10) where 
+
+rbase = 0 .02 · rp (11) and 
+
+raux = 0 .5 · (rv + ra + rx) (12) are the auxiliary terms. We compare this to keeping the outcome reward in the cur-riculum ( rbase = rg + 0 .02 · rp) towards the setting above in Fig. 9 for wtarget = 0 .5. As can be seen, the lower outcome reward in phase 2 hinders learning the task for RC-SAC and makes solely optimizing auxiliary terms a better performing policy, thus leading to ill-defined rewards. 
+
+> Figure 9: Different reward formulations for MobileRobot for 3 ran-dom seeds. Results are smoothed using a Savitzky-Golay filter with window length 200 and polyorder 2.
+
+# D Additional Results 
+
+The average rewards obtained using SAC, RC-SAC, TD3, and RC-TD3 presented in Fig. 1 are presented in detail in Table 1. Method TD3 RC-TD3 SAC RC-SAC Environment finger-turn-easy 0.56 ± 0.05 0.49 ± 0.02 0.71 ± 0.04 0.65 ± 0.05 reacher-hard 0.76 ± 0.13 0.82 ± 0.15 0.90 ± 0.01 0.91 ± 0.01 reacher-easy 0.91 ± 0.02 0.92 ± 0.01 0.92 ± 0.01 0.91 ± 0.02 pendulum-swingup 0.49 ± 0.01 0.53 ± 0.04 0.49 ± 0.01 0.56 ± 0.06 fish-upright 0.76 ± 0.03 0.79 ± 0.07 0.77 ± 0.03 0.77 ± 0.06 fish-swim 0.51 ± 0.01 0.38 ± 0.22 0.47 ± 0.01 0.48 ± 0.02 finger-turn-hard 0.37 ± 0.20 0.35 ± 0.25 0.54 ± 0.09 0.56 ± 0.04 walker-run 0.47 ± 0.00 0.62 ± 0.00 0.45 ± 0.00 0.57 ± 0.04 walker-walk 0.85 ± 0.01 0.86 ± 0.01 0.81 ± 0.04 0.84 ± 0.02 cheetah-run 0.46 ± 0.00 0.46 ± 0.00 0.42 ± 0.00 0.62 ± 0.01 ball-in-cup-catch 0.83 ± 0.19 0.94 ± 0.00 0.92 ± 0.00 0.92 ± 0.00 finger-spin 0.46 ± 0.00 0.77 ± 0.05 0.44 ± 0.00 0.83 ± 0.00 MobileRobot 0.21 ± 0.01 0.15 ± 0.14 0.12 ± 0.15 0.20 ± 0.00 PullCubeToolMO-v1 -0.02 ± 0.00 0.23 ± 0.00 0.00 ± 0.00 0.29 ± 0.01 PullCubeMO-v1 0.26 ± 0.01 0.21 ± 0.05 0.41 ± 0.01 0.37 ± 0.04 PickCubeMO-v1 0.31 ± 0.00 0.29 ± 0.01 0.33 ± 0.00 0.32 ± 0.00 LiftPegUprightMO-v1 0.36 ± 0.27 0.43 ± 0.26 0.60 ± 0.22 0.65 ± 0.06

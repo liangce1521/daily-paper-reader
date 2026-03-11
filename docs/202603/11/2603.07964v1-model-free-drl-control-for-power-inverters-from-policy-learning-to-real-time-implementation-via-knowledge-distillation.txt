@@ -1,0 +1,606 @@
+Title: Model-Free DRL Control for Power Inverters: From Policy Learning to Real-Time Implementation via Knowledge Distillation
+
+URL Source: https://arxiv.org/pdf/2603.07964v1
+
+Published Time: Tue, 10 Mar 2026 01:46:53 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+> 1
+
+# Model-Free DRL Control for Power Inverters: From Policy Learning to Real-Time Implementation via Knowledge Distillation 
+
+Yang Yang, Chenggang Cui, Member, IEEE ,Xitong Niu, Student Member, IEEE ,Jiaming Liu, Chuanlin Zhang, Senior Member, IEEE 
+
+Abstract —In response to the trade-off between control per-formance and computational burden hindering the deployment of Deep Reinforcement Learning (DRL) in power inverters, this paper presents a novel model-free control framework leveraging policy distillation. To handle the convergence instability and steady-state errors inherent in model-free agents, an error energy-guided hybrid reward mechanism is established to the-oretically constrain the exploration space. More specifically, an adaptive importance weighting mechanism is integrated into the distillation architecture to amplify the significance of fluctuation regions, ensuring high-quality transfer of transient control logic by mitigating the observational bias dominated by steady-state data. This approach efficiently compresses the heavy DRL policy into a lightweight neural network, retaining the desired control performance while overcoming the computational bottleneck during deployment. The proposed method is validated through a hardware-based kilowatt-level experimental platform. Experi-mental comparison results with traditional methods demonstrate that the proposed technique reduces inference time to the microsecond level and achieves superior transient response speed and parameter robustness. 
+
+Index Terms —Voltage source inverter, deep reinforcement learning, policy distillation, hybrid reward function, model-free control. 
+
+I. I NTRODUCTION 
+
+Driven by the extensive integration of renewable energy, microgrids, and electric vehicles, power electronic inverters serve as the fundamental interface in modern grids, where the control performance dictates the overall power quality and stability [1]. Traditional linear schemes, typically PI, use linearized models fixed to specific operating points. Under transients such as sudden load steps, performance deteriorates as the response becomes sluggish and robustness suffers. [2]. Filter parameter drift also compromises static-gain controllers, deviating them from the optimal state. Such limitations drive the industry toward advanced strategies, broadly categorized into model-based and data-driven control [3]. Composite control architectures currently represent a domi-nant paradigm in model-based research [4]. To secure stability under complex loads without requiring sensors, a feedback stabilization strategy based on a Nonlinear Disturbance Ob-server (NDO) is utilized in [5]. Further integration with Sliding Mode Control (SMC) leverages SMC’s inherent robustness; meanwhile, NDO feedforward compensation actively sup-presses disturbances [6]. In a similar vein, a robust Finite-Time Control (FTC) solution for three-phase inverters is presented in [7]. This approach incorporates an Extended Finite-Time Disturbance Observer (EFDO), achieving rapid estimation and suppression of both parameter uncertainties and load disturbances. These control strategies are nonetheless contingent upon precise mechanism models. Deriving these models remains time-consuming, laborious, and prone to error. Power electronics technology, simultaneously, evolves to-ward high frequency, high power density, and complex topolo-gies; this progression increases the difficulty of inverter de-sign. Consequently, controller synthesis is complicated by a rigid reliance on precise mathematical models. Structural complexities often mandate conservative performance margins. Nonlinearity and time-variance in passive components intro-duce severe parameter mismatches. Phase margin in traditional controllers is easily compromised under these conditions, triggering oscillations or instability. Model Predictive Control (MPC) is strictly governed by the accuracy of the prediction model. Excessive parameter deviation degrades its control effectiveness. Weighting factor tuning relies on engineering trial-and-error, making global optimality elusive [8]. Model-free methods effectively bypass the complexities of precise system modeling. This advantage has spurred extensive research efforts into data-driven alternatives. In [9], a system-atic analysis framework for power electronics is constructed based on Fliess’s classic MFC theory. Such theoretical work provides critical support, bridging the gap between abstract principles and engineering applications. Meanwhile, Model-Free Predictive Control (MFPC) substitutes rigid physical models with adaptive data-driven counterparts. This substi-tution strategy mitigates robustness limitations often inher-ent in Model-Based Predictive Control (MBPC). Specifically, a ULM-PM-MFPC strategy designed for PMSM drives is presented in [10]. The method achieves a trade-off between control performance and computational burden, serving as a practical benchmark for implementation. The potential of DRL in performance enhancement has been confirmed, achieving significant results in fields such as autonomous driving and robotics [11], and has been in-troduced into power electronics [12]–[14]. A model-free DRL control strategy based on domain adaptation transfer learning is developed in a recent result [15] to optimize the system performance of DC microgrids under complex conditions. In [16], the parameter tuning of non-smooth controllers is formulated as a continuous action space problem, where 
+
+> arXiv:2603.07964v1 [eess.SY] 9 Mar 2026 2
+
+the SAC algorithm is employed to facilitate real-time self-configuration. DRL utilizes Deep Neural Networks (DNN) as universal nonlinear function approximators, capable of directly mapping from raw states to optimal actions and implicitly capturing the complex dynamic characteristics of inverters without any linearization assumptions. [17] addresses the stability challenge of Reinforcement Learning (RL) in power converter control by proposing a Lyapunov-guided RL control strategy, which clarifies the actual stability domain of the system by quantifying the convergence compact set of voltage control errors. Although DRL exhibits excellent performance and robust-ness in simulation environments, its direct deployment on real power electronics hardware still faces challenges regarding real-time capability and computing power [18]. DRL strategies are typically based on multi-layer neural networks; their com-plex network structures and massive parameter counts lead to high computational demands, which are incompatible with the stringent real-time requirements of power electronic converters under high switching frequencies and resource-constrained hardware [14]. Secondly, standard DRL reward function de-signs usually focus only on minimizing instantaneous track-ing errors, lacking consideration for the system’s long-term dynamic behavior and robustness. This design paradigm tends to guide the agent to converge to suboptimal policies, which may perform excellently under specific conditions but poorly in the face of unknown disturbances [19]. To address the aforementioned challenges, this paper inno-vatively introduces Policy Distillation technology [20], [21]. Policy distillation efficiently transfers the knowledge learned by a complex DRL teacher policy to a compact, computa-tionally efficient lightweight student network. This reduces the model’s parameter count and inference latency while maintaining control performance. The main contributions of this paper are reflected in the following three aspects: 1) Hybrid Reward Function Design : A hybrid reward mechanism incorporating a discrete Lyapunov candidate function targets the convergence instability of model-free agents. By penalizing error energy increments ,the method constrains exploration within asymptotically stable regions. This design effectively counters subopti-mal convergence driven by the greedy optimization of instantaneous returns. 2) Model-Free DRL Control Framework : High-frequency switching nonlinearities, strong state couplings, and pa-rameter aging complicate mechanistic modeling in in-verters. A model-free DRL framework is established to address these specific challenges. DNNs extract latent features directly from raw data, implicitly capturing complex unmodeled dynamics. This capability bypasses reliance on precise mechanistic models. 3) Policy Distillation : Capturing complex dynamics de-mands high model capacity, yet hardware mandates strict latency. A teacher-student policy distillation architecture incorporating adaptive importance weighting is intro-duced to resolve this conflict. By amplifying the sig-nificance of fluctuation regions, this design mitigates the observational bias toward steady-state data, enabling the lightweight student network to achieve microsecond-level inference while effectively preserving the superior transient control performance of the teacher agent. II. P ROBLEM FORMULATION 
+
+This section first describes the configuration of the studied three-phase Voltage Source Inverter (VSI) system and analyzes the challenges posed by different load characteristics. Sub-sequently, the mathematical model of the system under load disturbances is established to define the control objectives and core problem formulation of this paper [22]. 
+
+A. System Description of the Three-Phase VSI 
+
+The system under study is a typical three-phase voltage source inverter system, with its topology illustrated in Fig. 1. The core of this system is a three-phase two-level VSI, which operates in islanded mode as the main power source to establish the AC bus voltage. The inverter output is connected to a third-order LCR filter to eliminate switching harmonics and supply power to the downstream load. DC  C1             
+
+> C2 C3 C4
+> R1 R2 R3
+> GND1
+> S2
+> S1 S3
+> S4 S6
+> S5
+> L1
+> L2
+> L3
+> DC
+> Source Three -Phase Two Level H-Bridge Inverter
+> LCR Filter
+> AC Bus
+> Space Vector PWM Loads
+> R6 ,a Li,L b i,L c i,bus a u,bus b u,bus c u,a oi,o b i,o c i
+
+Fig. 1: Simplified circuit diagram of an autonomous AC microgrid. Kirchhoff’s voltage and current laws support the controller design model. Park transformation maps the system from the three-phase stationary frame ( abc ) to synchronous rotating coordinates ( dq ). Dynamic differential equations in the dq 
+
+frame are derived. 
+
+
+
+Lf di Ld  
+
+> dt
+
+= uinv,d − ubus,d + ωL f iLq 
+
+Lf di Lq  
+
+> dt
+
+= uinv,q − ubus,q − ωL f iLd 
+
+mC f du bus,d  
+
+> dt
+
+= iLd − iod + ωmC f ubus,q 
+
+mC f du bus,q  
+
+> dt
+
+= iLq − ioq − ωmC f ubus,d 
+
+(1) where iLd , i Lq and ubus,d , u bus,q are the dq -axis compo-nents of the inductor current and bus voltage, respectively; 
+
+uinv,d , u inv,q are the inverter output voltage control vari-ables; iod , i oq are the load disturbance currents; and ω is the fundamental angular frequency. The parameter m is a correction coefficient introduced to simplify the third-order filter dynamics. Based on frequency-domain steady-state anal-ysis at the rated angular frequency, it is defined as m =1/
+
+q
+
+1 + ω2C2 
+
+> f
+
+R2. This model reveals the strong coupling and nonlinear characteristics among system state variables, serving as a simulation platform for the subsequent validation of the model-free control strategy. 
+
+Remark 1: The derived mathematical model is employed to construct the simulation environment for offline training. In 3
+
+the implementation phase, the proposed DRL controller uti-lizes deep architectures to capture complex nonlinearities and coupled dynamics, operating independently of explicit system parameters. Control actions are generated solely based on real-time measurements, characterizing the model-free nature. Ultimately, the model serves merely as the environment for the teacher policy to generate expert demonstrations. 
+
+B. Problem Formulation 
+
+As a critical interface in modern power systems, the VSI serves to maintain high-quality AC bus voltage. This paper investigates a stand-alone three-phase VSI system equipped with an LCR filter. Accurate voltage tracking and robust disturbance rejection constitute the primary control objectives. The controller is formulated to eliminate steady-state error and minimize Total Harmonic Distortion (THD) to comply with power quality standards. Furthermore, the control strategy is required to ensure rapid transient recovery under load steps and preserve stability against parameter perturbations, such as Lf and Cf
+
+drift. 
+
+To quantify this, the control objective is to regulate the measured AC bus voltage vector ubus = [ubus,d , u bus,q ]T
+
+to accurately track the ideal reference trajectory uref =[uref,d , u ref,q ]T in the synchronous rotating frame. The in-stantaneous voltage tracking error vector eu(t) is defined as: 
+
+eu(t) = uref (t) − ubus (t) (2) where the minimization of the Euclidean norm || eu(t)|| serves as the fundamental basis for the reward formulation in the subsequent DRL framework. 
+
+C. Fundamentals of SAC Algorithm 
+
+The voltage control problem is formulated as a Markov Decision Process (MDP). Given the continuous action space of power inverters, the SAC algorithm is adopted [23]– [25]. Unlike standard reinforcement learning, SAC operates on a maximum entropy framework to enhance exploration and robustness against parameter uncertainties. The policy optimization objective is explicitly expressed as: 
+
+J(θ) = Est∼penv ,a t∼πt [log πθ (at|st)Qπ (st, a t)
+
+−αKL 
+
+
+
+πθ (·| st) 1
+
+Z(st) e Qπ (st,·)
+
+> α
+
+ 
+
+(3) where the objective minimizes the Kullback-Leibler (KL) di-vergence between the parameterized policy πθ and the energy-based distribution induced by the soft Q-function Qπ (st, a t),and pepv denotes the distribution over initial states. The temperature coefficient α serves as a regularization term, explicitly governing the stochasticity of the agent to balance exploration and exploitation. The term Z(st) acts as the parti-tion function, ensuring the exponential Q-value distribution is properly normalized. This formulation encourages the control policy to align with the optimal Boltzmann distribution while preventing premature convergence. Furthermore, to mitigate Q-value overestimation, a clipped double-Q learning mecha-nism is incorporated. This design ensures the training stability requisite for high-precision inverter control. III. M ODEL -F REE DRL C ONTROL STRATEGY FOR 
+
+INVERTER SYSTEMS 
+
+Model uncertainty and disturbances pose significant chal-lenges to traditional control methods. Accordingly, a model-free DRL strategy anchored on the SAC algorithm is proposed. The voltage control task is formulated as an MDP. DNNs are utilized to extract end-to-end mapping relationships directly from interaction data, with the primary objective of maxi-mizing long-term cumulative rewards. This section details the proposed framework configuration, including the definitions of state space, action space, reward mechanism, and network architecture. 
+
+A. State Space 
+
+The design of the state space is crucial, as it provides the agent with sufficient information to comprehensively evaluate the current operating status. In this study, the state vector st
+
+is defined as: 
+
+st = [ eud , e uq , u bus,d , u bus,q , i Ld , i Lq ]T (4) where eud = uref,d − ubus,d and euq = uref,q − ubus,q 
+
+represent the tracking errors in the dq frame; ubus,d and 
+
+ubus,q denote the actual measured AC bus voltages; and iLd 
+
+and iLq correspond to the measured inductor currents. Before being fed into the neural network, all state variables are normalized to the interval [−1, 1] to enhance training stability and convergence speed. 
+
+B. Action Space 
+
+The agent outputs voltage references at = [ uinv,d , u inv,q ]
+
+to modulate the inverter and minimize the tracking error e(t).The action amplitude is restricted by the DC bus voltage Vdc 
+
+and the Space Vector Pulse Width Modulation (SVPWM) lin-ear region limits to avoid hardware overstress. This continuous formulation facilitates decoupled control of the voltage vector components. It also fits the SAC algorithm, enabling efficient policy search in continuous domains. 
+
+C. Deep Neural Network Design 
+
+Leveraging the universal function approximation of deep neural networks, this study addresses VSI nonlinearities via a DRL framework. The network dimensions are strictly guided by recent RL Scaling Laws [26], which indicate that SAC performance saturates beyond a depth of four layers but remains highly sensitive to width. Accordingly, a width-dominant architecture is employed. This approach mitigates the computational burden of deep models while ensuring suf-ficient parameter capacity to prevent underfitting in complex control landscapes. 
+
+Actor Network: Responsible for generating control poli-cies. This network consists of an input layer, three fully 4
+
+connected hidden layers, and an output layer. The input layer receives the normalized environmental state. After nonlinear feature extraction through the hidden layers, the output layer branches into two parallel fully connected layers, generating the mean ( μ) and standard deviation ( σ) of the action Gaussian distribution, respectively, where the standard deviation path employs a Softplus function to ensure positive definiteness. 
+
+Critic Network: Used to evaluate the value of state-action pairs Q(st, a t). Its structure adopts a dual-input path design: the state path receives the state vector, and the action path receives the action vector. After being processed by fully connected layers respectively, the features are concatenated. The fused features then undergo deep information interaction through subsequent fully connected layers, and finally, a scalar 
+
+Q value is output by a linear layer. The structure based on SAC algorithm control is shown in Fig. 2. Input            
+
+> layer
+> Hidden
+> layer
+> Output
+> layer vd vq dqdq
+> eevvii
+> LL
+> …
+> …
+> …
+> Action
+> space dq
+> vv{}s,a,r,s' sa
+> Soft
+> update ,,'ttsas,L k i,bus k u
+> Reference
+> voltage ,bus kr u
+> Phase lock loop 
+> Environment 00dq dq abc
+> T=ff
+> Park
+> transform
+> Actor Network
+> State
+> space
+> Replay
+> memory
+> Critic net2 Critic net1
+> Park inverse transform
+> Reward Function=r 1+r 2+r 3+r 4
+> Stability Reward r 1
+> Voltage Tracking Accuracy Reward r 2
+> Maximum Current Constraint Reward r 3
+> Current THD Constraint Reward r 4
+> Guide System Stability
+> Eliminate of Deviations
+> Overcurrent penalty term
+> y
+> Ensure Power Quality
+> State
+> Action
+> Reward
+
+Fig. 2: Deep Reinforcement Learning Training Process. 
+
+D. Lyapunov-Based Stability Constraint with Virtual Damping 
+
+The reward function determines the optimization direction of the agent and is crucial for achieving the desired control objectives. In power converter control tasks, traditional reward functions are typically constructed based solely on instanta-neous voltage tracking errors. For LCR systems, constraining the voltage error leads to zero-dynamics instability, where the internal inductor current iL may still oscillate even when the voltage error approaches zero. This phenomenon poses a severe challenge to the robustness of model-free control strategies. To facilitate asymptotic stability, this paper introduces the current increment as a virtual damping term to construct a damping-augmented discrete Lyapunov candidate function 
+
+V (k), thereby theoretically constraining the exploration space. This design aims to effectively suppress the internal resonance of the LCR filter by penalizing drastic current variations, with-out requiring prior knowledge of the ideal current reference. The Lyapunov candidate function V (k), incorporating both voltage tracking error potential energy and internal state damp-ing, is defined as follows: 
+
+V (k) = 12 ∥eu(k)∥2 + β
+
+2 ∥∆iL(k)∥2 (5) where eu(k) = [ eud (k), e uq (k)] T denotes the voltage track-ing error vector in the dq reference frame, and ∆iL(k) = 
+
+iL(k) − iL(k − 1) represents the incremental vector of the inductor current state, with iL(k) = [ iLd (k), i Lq (k)] T . The parameter β is a positive damping weighting coefficient used to balance tracking accuracy with control smoothness (i.e., vibration suppression). In the discrete-time domain, the rate of change of this function is approximated as: 
+
+∆V (k) = V (k) − V (k − 1) (6) A positive ∆V (k) implies an increase in the total system energy, indicating potential system instability. Consequently, a stability-oriented penalty term r1 is constructed to suppress the growth of the Lyapunov function: 
+
+r1(k) = −k1 · max(0 , ∆V (k)) (7) where k1 represents a positive penalty weighting factor. The operator max(0 , ·) imposes a penalty only when ∆V (k) > 0;when ∆V (k) ≤ 0, the penalty vanishes, allowing other control objectives to dominate. Through this mechanism, the agent is guided to learn actions that promote non-increasing system energy. This effectively steers the teacher policy πT toward the stable manifold during the exploration phase, avoiding current spikes and system instability caused by high-frequency switching actions. 
+
+E. Auxiliary Performance and Safety Reward Formulation 
+
+System stability, dynamic performance, and operational safety are balanced. Three auxiliary reward components are integrated with the aforementioned stability constraint after multiple validations. 
+
+1) Voltage Tracking Accuracy Reward r2: We design r2
+
+as a quadratic penalty on regulation errors to ensure high-precision tracking. Larger errors trigger stricter penalties. The agent prioritizes resolving voltage deviations, accelerating convergence to the reference. This term corresponds to the negative sum of squared errors in the dq frame, minimizing the deviation between actual and reference voltages. The specific definition is as follows: 
+
+r2 = −k2(e2 
+
+> ud
+
++ e2 
+
+> uq
+
+) (8) 
+
+2) Maximum Current Constraint Reward r3: To enforce physical safety constraints within the unconstrained optimiza-tion framework of DRL, the reward component r3 is formu-lated as a soft penalty barrier. This term internalizes the induc-tor current limit Imax by imposing a quadratic cost on boundary violations. Unlike sparse step-penalties, this continuous for-mulation provides a dense gradient signal proportional to the violation severity, effectively guiding the policy optimization back to the feasible region. The mathematical expression is defined as: 5
+
+r3 = −k3 max(0 , i 2 
+
+> Ld
+
++ i2 
+
+> Lq
+
+− I2
+
+> max
+
+) (9) where Imax denotes the critical amplitude threshold, and k3
+
+functions as a penalty scaling factor to calibrate the con-straint strictness. The max(0 , ·) operator activates the penalty strictly during overcurrent excursions, leaving the reward landscape unaffected within the Safe Operating Area (SOA). The quadratic nature of the penalty ensures that large devia-tions incur substantial costs, thereby accelerating the agent’s convergence toward safe control policies. 
+
+3) Current THD Constraint Reward r4: The reward com-ponent r4 imposes a limit on the total harmonic distortion (THD) to maintain power quality. Exceeding the 5% threshold triggers an immediate penalty, driving the control strategy to reduce distortion and ensure sinusoidal current waveforms. 
+
+r4 = −k4 max(0 , (ithd − 5)) (10) where ithd denotes the measured THD value of the output current. k4 functions as a positive weighting coefficient. In the experimental implementation, the reward components are derived directly from non-normalized physical quantities. Weighting factors undergo scaling to appropriate magnitudes, restricting the total reward to a numerical range essential for SAC value network convergence. Specifically, the coefficients are configured as k1 = 10 −6, k2 = 10 −3, k3 = 10 −5, and 
+
+k4 = 10 −4. The specific form of the total reward function r
+
+is as follows: 
+
+
+
+r1 = −k1 max(0 , ∆V (k)) 
+
+r2 = −k2(e2 
+
+> ud
+
++ e2 
+
+> uq
+
+)
+
+r3 = −k3 max(0 , i 2 
+
+> Ld
+
++ i2 
+
+> Lq
+
+− I2
+
+> max
+
+)
+
+r4 = −k4 max(0 , (ithd − 5)) 
+
+r = r1 + r2 + r3 + r4
+
+(11) 
+
+Remark 2: It is pivotal to note that the Deep architecture with sufficient capacity employed is necessitated by the uni-versal function approximation capability required for high-performance VSI control. Given the inverter’s strongly coupled dynamics and time-varying parameter uncertainties, a shallow network risks underfitting, failing to capture the intricate non-linear relationships between system states and optimal actions. Therefore, the teacher agent is designed as a highly capable expert possessing enough representational power to accurately model the complex control boundaries across the full operating range. This design ensures that the teacher policy converges to a global optimum, providing a high-fidelity performance benchmark for the subsequent lightweight student network to mimic during the distillation process. IV. A LGORITHM LIGHTWEIGHTING FRAMEWORK BASED ON POLICY DISTILLATION 
+
+Although DRL agents exhibit decent performance, their complex network structures conflict with the requirements for computational resources and real-time capability in power electronics control systems. To resolve the contradiction be-tween high performance and limited computing power, this section proposes a lightweight framework based on policy distillation. Rewar d 
+
+> State
+> Teacher
+> Lar ge-
+> scale
+> Neur al
+> Networ k
+> POLICY
+> The composite
+> rewar d function
+> proposed in this paper
+> Action
+> Environment
+> Collect
+> state-action
+> data pair s
+> Student
+> Lightweight
+> Neur al
+> Networ k
+> POLICY
+> Tr aining set
+> Test set
+> Weighted Loss Function
+> Adam optimizer
+> Lear ning tr ansient response
+> Dataset
+> Steady-State Oper ations
+> Standar d Par ameter Per tur bations
+> ... Solve
+> Action
+> State
+> Ver ify
+
+Fig. 3: Design process of Policy Distillation. 
+
+A. Principle of Policy Distillation 
+
+The idea of policy distillation is to construct a teacher-student learning paradigm to achieve knowledge transfer from a complex model to a lightweight model, while maintaining its original performance as much as possible. In the context of DRL, this is not merely a simple parameter reduction, but a transfer process involving function approximation and generalization capabilities. The trained teacher policy is defined as the mapping func-tion of the source domain, and the student policy to be deployed is defined as the mapping function of the Target Domain. The distillation process essentially seeks the optimal solution for the student network parameters within the state space distribution, making its decision boundary approach that of the teacher network infinitely. 
+
+B. Teacher-Student Knowledge Transfer Paradigm 
+
+Referring to the application of transfer learning in control systems [27], we formulate the policy distillation process as a function approximation problem constrained by model complexity. First, the Teacher Policy is defined as a deep neural network 
+
+πT parameterized by θT . To explicitly represent its deep architecture capable of extracting hierarchical features, the mapping from the high-dimensional state space s ∈ S to the action space is expressed as a deep composite function FT :
+
+aT = πT (s; θT ) = FT (s; θT )= ϕ(L)(. . . ϕ (1) (s; W(1)  
+
+> T
+
+, b(1)  
+
+> T
+
+) . . . ; W(L) 
+
+> T
+
+, b(L) 
+
+> T
+
+) (12) where ϕ(l)(·) denotes the non-linear activation function of the 
+
+l-th layer, and θT = {W(l) 
+
+> T
+
+, b(l) 
+
+> T
+
+}Ll=1 represents the massive set of weights and biases in the teacher network. This deep composite structure FT enables the teacher to capture the complex, highly coupled dynamics of the inverter. Correspondingly, the Student Policy πS , parameterized by 
+
+θS , is designed as a shallow or compact network to satisfy hardware constraints. Its output action aS is defined as: 
+
+aS = πS (s; θS ) = FS (s; θS ) (13) 6
+
+where the action variable a, representing either the teacher output aT or the student output aS , corresponds to the inverter control voltage vector uinv described in Section II. The key constraint for hardware deployment is |θS | ≪ | θT |. To achieve efficient knowledge transfer under this constraint, the optimization objective of policy distillation is formulated as: 
+
+θ∗ 
+
+> S
+
+= arg min 
+
+> θS
+
+Es∼ρ(s)[L(FT (s; θT ), FS (s; θS ))] (14) where θ∗ 
+
+> S
+
+denotes the optimal student parameters. This for-mulation minimizes the expected divergence L between the expert mapping FT and the simplified mapping FS over the distribution ρ(s). Consequently, the student network accurately reconstructs the teacher’s decision boundary within a compact parameter space.-
+
+C. Distillation with Adaptive Importance Weighting and Lya-punov Consistency 
+
+While standard MSE minimization is valid for continuous action regression, its application in power electronics faces two critical limitations. First, the overwhelming dominance of steady-state data induces severe observational bias [28], causing the student network to prioritize abundant steady-state behaviors at the expense of sparse yet crucial transient dynamics. Second, to deploy the lightweight student network 
+
+πS while retaining the stability characteristics inherited from the teacher policy, the distillation process requires explicit reg-ularization beyond simple action matching. To address these dual challenges, we propose a Lyapunov-Preserved Policy Distillation framework. This method constructs a composite loss function Jphy (θS ) that integrates an adaptive importance weight W(sk) with a Lyapunov-consistency constraint Lstab ,mathematically defined as: 
+
+Jphy (θS ) = 1
+
+N
+
+> N
+
+X
+
+> k=1
+
+W(sk) ·
+
+
+
+∥aT,k − F S (sk; θS )∥22
+
++ λstab · max(0 , ∆V (sk, a S,k )) 
+
+
+
+(15) where N denotes the mini-batch size, sk represents the k-th state sample in the batch, aT,k is the corresponding target action from the teacher, and λstab is the weighting coefficient. To specifically mitigate observational bias, the gradient-guided dynamic penalty factor W(sk) is formulated as: 
+
+W(sk) = 1 + ωp · I(∥eu(k) − eu(k − 1) ∥2 > δ th ) (16) where I(·) is the indicator function. This weight imposes a higher penalty gain ωp on samples where the transient error change rate exceeds a threshold δth . Simultaneously, the Lyapunov-consistency term introduces a stability regulariza-tion derived from the discrete Lyapunov candidate function 
+
+V (·), where ∆V (sk, a S,k ) represents the predicted energy change. The operator max(0 , ·) activates a penalty only when the student’s action leads to an increase in the Lyapunov function. By explicitly penalizing control actions that result in a positive increment of the Lyapunov function, this mechanism facilitates the lightweight student policy in complying with the asymptotic stability requirements. 
+
+D. Dataset Construction and Supervised Training 
+
+To ensure that that the student network generalizes to unknown disturbances rather than memorizing specific state points, this paper adopts a trajectory-based data partition strategy . Instead of random sampling, the expert dataset 
+
+Dexpert is constructed by collecting complete time-series trajectories generated by the teacher agent under closed-loop control. The dataset consists of M independent trajectories, mathematically expressed as: 
+
+Dexpert = {τi}Mi=1 , where τi = {(st, a t)}Ti 
+
+> t=0
+
+(17) where τi represents the i-th trajectory with a duration of Ti,containing sequential state-action pairs. Crucially, we enforce a strict isolation between training and testing data at the trajectory level. The training set Dtrain covers steady-state operations and standard parameter perturbations, while the test set Dtest is reserved for a completely unseen load step experiment that never appears during training. This design rigorously validates the student policy’s capability to handle unknown transient dynamics. Under this framework, the training of the student network is transformed into a supervised learning process on Dtrain .By using the Adam optimizer to minimize the weighted distillation loss defined in (15), the student network inher-its the teacher’s robust control capability while significantly compressing the computational load. The finally obtained lightweight mapping function FS (·) is then compiled and deployed to hardware for millisecond-level real-time control. Fig. 3 illustrates the entire process from DRL control to Algorithm Lightweighting. 
+
+Remark 3: It is worth emphasizing that the proposed policy distillation framework fundamentally transforms the computa-tionally intensive stochastic policy inference into a streamlined supervised regression task. Leveraging the highly capable expert policy established in Section III, the lightweight student network is trained to accurately reconstruct the optimized pol-icy mapping within a significantly compact parameter space. This paradigm allows the controller to inherit the robustness derived from the teacher’s deep feature extraction and general-ization capabilities, while bypassing the heavy computational burden, thus effectively bridging the gap between advanced AI capabilities and the stringent latency constraints of power electronic hardware. V. S IMULATION AND EXPERIMENTAL VALIDATION 
+
+Simulations and rapid control prototyping experiments val-idate the proposed DRL framework. The controller is bench-marked against conventional strategies to reveal performance differences. Key evaluation metrics include dynamic response, steady-state accuracy, and robustness. Feasibility in physical systems is confirmed through these tests. 7
+
+A. Simulation Verification 
+
+A simulation model of the three-phase voltage source in-verter is constructed as shown in Fig. 1. Table I lists the main circuit specifications. The control parameters, including the specific hyperparameters configured for the policy distillation process, are detailed in Table II. Various disturbances are applied to test transient response and steady-state recovery. These scenarios provide quantitative metrics for performance comparison. TABLE I: Main Circuit Parameters of VSI                    
+
+> Parameter Symbol Value
+> DC source voltage Vdc 650 V Nominal line voltage Vline 380 V DC-link capacitance C12000 μFFilter inductance Lf1.1 mH Filter capacitance Cf19.2 μFDamping resistance Rf3Ω
+> Switching frequency fsw 10 kHz
+
+TABLE II: Hyperparameters for DRL and Policy Distillation                        
+
+> Parameter Symbol Value
+> Episode number M500 Discount factor γ0.9 Learning rate η1×10 −3
+> Mini-batch size B256 Sampling time Ts1×10 −4sTarget Entropy Te-13 Transient detection threshold δth 0.0048 V Distillation penalty gain ωp9.0
+
+Four established strategies benchmark the proposed DRL framework. The primary network utilizes three hidden layers (128, 64, 64 neurons). External comparisons include standard dual-loop PI [29] and Finite Control Set MPC [30]. Internal comparisons involve two distilled variants: S1 (45, 30, 30) and the compact S2 (20, 15). The control efficacy is quantified via SSE, THD, and Relative Overshoot. TABLE III: PERFORMANCE METRICS OF DIFFERENT METHODS UNDER CASE 1 
+
+Method SSE (V) THD (%) Relative Overshoot (%) 
+
+Dual-loop PI 0.01 1.45 2.11 FCS-MPC 1.2 0.18 4.69 DRL-Distilled-S1 0.06 1.23 0.91 DRL-Distilled-S2 0.49 1.24 0.97 Proposed DRL 0.05 1.15 0.84 
+
+1) Case 1: Severe Linear Load Step: The condition is set such that at t = 0 .3 s, the purely resistive load undergoes a step decrease from 200 Ω to 50 Ω .As illustrated in Fig. 4(a) and Table III, all DRL-based controllers exhibit minimal overshoot. Specifically, the over-shoot of the proposed controller is limited to 0.84%, which is superior to the 2.11% of the PI controller and the 4.69% of the FCS-MPC. Although FCS-MPC achieves the lowest 
+
+(a) Case 1: Severe Linear Load Step (R steps from 200 Ω to 50 Ω). 
+
+(b) Case 2: Complex RL Load Switching (RL steps from 200 Ω
+
+to 50 Ω). 
+
+(c) Case 3: Linear Load Step under Parameter Uncertainty ( R
+
+steps from 200 Ω to 50 Ω with Lf + 20% and Cf − 20% ). 
+
+Fig. 4: Dynamic response comparison of the five controllers under different simulation scenarios THD of 0.18%, it suffers from a large steady-state error (SSE) of 1.2 V and significant transient fluctuations. Consequently, under purely resistive load step conditions, the proposed DRL controller achieves the optimal balance between dynamic response speed and steady-state accuracy in comparison with PI and FCS-MPC. TABLE IV: PERFORMANCE METRICS OF DIFFERENT METHODS UNDER CASE 2 
+
+Method SSE (V) THD (%) Relative Overshoot (%) 
+
+Dual-loop PI 0.01 1.42 2.01 FCS-MPC 0.41 0.19 2.95 DRL-Distilled-S1 0.08 1.24 1.04 DRL-Distilled-S2 0.51 1.24 1.07 Proposed DRL 0.05 1.18 0.92 
+
+2) Case 2: Complex RL Load Switching: The experimental condition is established such that at t = 0 .3 s, the load switches from an initial state of 200 Ω and 10 mH to a final state of 50 Ω 8
+
+and 1 mH. The corresponding quantitative results are listed in Table IV. The proposed controller and its distilled variants demonstrate superior damping, restricting the overshoot to below 1%. In contrast, the PI controller exhibits a slower response with a higher overshoot of 2.01%. While the FCS-MPC method main-tains a competitive THD performance, its voltage overshoot reaches 2.95% and is accompanied by a steady-state error of 0.41 V. Consequently, under resistive-inductive load switching conditions, the proposed DRL controller outperforms the tradi-tional PI and FCS-MPC schemes in terms of overall dynamic and steady-state performance. 
+
+3) Case 3: Load Step under Parameter Uncertainty: To evaluate robustness, the system is tested under parameter mismatch conditions where Lf is increased by 20% and Cf
+
+is decreased by 20%. Under this configuration, a load step change from 100 Ω to 50 Ω is applied at t = 0 .3 s. PI and FCS-MPC degrade (Fig. 4(c), Table V). FCS-MPC overshoot spikes to 5.02%. Parameter deviations are tolerated by DRL variants. The proposed controller limits overshoot to 1.33%. Robustness against mismatch surpasses conventional benchmarks. TABLE V: PERFORMANCE METRICS OF DIFFERENT METHODS UNDER CASE 3                 
+
+> Method SSE (V) THD (%) Relative Overshoot (%)
+> Dual-loop PI 0.01 1.56 2.50 FCS-MPC 1.00 0.15 5.02 DRL-Distilled-S1 0.12 1.39 1.44 DRL-Distilled-S2 0.41 1.42 1.56 Proposed DRL 0.05 1.33 1.33
+
+4) Policy Distillation and Quantitative Analysis: Table VI details the network complexity ablation. Inference FLOPs measure single-pass workload. A standard TMS320F28379D DSP with 800 MFLOPS throughput determines theoretical execution time. The teacher policy holds 13,442 parameters. This requires 26.4 k FLOPs or 33.0 μs. Distillation reduces the load. S1 and S2 models achieve compression ratios of 5 and 26.7. S2 cost drops to 0.9 k FLOPs. Inference takes 1.1 
+
+μs. This duration occupies 1.1% of the 10 kHz control cycle. Lightweight deployment feasibility is confirmed. TABLE VI: Quantitative Ablation Comparison of Policy Dis-tillation                  
+
+> Method Params. Infer. FLOPs Est. Time (μs) Comp. Ratio Distill. Loss
+> Proposed DRL 13442 ∼26.4 k 33.0 1/DRL-Distilled-S1 2687 ∼5.2 k 6.5 50.025/0.069 DRL-Distilled-S2 487 ∼0.9 k 1.1 26.7 0.024/0.079
+
+B. Experimental Results 
+
+To verify the practical feasibility of the proposed lightweight control strategy, a hardware experimental platform was built as shown in Fig. 6.The power stage core of this platform is a three-phase voltage source inverter, which constitutes the main circuit together with a programmable DC power supply and an AC electronic load. The control system adopts an architecture comprising a dSPACE 1202 MicroLabBox and a host computer; the former is responsible for real-time low-level control and signal acquisition, while the latter runs the SAC algorithm within the MATLAB environment for policy inference. On the hardware platform, the disturbance scenario identical to Case 1 in the simulation was reproduced, and key wave-forms were captured using a digital oscilloscope. To ensure the reproducibility of experimental results and the fairness of the comparative analysis, all comparative tests were conducted on the exact same hardware platform and under identical external conditions, ensuring that the performance differences between control strategies originate solely from the algorithms themselves. Specific circuit design parameters are detailed in Table I. Table VII presents the quantitative experimental comparison of performance metrics for various controllers under the Case 1 load step scenario. Fig. 5 shows the hardware experimental waveforms of the DRL-Distilled controllers under different load steps. From the waveforms, it is evident that the student networks exhibit rapid transient recovery capabilities and high steady-state waveform quality. Furthermore, to verify the real-time deployment capability of the proposed policy distillation strategy, Table VIII provides a detailed comparison of the total execution time and the average time consumption per control cycle for different controllers. The policy-distilled DRL con-trollers outperform traditional PI and FCS-MPC in terms of total execution time, and the single-cycle time consumption is maintained at the microsecond level. This strongly confirms that the proposed algorithm imposes a low computational load, satisfying the real-time deployment requirements of systems. TABLE VII: Comparative analysis of experimental results under case 1                                                      
+
+> Controller Load (Ω)Voltage THD( %)Current THD( %)SSE (%)Unbalance (%)PI 100 →50 0.7628 5.2778 0.1810 0.4350 200 →50 0.7740 5.4105 0.1921 0.2881
+> FCS-MPC 100 →50 0.7779 4.2242 0.1968 0.2952 200 →50 0.8251 4.0401 0.5421 0.8132
+> DRL-S1 100 →50 0.5526 3.2379 0.4814 0.7221 200 →50 0.5642 3.2580 0.3880 0.5819
+> DRL-S2 100 →50 0.5649 3.3340 0.4241 0.6362 200 →50 0.5738 3.3807 0.4371 0.6556
+
+TABLE VIII: Comparison of execution time for different controllers           
+
+> Controller Total time (s) Time of each control cycle ( μs)
+> Dual-loop PI 11.256 2.849 FCS-MPC 43.923 12.087 DRL-Distilled-S1 3.808 1.215 DRL-Distilled-S2 3.753 1.206
+
+VI. C ONCLUSION 
+
+This paper proposes a model-free deep reinforcement learn-ing control strategy for voltage source inverters. By intro-9200Ω→50Ω 
+
+> DRL-distilled-s1
+> controller
+
+(a) 100Ω→50Ω  
+
+> DRL-distilled-s1
+> controller
+
+(b) 200Ω→ 50Ω  
+
+> DRL-distilled-s2
+> controller
+
+(c) 100Ω→ 50Ω  
+
+> DRL-distilled-s2
+> controller
+
+(d) 100Ω→ 50Ω Dual-Loop PI 
+
+> controller
+
+(e) 100Ω→ 50Ω Dual-Loop PI  
+
+> controller
+
+(f) 200Ω→ 50Ω  
+
+> FCS-MPC
+> controller
+
+(g) 100Ω→ 50Ω  
+
+> FCS-MPC
+> controller
+
+(h) 
+
+Fig. 5: Hardware experimental comparison of controllers under different load steps. Main DC   
+
+> Source
+> Battery Simulator
+> DC Power Supply
+> AC Load Simulator
+> PC
+> dSPACE 1202
+> Oscilloscope
+> Three-Phase Inverter
+> System
+> Auxiliary
+> Power
+> Supply
+> PCC V&I
+> Sensors
+> Load
+> Control
+> Algorithm Control
+> Parameter ,k k,
+
+,bus Liu
+
+> PWM S1~S6
+
+Fig. 6: Experimental setup. ducing a hybrid reward mechanism based on error energy, the proposed method effectively enhances training conver-gence and control accuracy. Furthermore, policy distillation techniques are employed to compress the complex model into a lightweight network, thereby resolving computational bottlenecks associated with hardware deployment. Simulation and experimental results validate that the proposed strategy exhibits superior dynamic performance and robustness com-pared to traditional PI control and FCS-MPC under load steps and parameter mismatches, while its computational efficiency fully satisfies the real-time requirements of systems. REFERENCES [1] X. Wang and F. Blaabjerg, “Harmonic stability in power electronic-based power systems: Concept, modeling, and analysis,” IEEE Transactions on Smart Grid , vol. 10, no. 3, pp. 2858–2870, May 2019. [2] S. Buso and P. Mattavelli, Digital Control in Power Electronics , ser. Synthesis Lectures on Power Electronics. Cham, Switzerland: Morgan & Claypool Publishers, 2022. [3] Z.-S. Hou and Z. Wang, “From model-based control to data-driven control: Survey, classification and perspective,” Information Sciences ,vol. 235, pp. 3–35, Jun 2013. [4] W.-H. Chen, J. Yang, L. Guo, and S. Li, “Disturbance-observer-based control and related methods—an overview,” IEEE Transactions on Industrial Electronics , vol. 63, no. 2, pp. 1083–1095, Feb 2016. [5] X. Niu, C. Zhang, Y. Qu, X. Wang, and H. Li, “A new composite control strategy for large-signal stabilization of constant power loads in islanded AC microgrids,” IEEE Transactions on Smart Grid , vol. 15, no. 5, pp. 4407–4423, Sep 2024. [6] Y. Zhao, X. Li, and S. Song, “Observer-based sliding mode control for stabilization of mismatched disturbance systems with or without time delays,” IEEE Transactions on Systems, Man, and Cybernetics: Systems ,vol. 51, no. 12, pp. 7337–7345, Dec 2021. [7] Y.-S. Lin, K.-Z. Liu, P.-F. Liu, and M.-S. Yang, “A robust finite-time control strategy for a three-phase inverter with LC filter under uncertain disturbances,” IEEE Transactions on Circuits and Systems I: Regular Papers , pp. 1–12, Aug 2025, early Access. [8] M. Khalilzadeh, S. Vaez-Zadeh, J. Rodriguez, and R. Heydari, “Model-free predictive control of motor drives and power converters: A review,” 
+
+IEEE Access , vol. 9, pp. 105 733–105 747, Jul 2021, open Access under Creative Commons License; Cited by 125; Full Text Views: 6199; Classic review on MFPC for motor drives and power converters. [9] W. Li, H. Yuan, S. Li, and J. Zhu, “A revisit to model-free control,” 
+
+IEEE Transactions on Power Electronics , vol. 37, no. 12, Dec 2022. [10] Y. Wei, Y. Chen, C. Garcia, Z. Yin, F. Wang, and J. Rodriguez, “Model-free predictive control for PMSM drives using ultra-local with Poincar´ emapping causality,” IEEE Transactions on Industrial Electronics , pp. 1–12, Oct 2025. [11] S. Govinda, B. Brik, and S. Harous, “A survey on deep reinforce-ment learning applications in autonomous systems: Applications, open challenges, and future directions,” IEEE Transactions on Intelligent Transportation Systems , vol. 26, no. 7, pp. 11 088–11 113, Jul 2025. [12] B. She, F. Li, H. Cui, J. Zhang, and R. Bo, “Fusion of microgrid control with model-free reinforcement learning: Review and vision,” 
+
+IEEE Transactions on Smart Grid , vol. 14, no. 4, pp. 3232–3245, Jul 2023. [13] E. Mohammadi, M. Alizadeh, M. Asgarimoghaddam, X. Wang, and M. G. Sim˜ oes, “A review on application of artificial intelligence tech-niques in microgrids,” IEEE Journal of Emerging and Selected Topics in Industrial Electronics , vol. 3, no. 4, pp. 878–890, Oct 2022. [14] A. Rajamallaiah, S. V. K. Naresh, Y. Raghuvamsi, S. Manmadharao, K. Bingi, and A. R, “Deep reinforcement learning for power converter control: A comprehensive review of applications and challenges,” IEEE Open Journal of Power Electronics , vol. 6, pp. 1769–1802, Oct 2025. [15] C. Cui, Z. Fan, T. Yang, P. Lin, C. Gong, and C. Zhang, “Domain adaptation-based transfer learning for DRL control implementation of DC microgrids,” IEEE Transactions on Industrial Electronics , pp. 1–12, Jun 2025. [16] L. Zhou, C. Zhang, C. Cui, P. Lin, and X. Dong, “A DRL-based parameter self configuration mechanism of nonsmooth control for au-tonomous DC microgrids feeding constant power loads,” IEEE Journal of Emerging and Selected Topics in Power Electronics , vol. 12, no. 1, pp. 641–650, Feb 2024. 10 
+
+[17] Y. Wan and Q. Xu, “Stability-guided reinforcement learning control for power converters: A lyapunov approach,” IEEE Transactions on Industrial Electronics , vol. 72, no. 7, pp. 7553–7553, Jul 2025. [18] E. Li, L. Zeng, Z. Zhou, and X. Chen, “Edge AI: On-demand ac-celerating deep neural network inference via edge computing,” IEEE Transactions on Wireless Communications , vol. 19, no. 1, pp. 447–457, Jan 2020. [19] P. Chen, J. Zhao, K. Liu, J. Zhou, K. Dong, and Y. Li, “A review on the applications of reinforcement learning control for power electronic converters,” IEEE Transactions on Industry Applications , vol. 60, no. 6, pp. 8430–8450, Nov 2024. [20] A. Romero, N. Ballas, S. E. Kahou, A. Chassang, C. Gatta, and Y. Bengio, “Fitnets: Hints for thin deep nets,” in Proceedings of the 3rd International Conference on Learning Representations (ICLR) , 2015. [21] Z. Yang, Z. Li, X. Jiang, Y. Gong, Z. Yuan, D. Zhao, and C. Yuan, “Focal and global knowledge distillation for detectors,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2022, pp. 4643–4652. [22] T. Xin, Z. Xiangjun, and T. Chunming, “The engineering design and optimization of inverter output LCR filter in parallel active power filter,” in 2006 International Conference on Power System Technology . IEEE, 2006, pp. 1–6. [23] Y. Zeng et al. , “Multi-agent soft actor-critic aided active disturbance rejection control of DC solid-state transformer,” IEEE Transactions on Industrial Electronics , vol. 72, no. 1, pp. 492–503, Jan 2025. [24] Y. Pei, J. Zhao, Y. Yao, and F. Ding, “Multi-task reinforcement learning for distribution system voltage control with topology changes,” IEEE Transactions on Smart Grid , vol. 14, no. 3, pp. 2481–2484, May 2023. [25] A. Oshnoei, H. Sorouri, S. Oshnoei, R. Teodorescu, and F. Blaab-jerg, “Grid impedance shaping for Grid-Forming inverters: A Soft Actor-Critic deep reinforcement learning algorithm,” in 2024 IEEE 10th International Power Electronics and Motion Control Conference (IPEMC2024-ECCE Asia) . Chengdu, China: IEEE, 2024, pp. 4935– 4939. [26] K. Wang, M. Bortkiewicz, I. Javali, T. Trzci´ nski, and B. Eysenbach, “1000 layer networks for self-supervised RL: Scaling depth can enable new goal-reaching capabilities,” in Advances in Neural Information Processing Systems (NeurIPS) , 2025. [27] C. Cui, Z. Fan, T. Yang, P. Lin, C. Gong, and C. Zhang, “Domain adaptation-based transfer learning for DRL control implementation of DC microgrids,” IEEE Transactions on Industrial Electronics , vol. 72, no. 12, pp. 14 344–14 355, Dec. 2025. [28] Q. Lou, X. Meng, and G. E. Karniadakis, “Physics-informed neu-ral networks for solving forward and inverse flow problems via the boltzmann-bgk formulation,” Journal of Computational Physics , vol. 447, p. 110676, 2021. [29] N. Monshizadeh, F. Mancilla-David, R. Ortega, and R. Cisneros, “Non-linear stability analysis of the classical nested PI control of voltage sourced inverters,” IEEE Control Systems Letters , vol. 6, pp. 1442–1447, 2022. [30] P. Cort´ es, G. Ortiz, J. I. Yuz, J. Rodr´ ıguez, S. Vazquez, and L. G. Franquelo, “Model predictive control of an inverter with output LC filter for UPS applications,” IEEE Transactions on Industrial Electronics ,vol. 56, no. 6, pp. 1875–1883, Jun 2009. 
+
+Yang Yang received the B.E. degree in Electrical Engineering from Nanjing University of Information Science & Technology, Nanjing, China, in 2022. He is currently working toward the M.S. degree in Automation Engineering at Shanghai University of Electric Power, Shanghai, China.He is a member of Intelligent Autonomous Systems Laboratory. His research focuses on the application of artificial in-telligence in power electronics systems. 
+
+Chengang Cui (Member, IEEE) received the B.E. degree in automation engineering from Jilin Univer-sity, China, in 2004, the Ph.D. degree in control the-ory and control from Zhejiang University, China, in 2010. He worked at Shanghai Institute for Advanced Studies, Chinese Academy of Sciences, engaged in energy management and optimal scheduling from 2012 to 2015. He has been with the School of Automation, Shanghai University of Electric Power, where he is currently a associate professor. His research interests cover the control. 
+
+Xitong Niu (Student Member, IEEE) received the M.Sc. degree in electrical engineering from the Shanghai University of Electric Power, Shanghai, China, in 2018, where he is currently pursuing the Ph.D. degree in electrical engineering with the School of Electrical Engineering. He was with Unitech Embedded and KUKA Company from 2018 to 2023, focusing on power electronic systems. His research interests include advanced algorithm in power electronic systems and microgrids. 
+
+Jiaming Liu received the B.E. degree in Electrical Engineering from Nanjing University of Information Science & Technology, Nanjing, China, in 2022. He is currently working toward the M.S. degree in Automation Engineering at Shanghai University of Electric Power, Shanghai, China.He is a member of Intelligent Autonomous Systems Laboratory. His re-search focuses on the application of Large Language Model. 
+
+Chuanlin Zhang (Senior Member, IEEE) received the B.S. degree in mathematics and the Ph.D. degree in control theory and control engineering from the School of Automation, Southeast University, Nan-jing, China, in 2008 and 2014, respectively. He was a Visiting Ph.D. Student with the Department of Electrical and Computer Engineering, University of Texas at San Antonio, USA, from 2011 to 2012; a Visiting Scholar with the Energy Research Institute, Nanyang Technological University, Singapore, from 2016 to 2017. Since 2014, he has been with the College of Automation Engineering, Shanghai University of Electric Power, Shanghai, where he is currently a Professor. His research interests include nonlinear system control theory and applications for power systems.
