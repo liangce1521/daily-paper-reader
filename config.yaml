@@ -48,9 +48,6 @@ subscriptions:
         - keyword: HEV
           keyword_cn: 混合动力汽车
           query: Hybrid Electric Vehicle energy consumption optimization
-        - keyword: Trajectory Optimization
-          keyword_cn: 轨迹优化
-          query: Vehicle trajectory optimization for fuel economy
       intent_queries:
         - query: Application of Generative AI in vehicle energy management systems
           query_cn: 生成式人工智能在车辆能量管理系统中的应用
@@ -67,4 +64,4 @@ subscriptions:
           enabled: true
           source: manual
           note: ''
-      updated_at: '2026-03-11T05:50:36.827Z'
+      updated_at: '2026-03-11T06:07:22.218Z'
